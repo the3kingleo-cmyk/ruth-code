@@ -8,5 +8,7 @@ describe("RUTH_SYSTEM_PROMPT", () => {
     expect(RUTH_SYSTEM_PROMPT).toContain("make a real tool call")
     expect(RUTH_SYSTEM_PROMPT).toContain('content="hello Ruth"')
     expect(RUTH_SYSTEM_PROMPT).toContain('path="hello.txt"')
+    expect(RUTH_SYSTEM_PROMPT).toContain("run tests or a typecheck")
+    expect(RUTH_SYSTEM_PROMPT).toContain("/models")
   })
 })

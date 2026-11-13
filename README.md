@@ -45,4 +45,5 @@ Upstream OpenCode (anomalyco/opencode) is the reference project this tree is for
 
 Issues and source: https://github.com/the3kingleo-cmyk/ruth-code
 
-Docs and install: https://github.com/the3kingleo-cmyk/ruth-install
+Docs: https://github.com/the3kingleo-cmyk/ruth-code
+Install: https://github.com/the3kingleo-cmyk/ruth-install

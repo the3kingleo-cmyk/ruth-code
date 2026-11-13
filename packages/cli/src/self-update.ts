@@ -9,7 +9,14 @@ import {
   resolveExpectedSha256,
   resolveGithubToken,
   sha256File,
+  type FetchLike,
 } from "./github-release"
+
+export type RunSync = (
+  command: string,
+  args?: readonly string[],
+  options?: { encoding?: BufferEncoding; timeout?: number; env?: NodeJS.ProcessEnv },
+) => { status: number | null; stdout?: string | Buffer; stderr?: string | Buffer }
 
 
 export function runningBinary(): string {
@@ -37,8 +44,8 @@ export type SelfUpdateOptions = {
   token?: string
   target?: string
   chatCheck?: boolean
-  fetchImpl?: typeof fetch
-  run?: typeof spawnSync
+  fetchImpl?: FetchLike
+  run?: RunSync
   extract?: (archive: string, directory: string) => string
 }
 
@@ -76,21 +83,25 @@ function walkForBinary(directory: string): string | undefined {
   return undefined
 }
 
+function stdioText(value: string | Buffer | undefined) {
+  return String(value ?? "").trim()
+}
+
 export function healthCheck(
   binary: string,
-  options: { chatCheck?: boolean; run?: typeof spawnSync } = {},
+  options: { chatCheck?: boolean; run?: RunSync } = {},
 ): { ok: boolean; detail: string } {
   const run = options.run ?? spawnSync
   const version = run(binary, ["--version"], { encoding: "utf8", timeout: 20_000 })
   if (version.status !== 0) {
-    return { ok: false, detail: `health-check --version failed: ${(version.stderr || version.stdout || "").trim()}` }
+    return { ok: false, detail: `health-check --version failed: ${stdioText(version.stderr || version.stdout)}` }
   }
   if (options.chatCheck === false) {
-    return { ok: true, detail: (version.stdout || "").trim() }
+    return { ok: true, detail: stdioText(version.stdout) }
   }
   const ollama = run("ollama", ["list"], { encoding: "utf8", timeout: 10_000 })
   if (ollama.status !== 0) {
-    return { ok: true, detail: `${(version.stdout || "").trim()} (chat check skipped: ollama not available)` }
+    return { ok: true, detail: `${stdioText(version.stdout)} (chat check skipped: ollama not available)` }
   }
   const chat = run(binary, ["run", "--format", "json", "Say hi in three words."], {
     encoding: "utf8",
@@ -100,10 +111,10 @@ export function healthCheck(
   if (chat.status !== 0) {
     return {
       ok: false,
-      detail: `health-check chat failed: ${(chat.stderr || chat.stdout || "exit " + String(chat.status)).trim()}`,
+      detail: `health-check chat failed: ${stdioText(chat.stderr || chat.stdout || "exit " + String(chat.status))}`,
     }
   }
-  return { ok: true, detail: (version.stdout || "").trim() }
+  return { ok: true, detail: stdioText(version.stdout) }
 }
 
 function replaceBinary(current: string, next: string): { previous: string } {

@@ -18,6 +18,8 @@ export type GithubRelease = {
   assets: ReleaseAsset[]
 }
 
+export type FetchLike = (input: string | URL | Request, init?: RequestInit) => Promise<Response>
+
 export function resolveGithubToken(): string | undefined {
   const fromEnv =
     env("GITHUB_TOKEN") || process.env.GITHUB_TOKEN || process.env.GH_TOKEN || env("GH_TOKEN")
@@ -58,7 +60,7 @@ function headers(token?: string, accept = "application/vnd.github+json"): Record
 }
 
 export async function fetchLatestRelease(
-  options: { token?: string; slug?: string; fetchImpl?: typeof fetch } = {},
+  options: { token?: string; slug?: string; fetchImpl?: FetchLike } = {},
 ): Promise<GithubRelease> {
   const token = options.token ?? resolveGithubToken()
   const slug = options.slug ?? repoSlug()
@@ -114,7 +116,7 @@ export function sha256File(file: string): string {
 export async function downloadAsset(
   asset: ReleaseAsset,
   dest: string,
-  options: { token?: string; fetchImpl?: typeof fetch } = {},
+  options: { token?: string; fetchImpl?: FetchLike } = {},
 ): Promise<void> {
   const token = options.token ?? resolveGithubToken()
   const fetchImpl = options.fetchImpl ?? fetch
@@ -130,7 +132,7 @@ export async function downloadAsset(
 
 export async function resolveExpectedSha256(
   release: { binary?: ReleaseAsset; checksum?: ReleaseAsset },
-  options: { token?: string; fetchImpl?: typeof fetch } = {},
+  options: { token?: string; fetchImpl?: FetchLike } = {},
 ): Promise<string | undefined> {
   if (release.binary?.digest) {
     const fromDigest = parseSha256(release.binary.digest)

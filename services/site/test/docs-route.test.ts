@@ -138,6 +138,6 @@ describe("V1 docs routes", () => {
     expect(host("https://docs.opencode.ai/docs/ide/?x=1")).toBe("https://opencode.ai/v1/docs/ide/?x=1")
     expect(host("https://docs.opencode.ai/s/abc")).toBe("https://opencode.ai/v1/docs/s/abc")
     expect(host("https://docs.dev.opencode.ai/docs/ja/")).toBe("https://dev.opencode.ai/v1/docs/ja/")
-    expect(host("https://opencode.ai/docs/")).toBeUndefined()
+    expect(host("https://github.com/the3kingleo-cmyk/ruth-code/")).toBeUndefined()
   })
 })

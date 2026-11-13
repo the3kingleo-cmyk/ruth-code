@@ -4,7 +4,7 @@ import { docsInstalls } from "~/lib/install-commands"
 import { blocks, codeFence, link, richToMarkdown, type RichText } from "~/lib/markdown"
 
 // The docs mock in the new site layout, shared by the page and its Markdown version. Content mirrors
-// https://opencode.ai/docs/ (the Intro page).
+// https://github.com/the3kingleo-cmyk/ruth-code/ (the Intro page).
 
 export const docsProducts = [
   { label: "Docs", href: docsUrl() },

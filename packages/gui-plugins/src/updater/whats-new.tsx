@@ -5,7 +5,7 @@ import { Dialog } from "@opencode/ui/dialog"
 import { usePlugin, type DialogHandle, type SetupContext } from "@opencode/plugin/gui"
 import type definition from "./index"
 
-const CHANGELOG_URL = "https://opencode.ai/changelog.json"
+const CHANGELOG_URL = "https://api.github.com/repos/the3kingleo-cmyk/ruth-install/releases"
 
 export type Highlight = {
   title: string
@@ -39,6 +39,7 @@ const Release = Schema.Struct({
   tag: Text,
   tag_name: Text,
   name: Text,
+  body: Text,
   highlights: lenient(Schema.Array(entry(Group))),
 })
 
@@ -77,21 +78,25 @@ function releases(changelog: typeof Changelog.Type) {
     if (!release) return []
 
     const groups = release.highlights ?? []
+    const tag = text(release.tag) ?? text(release.tag_name) ?? text(release.name)
+    const fromGroups = groups.flatMap((group) => {
+      const source = text(group?.source)
 
-    return [
-      {
-        tag: text(release.tag) ?? text(release.tag_name) ?? text(release.name),
-        highlights: groups.flatMap((group) => {
-          const source = text(group?.source)
+      if (!group) return []
+      // Official changelog groups are tagged "desktop"; GitHub release notes have no source tag.
+      if (source && !source.toLowerCase().includes("desktop") && source.toLowerCase() !== "ruth") return []
 
-          if (!group || !source?.toLowerCase().includes("desktop")) return []
+      if (group.items) return group.items.flatMap((item) => (item ? Option.toArray(highlight(item)) : []))
 
-          if (group.items) return group.items.flatMap((item) => (item ? Option.toArray(highlight(item)) : []))
+      return Option.toArray(highlight(group))
+    })
+    if (fromGroups.length === 0) {
+      const title = text(release.name) ?? tag
+      const description = text(release.body)
+      if (title && description) fromGroups.push({ title, description })
+    }
 
-          return Option.toArray(highlight(group))
-        }),
-      },
-    ]
+    return [{ tag, highlights: fromGroups }]
   })
 }
 

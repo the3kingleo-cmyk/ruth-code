@@ -110,36 +110,6 @@ function push(
   lines.push({ left, top, text, fg, bg, attrs })
 }
 
-function draw(
-  lines: Array<{ left: number; top: number; text: string; fg: ColorInput; bg?: ColorInput; attrs?: number }>,
-  row: string,
-  input: {
-    left: number
-    top: number
-    fg: ColorInput
-    shadow: ColorInput
-    attrs?: number
-  },
-) {
-  let x = input.left
-  for (const cell of cells(row)) {
-    if (cell.mark === "full" || cell.mark === "mix") {
-      push(lines, x, input.top, cell.char, input.fg, input.shadow, input.attrs)
-      x += 1
-      continue
-    }
-
-    if (cell.mark === "top") {
-      push(lines, x, input.top, cell.char, input.shadow, undefined, input.attrs)
-      x += 1
-      continue
-    }
-
-    push(lines, x, input.top, cell.char, input.fg, undefined, input.attrs)
-    x += 1
-  }
-}
-
 function buildExit(input: SplashWriterInput, ctx: ScrollbackRenderContext): ScrollbackSnapshot {
   const width = Math.max(1, ctx.width)
   const meta = splashMeta(input)

@@ -9,6 +9,6 @@
     "noUncheckedIndexedAccess": false,
     "noUnusedLocals": true
   },
-  "exclude": ["dist", "dist-node"],
+  "exclude": ["dist", "dist-node", "dev"],
   "references": [{ "path": "../core" }]
 }

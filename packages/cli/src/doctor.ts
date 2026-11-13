@@ -33,17 +33,6 @@ function home(): string {
   return env("TEST_HOME") || os.homedir()
 }
 
-function pluginDist(): string | undefined {
-  const data = env("XDG_DATA_HOME") || path.join(home(), ".local", "share")
-  const candidates = [
-    path.join(data, "ruth", "plugin"),
-    path.join(data, "oh-my-openagent"), // leftover path from earlier installs
-  ]
-  for (const dir of candidates) {
-    if (fs.existsSync(path.join(dir, "dist", "index.js"))) return dir
-  }
-}
-
 function pathHasLocalBin(): boolean {
   const bin = path.join(home(), ".local", "bin")
   return (process.env.PATH ?? "").split(path.delimiter).some((entry) => entry === bin)
@@ -65,21 +54,6 @@ function ensurePathInBashrc(): boolean {
   return true
 }
 
-function registerPlugin(configPath: string, pluginPath: string): boolean {
-  try {
-    const raw = fs.readFileSync(configPath, "utf8")
-    const json = JSON.parse(raw) as { plugins?: unknown }
-    const plugins = Array.isArray(json.plugins) ? [...json.plugins] : []
-    const already = plugins.some((entry) => entry === pluginPath || (entry && typeof entry === "object" && (entry as { package?: string }).package === pluginPath))
-    if (already) return false
-    plugins.push(pluginPath)
-    json.plugins = plugins
-    fs.writeFileSync(configPath, `${JSON.stringify(json, null, 2)}\n`)
-    return true
-  } catch {
-    return false
-  }
-}
 
 export function runDoctor(options: { repair?: boolean } = {}): DoctorReport {
   const repair = options.repair !== false

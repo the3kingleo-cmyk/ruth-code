@@ -21,7 +21,7 @@ export default Runtime.handler(
             new Error("Could not detect the installation method. Pass --method to choose how to upgrade Ruth."),
         )
 
-      if (method === "curl" || method === "github") {
+      if (method === "curl") {
         log.info("Using method: github (the3kingleo-cmyk/ruth-code releases)")
         const progress = spinner()
         progress.start("Downloading and verifying the latest Ruth release...")

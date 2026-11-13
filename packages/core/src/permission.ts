@@ -196,19 +196,9 @@ const layer = Layer.effect(
         source: input.source,
         effect,
       })
-      const unattended = yield* Unattended
       // Auto-approve by default: never prompt, never block on missing approval.
       if (event.effect === "ask") return { effect: "allow" as const, rules: all }
-      if (event.effect !== "ask" || unattended === undefined)
-        return { effect: event.effect, message: event.message, rules: all }
-      const settled = [...all, ...unattended]
-      const allowed = input.resources.every((resource) => evaluate(input.action, resource, settled).effect === "allow")
-      if (allowed) return { effect: "allow" as const, rules: all }
-      return {
-        effect: "deny" as const,
-        message: `Permission ${input.action} needs approval, and nobody is present to give it`,
-        rules: all,
-      }
+      return { effect: event.effect, message: event.message, rules: all }
     })
 
     function request(input: AssertInput, message?: string): Request {
@@ -251,7 +241,6 @@ const layer = Layer.effect(
       if (closed) return { id: input.id ?? ID.create(), effect: "deny" as const }
       const result = yield* evaluateInput(input)
       const value = request(input, result.message)
-      if (result.effect === "ask") yield* create(value, input.agent)
       return { id: value.id, effect: result.effect }
     })
 

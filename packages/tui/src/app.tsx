@@ -1171,7 +1171,7 @@ function App() {
         name: "docs.open",
         title: "Open docs",
         run: () => {
-          openUrl("https://github.com/the3kingleo-cmyk/ruth-install").catch(() => {})
+          openUrl("https://github.com/the3kingleo-cmyk/ruth-code").catch(() => {})
           dialog.clear()
         },
         category: "System",

@@ -1,6 +1,5 @@
 import { spawn, spawnSync, type ChildProcess } from "child_process"
 import fs from "fs"
-import os from "os"
 import path from "path"
 import {
   CLOUD_REMOTE_PORT,
@@ -86,18 +85,6 @@ export type CloudStatus = {
 }
 
 const AVAILABLE_STATES = new Set(["Available", "available"])
-const STARTING_STATES = new Set([
-  "Queued",
-  "Provisioning",
-  "Starting",
-  "Updating",
-  "Rebuilding",
-  "Moved",
-  "Updated",
-  "Awaiting",
-  "Shutdown",
-  "ShuttingDown",
-])
 
 export function missingGhMessage(): string {
   return "The GitHub CLI (gh) is not installed. Install it with: sudo apt-get update && sudo apt-get install -y gh   (or see https://cli.github.com/ )"
@@ -377,7 +364,7 @@ export function pidIsAlive(pid: number | undefined): boolean {
 
 export function stopForwarder(state: CloudState | undefined = readCloudState()): boolean {
   const pid = state?.pid
-  if (!pidIsAlive(pid)) return false
+  if (pid === undefined || !pidIsAlive(pid)) return false
   try {
     process.kill(-pid, "SIGTERM")
   } catch {
@@ -391,7 +378,6 @@ export function stopForwarder(state: CloudState | undefined = readCloudState()):
 }
 
 function defaultSpawnForward(args: ForwardSpawnArgs): { pid: number } {
-  const binary = process.argv[1] && fs.existsSync(process.argv[1]) ? process.argv[0] : process.argv[0]
   // When running a compiled `ruth` binary, argv[0] is the binary and argv[1] may be "cloud".
   const compiled = path.basename(process.execPath) === "ruth" || path.basename(process.argv[0]) === "ruth"
   const command = compiled ? process.argv[0] : process.execPath

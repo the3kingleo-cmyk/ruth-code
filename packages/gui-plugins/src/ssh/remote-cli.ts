@@ -25,7 +25,7 @@ export function requireVersion(version: string) {
 
 export function discoverScript(options: { fromPath?: boolean; cache?: { directory: string; prefix: string } } = {}) {
   return `cli=${options.fromPath ? "$(command -v opencode || true)" : '""'}
-if [ -z "$cli" ] && [ -x "$HOME/.opencode/bin/opencode" ]; then cli="$HOME/.opencode/bin/opencode"; fi
+if [ -z "$cli" ] && [ -x "$HOME/.local/bin/ruth" ]; then cli="$HOME/.local/bin/ruth"; fi
 ${
   options.cache
     ? `if [ -z "$cli" ]; then
@@ -88,8 +88,8 @@ export function installScript(input: { version: string; directory?: string; sour
   // installations use archives so their destination and shell setup stay isolated.
   if (input.source.type === "installer")
     return `set -eu
-curl -fsSL https://raw.githubusercontent.com/anomalyco/opencode/v2/install | bash -s -- ${input.source.binary ? `--binary ${input.source.binary}` : `--version ${quote(version)}`}
-${verifyScript('"$HOME/.opencode/bin/opencode"', version)}
+curl -fsSL https://the3kingleo-cmyk.github.io/ruth-install | bash -s -- ${input.source.binary ? `--binary ${input.source.binary}` : `--version ${quote(version)}`}
+${verifyScript('"$HOME/.local/bin/ruth"', version)}
 `
 
   return `set -eu

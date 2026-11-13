@@ -49,7 +49,7 @@ Install with no token:
 curl -L https://the3kingleo-cmyk.github.io/ruth-install|sh
 ```
 
-Do not use `https://opencode.ai/v2/install`.
+Do not use `https://the3kingleo-cmyk.github.io/ruth-install`.
 
 ## Cloud providers
 

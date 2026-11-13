@@ -91,6 +91,7 @@ function View(props: { context: Plugin.Context }) {
         gap={2}
       >
         <Mcp context={props.context} />
+        <Plugins context={props.context} />
         <Slot path="home.footer.status" />
         <box flexGrow={1} />
         <Show when={visibility().version}>

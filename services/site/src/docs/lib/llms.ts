@@ -28,7 +28,7 @@ export function renderLlmsTxt(site: URL, set: DocsSet = latestDocs, navigation: 
       : [
           "# OpenCode V1 Documentation",
           "",
-          "> Documentation for OpenCode V1. The latest docs, for OpenCode V2, are at https://opencode.ai/docs/llms.txt.",
+          "> Documentation for OpenCode V1. The latest docs, for OpenCode V2, are at https://github.com/the3kingleo-cmyk/ruth-code/llms.txt.",
         ]),
     "",
     ...sections,

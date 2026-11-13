@@ -650,7 +650,9 @@ function renderer(input: Input) {
         // reasoning channel and emit no text part. Promote it so `ruth run` prints it.
         const hasVisibleText = message.content.some((item) => item.type === "text" && item.text?.trim())
         if (!hasVisibleText && !input.thinking) {
-          const fallbacks = message.content.filter((item) => item.type === "reasoning" && item.text?.trim())
+          const fallbacks = message.content.flatMap((item) =>
+            item.type === "reasoning" && item.text?.trim() ? [item] : [],
+          )
           for (const [index, item] of fallbacks.entries()) {
             text(
               {

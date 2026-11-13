@@ -20,7 +20,7 @@ echo
 echo "Protected strings (will not be blindly replaced):"
 echo "  - MIT license / 'Copyright (c) 2025 opencode'"
 echo "  - @opencode-ai/plugin and other plugin/SDK import names"
-echo "  - https://github.com/anomalyco/opencode and opencode.ai docs links in attribution"
+echo "  - https://github.com/the3kingleo-cmyk/ruth-code and opencode.ai docs links in attribution"
 echo "  - https://models.dev and https://models.opencode.ai"
 echo "  - Provider id 'opencode' (OpenCode Zen / official OpenCode API provider)"
 echo "  - Internal workspace package names @opencode/*"
