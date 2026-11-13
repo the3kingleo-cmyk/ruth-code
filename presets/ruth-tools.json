@@ -10,7 +10,6 @@
     "ollama": {
       "options": {
         "headerTimeout": 1200000,
-        "chunkTimeout": false
       },
       "models": {
         "ruth": {
