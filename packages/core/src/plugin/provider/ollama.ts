@@ -1,4 +1,5 @@
 import { Effect, Schema } from "effect"
+import { resolveOllamaOrigin } from "@opencode/util/ollama-origin"
 import { createLocalProviderPlugin } from "./local.js"
 
 const Details = Schema.Struct({
@@ -56,6 +57,7 @@ export const make = createLocalProviderPlugin({
   providerID: "ollama",
   name: "Ollama",
   origin: "http://127.0.0.1:11434",
+  resolveOrigin: () => resolveOllamaOrigin(),
   stripPathSuffix: /\/(?:v1|api)$/,
   discover: (client) =>
     Effect.gen(function* () {

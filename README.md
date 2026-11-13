@@ -28,6 +28,17 @@ curl -fsSL https://raw.githubusercontent.com/the3kingleo-cmyk/ruth-install/main/
 
 The installer places `ruth` in `~/.local/bin`, adds that directory to `PATH`, writes a default Ollama config, installs Ollama if it is missing, pulls `huihui_ai/qwen3-abliterated:1.7b`, and installs the Chromebook-lite Oh My OpenCode plugin unless you set `INSTALL_PLUGIN=0`. Then run `ruth run 'hello'`. Use `ruth doctor` to check and repair the setup, and `ruth upgrade` or `ruth self-update` to install a newer public release (sha256-verified, with rollback). A token is optional and only needed if you point those commands at a private repo.
 
+Optional cloud Ollama (GitHub Codespace, tunneled to `localhost:11435`; local Ollama on `11434` is the automatic fallback):
+
+```bash
+ruth cloud up
+ruth run 'hello'
+ruth cloud status
+ruth cloud down    # stop the codespace so it stops using free hours
+```
+
+A personal GitHub account includes about 120 core-hours per month. The default `standardLinux32gb` machine has 4 cores, so that is about **30 clock hours** per month. Always run `ruth cloud down` when you are done. See `docs/CLOUD.md`.
+
 A default Ollama preset is in `presets/ruth.json`. The 1.7b model is included for light chat; **4b is recommended when you need tools**.
 
 The upstream OpenCode README follows.

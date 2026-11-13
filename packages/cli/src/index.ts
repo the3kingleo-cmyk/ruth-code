@@ -56,6 +56,13 @@ const Handlers = Runtime.handlers(Commands, {
   upgrade: () => import("./commands/handlers/upgrade"),
   "self-update": () => import("./commands/handlers/self-update"),
   doctor: () => import("./commands/handlers/doctor"),
+  cloud: {
+    up: () => import("./commands/handlers/cloud/up"),
+    down: () => import("./commands/handlers/cloud/down"),
+    status: () => import("./commands/handlers/cloud/status"),
+    logs: () => import("./commands/handlers/cloud/logs"),
+    forward: () => import("./commands/handlers/cloud/forward"),
+  },
   uninstall: () => import("./commands/handlers/uninstall"),
   acp: () => import("./commands/handlers/acp"),
   api: () => import("./commands/handlers/api"),

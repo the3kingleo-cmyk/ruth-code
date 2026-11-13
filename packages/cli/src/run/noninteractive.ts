@@ -54,8 +54,20 @@ type Tool = {
 const QUESTION_CANCELLED_FEEDBACK =
   "This non-interactive run cannot ask the user questions, so the question was cancelled. Continue without an answer; make reasonable assumptions and state them."
 
+const WEBSEARCH_CANCELLED_FEEDBACK =
+  "Web search could not complete in this non-interactive run (no provider prompt can be shown, or the search failed). Continue without live web results; do not retry the same search unless the user asks."
+
 const PERMISSION_REJECTED_FEEDBACK =
   "This non-interactive run cannot ask the user for permission, so the request was rejected. Continue without this action."
+
+/** Forms that should cancel with feedback to the model instead of failing `ruth run`. */
+export function formCancelFailsRun(form: Pick<FormInfo, "metadata" | "title">): boolean {
+  const kind = typeof form.metadata?.kind === "string" ? form.metadata.kind : undefined
+  if (kind === "question" || kind === "websearch.provider") return false
+  const title = (form.title ?? "").toLowerCase()
+  if (title.includes("web search") || title.includes("websearch")) return false
+  return true
+}
 
 /**
  * Runs one prompt to completion:
@@ -120,10 +132,17 @@ export async function runNonInteractivePrompt(input: Input) {
       : ownsSession(form.sessionID)
 
   const cancelForm = async (form: Pick<FormInfo, "id" | "sessionID" | "title" | "metadata">) => {
-    const question = form.metadata?.kind === "question"
+    const fails = formCancelFailsRun(form)
+    const kind = typeof form.metadata?.kind === "string" ? form.metadata.kind : undefined
+    const message =
+      kind === "websearch.provider" || (form.title ?? "").toLowerCase().includes("web search")
+        ? WEBSEARCH_CANCELLED_FEEDBACK
+        : kind === "question"
+          ? QUESTION_CANCELLED_FEEDBACK
+          : undefined
     await input.client.session.form
       .cancel(
-        { sessionID: form.sessionID, formID: form.id, ...(question ? { message: QUESTION_CANCELLED_FEEDBACK } : {}) },
+        { sessionID: form.sessionID, formID: form.id, ...(message ? { message } : {}) },
         // A global form is found through its location.
         ...(form.sessionID === "global"
           ? [{ headers: { "x-opencode-directory": encodeURIComponent(input.location.directory) } }]
@@ -132,7 +151,7 @@ export async function runNonInteractivePrompt(input: Input) {
       .catch((error) => {
         if (!formAlreadySettled(error)) throw error
       })
-    if (!question)
+    if (fails)
       state.failure ??= {
         type: "unknown",
         message: `Cancelled a request for input this run cannot answer: ${form.title}`,

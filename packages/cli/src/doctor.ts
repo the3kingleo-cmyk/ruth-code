@@ -12,6 +12,7 @@ import {
   findExistingConfig,
 } from "./defaults"
 import { shouldEnableFilewatcher } from "./filewatcher-policy"
+import { doctorCloudChecks } from "./cloud"
 import { resolveGithubToken } from "./github-release"
 
 export type DoctorCheck = {
@@ -201,6 +202,8 @@ export function runDoctor(options: { repair?: boolean } = {}): DoctorReport {
       ? `Low memory (MemAvailable under 768 MiB). Background work may be limited.`
       : `Memory ok (MemAvailable ${readMemAvailableKiB() ?? "n/a"} KiB)`,
   })
+
+  checks.push(...doctorCloudChecks())
 
   const token = resolveGithubToken()
   checks.push({

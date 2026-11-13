@@ -35,6 +35,7 @@ export function createLocalProviderPlugin<Discovered>(input: {
   readonly providerID: string
   readonly name: string
   readonly origin: string
+  readonly resolveOrigin?: () => string
   readonly stripPathSuffix?: RegExp
   readonly discover: (client: LocalDiscoveryClient) => Effect.Effect<readonly Discovered[], unknown>
   readonly model: (item: NoInfer<Discovered>) => LocalModel
@@ -52,14 +53,15 @@ export function createLocalProviderPlugin<Discovered>(input: {
         const config = yield* Config.Service
         const environment = yield* Effect.serviceOption(Environment.Service)
         const location = yield* Effect.serviceOption(Location.Service)
-        const defaultOrigin =
+        const fallbackOrigin =
           origin ??
           (photonWasm === "" ||
           (Option.isSome(location) && location.value.workspaceID !== undefined) ||
           (Option.isSome(environment) && environment.value.spawner === EnvironmentUnavailable.spawner)
             ? undefined
             : input.origin)
-        const source = { current: configured(yield* config.entries(), input.providerID, defaultOrigin, suffix) }
+        const currentOrigin = () => input.resolveOrigin?.() ?? fallbackOrigin
+        const source = { current: configured(yield* config.entries(), input.providerID, currentOrigin(), suffix) }
         const loaded = { models: [] as readonly Discovered[], connected: false, hash: "[]", failing: false }
 
         yield* ctx.integration.transform((integrations) => {
@@ -146,25 +148,39 @@ export function createLocalProviderPlugin<Discovered>(input: {
         // Keep the last successful inventory through transient outages instead of flickering model availability.
         // Only a configured endpoint is expected to answer, and it is reported once per outage.
         // A reload doesn't wait for the attempt in flight, so a failure for a replaced source is dropped.
-        const attempt = Effect.suspend(() => {
-          const current = source.current
-          return refresh().pipe(
-            Effect.catch((cause) => {
-              if (current !== source.current || !current.explicit || loaded.failing) return Effect.void
-              loaded.failing = true
-              return Effect.logWarning(`failed to discover ${input.name} models`, {
-                baseURL: current.baseURL,
-                cause,
-              })
-            }),
-          )
-        })
+        const attempt = Effect.suspend(() =>
+          Effect.gen(function* () {
+            const next = configured(yield* config.entries(), input.providerID, currentOrigin(), suffix)
+            if (
+              next.baseURL !== source.current.baseURL ||
+              next.apiKey !== source.current.apiKey ||
+              next.root !== source.current.root
+            ) {
+              source.current = next
+              loaded.models = []
+              loaded.connected = false
+              loaded.hash = "[]"
+              loaded.failing = false
+            }
+            const current = source.current
+            return yield* refresh().pipe(
+              Effect.catch((cause) => {
+                if (current !== source.current || !current.explicit || loaded.failing) return Effect.void
+                loaded.failing = true
+                return Effect.logWarning(`failed to discover ${input.name} models`, {
+                  baseURL: current.baseURL,
+                  cause,
+                })
+              }),
+            )
+          }),
+        )
         yield* attempt.pipe(Effect.repeat(Schedule.spaced(interval)), Effect.forkScoped)
         // Event handlers start discovery without waiting on it, so a slow endpoint doesn't hold up the next event.
         const background = yield* FiberSet.make()
         yield* ProviderRefresh.onSwitch(input.providerID, FiberSet.run(background, attempt))
         const reload = Effect.fn("LocalProviderPlugin.reload")(function* () {
-          const next = configured(yield* config.entries(), input.providerID, defaultOrigin, suffix)
+          const next = configured(yield* config.entries(), input.providerID, currentOrigin(), suffix)
           if (
             next.baseURL === source.current.baseURL &&
             next.apiKey === source.current.apiKey &&

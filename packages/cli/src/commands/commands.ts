@@ -98,7 +98,50 @@ const Root = Spec.make(typeof OPENCODE_CLI_NAME === "string" ? OPENCODE_CLI_NAME
       },
     }),
     Spec.make("doctor", {
-      description: "Check Ollama, the default model, config, plugin, PATH, and disk, and repair what can be repaired",
+      description: "Check Ollama, the default model, config, plugin, PATH, disk, and the optional Ruth cloud tunnel, and repair what can be repaired",
+    }),
+    Spec.make("cloud", {
+      description: "Run Ollama in a GitHub Codespace and tunnel it to this machine",
+      commands: [
+        Spec.make("up", {
+          description: "Create or start the Ruth Ollama codespace and forward port 11434 to localhost:11435",
+          params: {
+            repo: Flag.String("repo").pipe(
+              Flag.withDescription("Codespace repository (default the3kingleo-cmyk/ruth-codespace)"),
+              Flag.optional,
+            ),
+            machine: Flag.String("machine").pipe(
+              Flag.withDescription("Codespace machine type"),
+              Flag.withDefault("standardLinux32gb"),
+            ),
+            localPort: Flag.Int("local-port").pipe(
+              Flag.withDescription("Local tunnel port (default 11435, so local Ollama on 11434 is left alone)"),
+              Flag.withDefault(11435),
+            ),
+            idleTimeout: Flag.String("idle-timeout").pipe(
+              Flag.withDescription("Codespace idle timeout (default 240m, the usual personal-account maximum)"),
+              Flag.withDefault("240m"),
+            ),
+          },
+        }),
+        Spec.make("down", {
+          description: "Stop the codespace and the local tunnel to save free hours",
+        }),
+        Spec.make("status", {
+          description: "Show codespace state, tunnel health, and an estimate of hours used",
+        }),
+        Spec.make("logs", {
+          description: "Show local tunnel logs and codespace logs",
+        }),
+        Spec.make("forward", {
+          description: "Internal: keep the Ollama port-forward alive (used by ruth cloud up)",
+          params: {
+            codespace: Flag.String("codespace").pipe(Flag.withDescription("Codespace name")),
+            localPort: Flag.Int("local-port").pipe(Flag.withDefault(11435)),
+            remotePort: Flag.Int("remote-port").pipe(Flag.withDefault(11434)),
+          },
+        }),
+      ],
     }),
     Spec.make("uninstall", {
       description: "Uninstall Ruth, keeping session data, configuration, and state",

@@ -60,3 +60,18 @@ ruth auth login
 ```
 
 Follow the prompts for the provider you want. Some providers also honor standard environment variables such as `OPENAI_API_KEY` or `ANTHROPIC_API_KEY`. Never put tokens in the repo or in committed config files.
+
+
+## Cloud Ollama (optional)
+
+To run the 4b model on a GitHub Codespace and keep the Chromebook cool:
+
+```bash
+sudo apt-get update && sudo apt-get install -y gh   # if the installer could not
+gh auth login                                       # needs Codespaces access
+ruth cloud up
+ruth run 'hello'
+ruth cloud down
+```
+
+The tunnel listens on `localhost:11435`. Local Ollama on `localhost:11434` is left alone, and Ruth falls back to it when the tunnel is down. A personal account has about 120 core-hours per month (about 30 hours on the 4-core `standardLinux32gb` machine). Stop the codespace when you are done.
