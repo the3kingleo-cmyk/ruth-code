@@ -19,6 +19,7 @@ import { ServiceRegistration } from "./services/service-registration"
 import { RemoteTunnel } from "./services/remote-tunnel"
 import { WebUi } from "./services/web-ui"
 import { databasePath } from "./database-path"
+import { shouldEnableFilewatcher } from "./filewatcher-policy"
 
 export type Mode = "default" | "service" | "stdio"
 
@@ -136,7 +137,7 @@ const processEffect = Effect.fnUntraced(function* (options: Options) {
             gitbash: process.env.OPENCODE_GIT_BASH_PATH,
           },
           fs: {
-            filewatcher: !truthy(process.env.OPENCODE_FILEWATCHER_DISABLE ?? process.env.OPENCODE_DISABLE_FILEWATCHER),
+            filewatcher: shouldEnableFilewatcher().enabled,
             fff:
               process.env.OPENCODE_DISABLE_FFF === undefined
                 ? process.platform !== "win32"

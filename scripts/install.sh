@@ -13,7 +13,7 @@ RUTH_BIN_DIR="${RUTH_BIN_DIR:-$HOME/.local/bin}"
 OMO_INSTALL_DIR="${OMO_INSTALL_DIR:-$HOME/.local/share/oh-my-openagent}"
 CONFIG_DIR="${RUTH_CONFIG_DIR:-$HOME/.config/ruth}"
 TOKEN="${GITHUB_TOKEN:-${GH_TOKEN:-}}"
-INSTALL_PLUGIN="${INSTALL_PLUGIN:-0}"
+INSTALL_PLUGIN="${INSTALL_PLUGIN:-1}"
 
 log() { printf '%s\n' "$*"; }
 die() { printf 'error: %s\n' "$*" >&2; exit 1; }
@@ -96,6 +96,18 @@ PRESET
   log "Wrote default $CONFIG_DIR/ruth.json (1.7b chat; use 4b for tools — see presets/ruth-tools.json)"
 fi
 
+
+# Persist the token for `ruth upgrade` / `ruth self-update` (mode 600, never echoed).
+if [ -n "$TOKEN" ]; then
+  mkdir -p "$CONFIG_DIR"
+  token_file="$CONFIG_DIR/github-token"
+  umask 077
+  printf '%s
+' "$TOKEN" > "$token_file"
+  chmod 600 "$token_file"
+  log "Saved a GitHub token to $token_file for future self-updates (not printed)."
+fi
+
 # Env defaults and PATH, appended once.
 bashrc="${HOME}/.bashrc"
 marker="# ruth chromebook-lite defaults"
@@ -173,8 +185,29 @@ if [ "$INSTALL_PLUGIN" = "1" ] || [ "$INSTALL_PLUGIN" = "true" ] || [ "$INSTALL_
   command -v jq >/dev/null 2>&1 || die "jq is required to register the plugin in ruth.json"
   install_plugin
 else
-  log "Skipping Oh My OpenCode plugin (set INSTALL_PLUGIN=1 to install and register it for Ruth)."
+  log "Skipping Oh My OpenCode plugin (INSTALL_PLUGIN=0). Set INSTALL_PLUGIN=1 to install it."
 fi
 
-log "Cloud providers (OpenCode Zen and others) are not pre-keyed. After install, run: ruth auth login"
-log "Done. Open a new terminal (or source ~/.bashrc), then run: ruth --version"
+# Local chat model — first-run talks to Ollama with no extra setup.
+if command -v ollama >/dev/null 2>&1; then
+  if ! ollama list 2>/dev/null | grep -q "qwen3-abliterated:1.7b"; then
+    log "Pulling the default chat model huihui_ai/qwen3-abliterated:1.7b ..."
+    ollama pull huihui_ai/qwen3-abliterated:1.7b || log "warning: could not pull 1.7b; run: ollama pull huihui_ai/qwen3-abliterated:1.7b"
+  else
+    log "Ollama already has huihui_ai/qwen3-abliterated:1.7b"
+  fi
+  if ! ollama list 2>/dev/null | grep -q "qwen3-abliterated:4b"; then
+    log "For tool use, the 4b model is recommended. To install it now: ollama pull huihui_ai/qwen3-abliterated:4b"
+  fi
+else
+  log "Ollama is not on PATH. Install it from https://ollama.com, then: ollama pull huihui_ai/qwen3-abliterated:1.7b"
+fi
+
+log "Cloud providers (OpenCode Zen and others) are not pre-keyed. After local chat works, you can run: ruth auth login"
+log ""
+log "Next steps:"
+log "  1. source ~/.bashrc    (or open a new terminal so PATH includes ~/.local/bin)"
+log "  2. ruth --version"
+log "  3. ruth run 'hello'"
+log "  4. ruth doctor         (repairs config/PATH/model if needed)"
+log "Done."

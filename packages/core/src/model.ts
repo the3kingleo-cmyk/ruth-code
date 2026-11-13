@@ -303,7 +303,22 @@ const layer = Layer.effect(
         const value = yield* read()
         const requested = value.data.defaultModel
         const model = requested && value.byProvider.get(requested.providerID)?.get(requested.modelID)
-        return model?.enabled ? model : value.available.find(supportsText)
+        if (model?.enabled) return model
+        const preferred = [
+          "huihui_ai/qwen3-abliterated:1.7b",
+          "huihui_ai/qwen3-abliterated:4b",
+        ]
+        const local = preferred
+          .map((id) =>
+            value.available.find(
+              (item) =>
+                item.enabled &&
+                (item.providerID === "ollama" || item.providerID === "ollama-cloud") &&
+                (item.id === id || item.id.endsWith(id) || item.modelID === id),
+            ),
+          )
+          .find(Boolean)
+        return local ?? value.available.find(supportsText)
       }),
       small: Effect.fn("Model.small")(function* (providerID) {
         const value = yield* read()

@@ -23,7 +23,7 @@ A short local-model prompt for Qwen-family models ships in this core (`opencode.
 - Title generation is capped at 128 output tokens.
 - Conservative extraction of a single `{name, arguments}` tool call from assistant text.
 - `RUTH_OLLAMA_ASSUME_TOOLS=1` treats configured Ollama models as tool-capable.
-- The Oh My OpenCode chromebook-lite plugin (optional) lowers background concurrency, caps loops, and adds a memory guard.
+- The Oh My OpenCode chromebook-lite plugin is installed by default. It keeps todo-continuation on, but caps and loop-guards it, and adds a memory guard. The file watcher stays on unless memory is low.
 
 ## Recommended config
 
@@ -39,6 +39,9 @@ export RUTH_OLLAMA_ASSUME_TOOLS=1
 The OpenCode provider id (`opencode`) is unchanged so OpenCode Zen cloud models and `ruth auth login` keep working.
 
 ## Install
+
+After install: `source ~/.bashrc`, then `ruth run 'hello'`, `ruth doctor`, and later `ruth auth login` for cloud providers.
+
 
 Use `scripts/install.sh` with a GitHub token that can read `the3kingleo-cmyk/ruth-code`. Do not use `https://opencode.ai/v2/install`.
 

@@ -21,6 +21,7 @@ import { EffectFlock } from "@opencode/util/effect-flock"
 import { Heap } from "./heap"
 import { CpuProfile } from "./cpu-profile"
 import { ShutdownDeadline } from "./shutdown-deadline"
+import { ensureDefaultConfig } from "./defaults"
 
 // Keep requests to the local service off any proxy. Bun reads lowercase `no_proxy` alone whenever it is set, so both
 // spellings get the same merged list.
@@ -37,6 +38,12 @@ process.env.no_proxy = noProxy
 
 ensurePluginRuntime()
 
+try {
+  ensureDefaultConfig()
+} catch {
+  // First-run config is best-effort; `ruth doctor` repairs it.
+}
+
 if (process.env.OPENCODE_SSH_ASKPASS_PORT) {
   const { askpass } = await import("./ssh-askpass")
   process.exit(await Effect.runPromise(askpass.pipe(Effect.provide(NodeServices.layer))))
@@ -47,6 +54,8 @@ let terminated = false
 const Handlers = Runtime.handlers(Commands, {
   $: () => import("./commands/handlers/default"),
   upgrade: () => import("./commands/handlers/upgrade"),
+  "self-update": () => import("./commands/handlers/self-update"),
+  doctor: () => import("./commands/handlers/doctor"),
   uninstall: () => import("./commands/handlers/uninstall"),
   acp: () => import("./commands/handlers/acp"),
   api: () => import("./commands/handlers/api"),

@@ -83,6 +83,23 @@ const Root = Spec.make(typeof OPENCODE_CLI_NAME === "string" ? OPENCODE_CLI_NAME
         ),
       },
     }),
+    Spec.make("self-update", {
+      description: "Download the latest Ruth release from GitHub, verify sha256, health-check, and roll back on failure",
+      aliases: ["selfupdate"],
+      params: {
+        target: Argument.String("target").pipe(
+          Argument.withDescription("Version to install (must match the latest release tag for now)"),
+          Argument.optional,
+        ),
+        skipChat: Flag.Boolean("skip-chat").pipe(
+          Flag.withDescription("Skip the post-update chat health check (still runs --version)"),
+          Flag.withDefault(false),
+        ),
+      },
+    }),
+    Spec.make("doctor", {
+      description: "Check Ollama, the default model, config, plugin, PATH, and disk, and repair what can be repaired",
+    }),
     Spec.make("uninstall", {
       description: "Uninstall Ruth, keeping session data, configuration, and state",
       params: {
