@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test"
-import { fetchLatestRelease, parseSha256, pickLinuxX64Asset } from "../src/github-release"
+import { fetchLatestRelease, parseSha256, pickLinuxX64Asset, tokenFromGhAuth } from "../src/github-release"
 
 describe("github release helpers", () => {
   test("picks the linux-x64 archive and checksum", () => {
@@ -38,5 +38,15 @@ describe("fetchLatestRelease", () => {
         ),
     })
     expect(release.assets[0]?.url).toContain("releases/download/")
+  })
+})
+
+describe("tokenFromGhAuth", () => {
+  test("reads a token from gh auth token without printing it", () => {
+    const token = tokenFromGhAuth(() => ({ status: 0, stdout: "ghs_exampletokenvalue_notreal\n" }))
+    expect(token).toBe("ghs_exampletokenvalue_notreal")
+  })
+  test("returns undefined when gh is not logged in", () => {
+    expect(tokenFromGhAuth(() => ({ status: 1, stdout: "" }))).toBeUndefined()
   })
 })

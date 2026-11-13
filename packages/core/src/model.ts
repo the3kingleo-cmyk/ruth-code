@@ -9,6 +9,27 @@ import { Location } from "./location.js"
 import { freeze } from "immer"
 import { AISDKNative } from "./aisdk-native.js"
 
+/** Bare Ollama name <-> `:latest` tag, so config `ruth` matches a discovered `ruth:latest`. */
+export function alternateModelTag(id: string): string | undefined {
+  if (id.endsWith(":latest")) return id.slice(0, -":latest".length)
+  if (!id.includes(":")) return `${id}:latest`
+  return undefined
+}
+
+export function modelTagMatches(value: string, wanted: string): boolean {
+  if (value === wanted) return true
+  const alt = alternateModelTag(wanted)
+  return alt !== undefined && value === alt
+}
+
+function lookupTagged<T>(models: ReadonlyMap<string, T> | Map<string, T> | undefined, modelID: string): T | undefined {
+  if (!models) return undefined
+  const direct = models.get(modelID)
+  if (direct) return direct
+  const alt = alternateModelTag(modelID)
+  return alt ? models.get(alt) : undefined
+}
+
 export const ID = Model.ID
 export type ID = typeof ID.Type
 
@@ -285,7 +306,7 @@ const layer = Layer.effect(
       transform: (update) => prepare.pipe(Effect.andThen(state.transform(update))),
       reload,
       get: Effect.fn("Model.get")((providerID, modelID) =>
-        read().pipe(Effect.map((value) => value.byProvider.get(providerID)?.get(modelID))),
+        read().pipe(Effect.map((value) => lookupTagged(value.byProvider.get(providerID), modelID))),
       ),
       all: Effect.fn("Model.all")(() => read().pipe(Effect.map((value) => value.all))),
       available: Effect.fn("Model.available")((types?: readonly Model.Type[]) =>
@@ -302,9 +323,11 @@ const layer = Layer.effect(
       default: Effect.fn("Model.default")(function* () {
         const value = yield* read()
         const requested = value.data.defaultModel
-        const model = requested && value.byProvider.get(requested.providerID)?.get(requested.modelID)
+        const model = requested && lookupTagged(value.byProvider.get(requested.providerID), requested.modelID)
         if (model?.enabled) return model
         const preferred = [
+          "ruth",
+          "ruth-pro",
           "huihui_ai/qwen3-abliterated:1.7b",
           "huihui_ai/qwen3-abliterated:4b",
         ]
@@ -314,7 +337,11 @@ const layer = Layer.effect(
               (item) =>
                 item.enabled &&
                 (item.providerID === "ollama" || item.providerID === "ollama-cloud") &&
-                (item.id === id || item.id.endsWith(id) || item.modelID === id),
+                (item.id === id ||
+                  item.modelID === id ||
+                  modelTagMatches(item.id, id) ||
+                  modelTagMatches(item.modelID, id) ||
+                  item.id.endsWith(id)),
             ),
           )
           .find(Boolean)

@@ -20,7 +20,7 @@ import { credentialConnections } from "./dialog-integration"
 import { DialogModel } from "./dialog-model"
 import "./go-upsell-art"
 
-export const GO_URL = "https://opencode.ai/go"
+export const GO_URL = "https://github.com/the3kingleo-cmyk/ruth-install"
 const ACTIONS = ["don't show again", "dismiss", "subscribe"] as const
 type Action = (typeof ACTIONS)[number]
 type IntegrationAttempt = IntegrationOauthConnectOutput["data"]

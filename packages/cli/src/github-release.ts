@@ -1,3 +1,4 @@
+import { spawnSync } from "child_process"
 import { createHash } from "crypto"
 import fs from "fs"
 import os from "os"
@@ -24,10 +25,26 @@ export function resolveGithubToken(): string | undefined {
   const file = path.join(env("CONFIG_DIR") || path.join(os.homedir(), ".config", "ruth"), "github-token")
   try {
     const text = fs.readFileSync(file, "utf8").trim()
-    return text || undefined
+    if (text) return text
+  } catch {
+    // fall through to gh auth
+  }
+  return tokenFromGhAuth()
+}
+
+/** Use a token already saved by `gh auth login --web` (never printed). */
+export function tokenFromGhAuth(
+  run: () => { status: number | null; stdout: string } = () =>
+    spawnSync("gh", ["auth", "token"], { encoding: "utf8", timeout: 8_000 }),
+): string | undefined {
+  try {
+    const result = run()
+    const text = (result.stdout || "").trim()
+    if (result.status === 0 && text && !text.includes("\n") && text.length > 8) return text
   } catch {
     return undefined
   }
+  return undefined
 }
 
 export function repoSlug(): string {

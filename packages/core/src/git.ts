@@ -21,7 +21,7 @@ export class Repository extends Schema.Class<Repository>("Git.Repository")({
 
 // Included from $GIT_DIR/config via include.path (git >= 1.7.10); OpenCode owns
 // this file entirely, so updates are plain rewrites with no config parsing.
-const snapshotConfigFile = "opencode.gitconfig"
+const snapshotConfigFile = "ruth.gitconfig"
 const snapshotConfigInclude = `[include]
 	path = ${snapshotConfigFile}
 `
@@ -43,7 +43,7 @@ const snapshotConfig = `[core]
 export const TreeID = Schema.String.pipe(Schema.brand("Git.TreeID"))
 export type TreeID = typeof TreeID.Type
 
-const temporaryIndexPrefix = "index.opencode-"
+const temporaryIndexPrefix = "index.ruth-"
 // Like `git gc --auto`, pack once loose objects accumulate, and combine packs before lookups slow down.
 // Room for paths on one Git command line after the Git path, repository flags, and quoting. Windows caps a command
 // line at 32,767 characters. macOS caps arguments plus environment at 1 MiB, and Linux caps them at 2 MiB by default.

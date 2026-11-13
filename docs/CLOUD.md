@@ -21,7 +21,7 @@ ruth doctor          # includes cloud checks; Ruth still works locally if cloud 
 - Idle timeout: 4 hours (`240m`), the usual personal-account maximum
 - Retention after stop: 30 days, so pulled models stay on disk
 
-Models pulled inside the codespace: `huihui_ai/qwen3-abliterated:4b` and `:1.7b`.
+The codespace pulls `huihui_ai/qwen3-abliterated:4b` and `:1.7b`, then builds the named Ollama models `ruth` (1.7b) and `ruth-pro` (4b).
 
 ## Fallback
 

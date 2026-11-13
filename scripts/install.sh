@@ -10,7 +10,7 @@ RUTH_REPO_SLUG="${RUTH_REPO_SLUG:-the3kingleo-cmyk/ruth-code}"
 OMO_REPO_SLUG="${OMO_REPO_SLUG:-the3kingleo-cmyk/oh-my-openagent}"
 OMO_REPO_BRANCH="${OMO_REPO_BRANCH:-chromebook-lite}"
 RUTH_BIN_DIR="${RUTH_BIN_DIR:-$HOME/.local/bin}"
-OMO_INSTALL_DIR="${OMO_INSTALL_DIR:-$HOME/.local/share/oh-my-openagent}"
+OMO_INSTALL_DIR="${OMO_INSTALL_DIR:-$HOME/.local/share/ruth/plugin}"
 CONFIG_DIR="${RUTH_CONFIG_DIR:-$HOME/.config/ruth}"
 TOKEN="${GITHUB_TOKEN:-${GH_TOKEN:-}}"
 INSTALL_PLUGIN="${INSTALL_PLUGIN:-1}"
@@ -69,10 +69,12 @@ if [ ! -f "$CONFIG_DIR/ruth.json" ] && [ ! -f "$CONFIG_DIR/ruth.jsonc" ]; then
   else
     cat > "$CONFIG_DIR/ruth.json" << 'PRESET'
 {
-  "$schema": "https://opencode.ai/config.json",
-  "$comment": "Default Ruth config for local Ollama. Prefer huihui_ai/qwen3-abliterated:4b when you need tools.",
-  "model": "ollama/huihui_ai/qwen3-abliterated:1.7b",
-  "small_model": "ollama/huihui_ai/qwen3-abliterated:1.7b",
+  "$comment": "Default Ruth config. Local model is named Ruth (Ollama `ruth` on Qwen3 1.7B, Apache 2.0). Use `ruth-pro` (4B) for heavier tool work.",
+  "model": "ollama/ruth",
+  "small_model": "ollama/ruth",
+  "permissions": [
+    { "action": "execute", "resource": "*", "effect": "deny" }
+  ],
   "plugins": [],
   "provider": {
     "ollama": {
@@ -81,6 +83,12 @@ if [ ! -f "$CONFIG_DIR/ruth.json" ] && [ ! -f "$CONFIG_DIR/ruth.jsonc" ]; then
         "chunkTimeout": false
       },
       "models": {
+        "ruth": {
+          "capabilities": { "tools": true }
+        },
+        "ruth-pro": {
+          "capabilities": { "tools": true }
+        },
         "huihui_ai/qwen3-abliterated:4b": {
           "capabilities": { "tools": true }
         },
@@ -93,7 +101,7 @@ if [ ! -f "$CONFIG_DIR/ruth.json" ] && [ ! -f "$CONFIG_DIR/ruth.jsonc" ]; then
 }
 PRESET
   fi
-  log "Wrote default $CONFIG_DIR/ruth.json (1.7b chat; use 4b for tools — see presets/ruth-tools.json)"
+  log "Wrote default $CONFIG_DIR/ruth.json (model: ollama/ruth; tools: ollama/ruth-pro)"
 fi
 
 
@@ -188,19 +196,19 @@ else
   log "Skipping Oh My OpenCode plugin (INSTALL_PLUGIN=0). Set INSTALL_PLUGIN=1 to install it."
 fi
 
-# Local chat model — first-run talks to Ollama with no extra setup.
+# Local chat model — first-run talks to the named Ruth Ollama model.
 if command -v ollama >/dev/null 2>&1; then
-  if ! ollama list 2>/dev/null | grep -q "qwen3-abliterated:1.7b"; then
-    log "Pulling the default chat model huihui_ai/qwen3-abliterated:1.7b ..."
-    ollama pull huihui_ai/qwen3-abliterated:1.7b || log "warning: could not pull 1.7b; run: ollama pull huihui_ai/qwen3-abliterated:1.7b"
+  script_dir="$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+  if [ -x "$script_dir/create-ruth-models.sh" ]; then
+    "$script_dir/create-ruth-models.sh" || log "warning: could not build Ruth Ollama models. Later run: ruth doctor --repair"
   else
-    log "Ollama already has huihui_ai/qwen3-abliterated:1.7b"
-  fi
-  if ! ollama list 2>/dev/null | grep -q "qwen3-abliterated:4b"; then
-    log "For tool use, the 4b model is recommended. To install it now: ollama pull huihui_ai/qwen3-abliterated:4b"
+    log "Building Ruth Ollama models via: ruth doctor --repair"
+    if command -v ruth >/dev/null 2>&1; then
+      ruth doctor --repair || log "warning: ruth doctor --repair did not finish. Later run: ruth doctor --repair"
+    fi
   fi
 else
-  log "Ollama is not on PATH. Install it from https://ollama.com, then: ollama pull huihui_ai/qwen3-abliterated:1.7b"
+  log "Ollama is not on PATH. Install it from https://ollama.com, then: ruth doctor --repair"
 fi
 
 log "Cloud providers (OpenCode Zen and others) are not pre-keyed. After local chat works, you can run: ruth auth login"

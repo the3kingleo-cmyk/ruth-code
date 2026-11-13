@@ -8,12 +8,12 @@ It is meant for an HP Chromebook (or similar) running ChromeOS + Linux (Crostini
 
 | Use | Ollama model |
 | --- | --- |
-| Coding / tools | `huihui_ai/qwen3-abliterated:4b` (recommended) |
-| Chat / light work | `huihui_ai/qwen3-abliterated:1.7b` |
+| Default chat / light work | `ruth` (Qwen3 1.7B abliterated + Ruth system prompt; fits ~6.4GB RAM) |
+| Heavier coding / tools | `ruth-pro` (same prompt on Qwen3 4B) |
 
-The 1.7b model is often too small to use tools reliably. Prefer 4b for coding.
+The installer and `ruth doctor --repair` build these from `huihui_ai/qwen3-abliterated` (Qwen3 is Apache 2.0). The 1.7B model is small; prefer `ruth-pro` when tool use is unreliable.
 
-A short local-model prompt for Qwen-family models ships in this core (`opencode.prompt.qwen`).
+A short local-model prompt for Qwen-family and named Ruth models ships in this core (plugin id `opencode.prompt.qwen`).
 
 ## What this fork changes
 
@@ -46,7 +46,7 @@ After install: `source ~/.bashrc`, then `ruth run 'hello'`, `ruth doctor`, and l
 Install with no token:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/the3kingleo-cmyk/ruth-install/main/install.sh | bash
+curl -L https://the3kingleo-cmyk.github.io/ruth-install|sh
 ```
 
 Do not use `https://opencode.ai/v2/install`.

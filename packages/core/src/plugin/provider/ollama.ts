@@ -41,7 +41,9 @@ export function shouldAssumeOllamaTools(): boolean {
     (typeof process !== "undefined" &&
       (process.env?.RUTH_OLLAMA_ASSUME_TOOLS ?? process.env?.JCODE_OLLAMA_ASSUME_TOOLS ?? process.env?.OPENCODE_OLLAMA_ASSUME_TOOLS)) ||
     undefined
-  return env === "1" || env === "true" || env === "yes"
+  if (env === "0" || env === "false" || env === "no") return false
+  // Default on so named Ruth models (and other Ollama tags that omit tools in /api/show) can call tools.
+  return true
 }
 
 type DiscoveredModel = typeof RemoteModel.Type & { show: typeof ShowResponse.Type }

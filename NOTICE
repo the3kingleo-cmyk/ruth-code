@@ -16,3 +16,12 @@ models.opencode.ai are unchanged because they must still resolve.
 
 `ruth auth login` is the supported way to sign in to cloud providers. This
 repository does not ship third-party API keys.
+
+Default local model
+-------------------
+The default Ollama models `ruth` and `ruth-pro` are built from
+huihui_ai/qwen3-abliterated (Qwen3 1.7B and 4B). Qwen3 is licensed under
+Apache License 2.0 by Alibaba (https://github.com/QwenLM/Qwen3). The
+abliterated weights are a community modification of those Apache-2.0
+checkpoints. Ruth only adds a system prompt (identity and coding-agent
+rules) via an Ollama Modelfile; it does not relicense the weights.

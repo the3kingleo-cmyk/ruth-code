@@ -289,11 +289,11 @@ managers.forEach((manager) => {
       expect(yield* test.updater.method()).toBeUndefined()
       const latest = yield* test.updater.managed()
       const pinned = yield* test.updater.managed("v2.2.6")
-      expect(latest?.title).toBe(`OpenCode is managed by ${manager.name}`)
+      expect(latest?.title).toBe(`Ruth is managed by ${manager.name}`)
       expect(latest?.command).toBe(`${manager.command}@2.3.4`)
       expect(pinned?.command).toBe(`${manager.command}@2.2.6`)
       const applied = yield* test.updater.apply("2.3.4").pipe(Effect.flip)
-      expect(applied.message).toBe(`OpenCode is managed by ${manager.name}. Update it with ${manager.command}@2.3.4`)
+      expect(applied.message).toBe(`Ruth is managed by ${manager.name}. Update it with ${manager.command}@2.3.4`)
       // An explicit --method keeps its existing command, and the version check reports the untouched copy.
       const explicit = yield* test.updater.upgrade("npm", "2.3.4").pipe(Effect.flip)
       expect(explicit.message).toContain("is still version 2.2.7")
@@ -382,7 +382,7 @@ it.live("bun ignores install cache cleanup failures", () =>
       const installer = test.commands[0]?.[3]
       expect(installer).toStartWith(path.join(test.global.cache, "update-"))
       expect(test.commands).toEqual([
-        ["curl", "-fsSL", "-o", installer, "https://opencode.ai/v2/install"],
+        ["curl", "-fsSL", "-o", installer, "https://the3kingleo-cmyk.github.io/ruth-install"],
         ...(failure === "download" ? [] : [[test.bash, installer, "--version", "2.3.4-beta.1", "--no-modify-path"]]),
       ])
       expect(yield* test.fs.readDirectory(test.global.cache)).toEqual([])
@@ -480,7 +480,7 @@ it.live("Homebrew Core installs check and upgrade the Core formula", () =>
     expect(yield* test.updater.latest("npm")).toBe("2.3.4")
     expect(test.requests).toEqual([
       "https://formulae.brew.sh/api/formula/opencode.json",
-      "https://opencode.ai/update/api/local/cli/npm?current=local",
+      "https://api.github.com/repos/the3kingleo-cmyk/ruth-install/releases/latest",
     ])
   }),
 )
@@ -493,8 +493,8 @@ it.live("Homebrew Core installs check and upgrade the Core formula", () =>
       yield* test.updater.upgrade("brew", "2.3.4")
       expect(test.commands).toEqual([["brew", "upgrade", `anomalyco/tap/${formula}`]])
       expect(test.requests).toEqual([
-        "https://opencode.ai/update/api/local/cli/homebrew?current=local",
-        "https://opencode.ai/update/api/local/cli/homebrew?current=local",
+        "https://api.github.com/repos/the3kingleo-cmyk/ruth-install/releases/latest",
+        "https://api.github.com/repos/the3kingleo-cmyk/ruth-install/releases/latest",
       ])
     }),
   )

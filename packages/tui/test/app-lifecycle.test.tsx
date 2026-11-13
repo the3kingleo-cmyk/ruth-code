@@ -369,7 +369,7 @@ test("session lifecycle updates the terminal title and prints the epilogue after
     await task
 
     expect(stdout).toContain("Renamed session")
-    expect(stdout).toContain("opencode -s dummy")
+    expect(stdout).toContain("ruth -s dummy")
     expect(promptRequests).toBe(0)
   } finally {
     process.stdout.write = originalWrite
@@ -1898,7 +1898,7 @@ test("free usage limit offers OpenCode Go once per 24h, transitions Subscribe to
   const upsell = setup.captureCharFrame()
   expect(upsell).toContain("OpenCode Go gives you reliable access")
   expect(upsell).toContain("▀▀▀▀ ▀▀▀▀")
-  expect(upsell).toContain("opencode.ai/go")
+  expect(upsell).toContain("github.com/the3kingleo-cmyk/ruth-install")
   expect(upsell).toContain("don't show again")
   expect(upsell).toContain("dismiss")
   expect(upsell).toContain("subscribe")
@@ -1986,7 +1986,7 @@ test("free usage limit offers OpenCode Go once per 24h, transitions Subscribe to
   await setup.waitForFrame((frame) => frame.includes("Free limit reached"))
   setup.mockInput.pressEnter()
   await setup.waitForFrame((frame) => frame.includes("GOGO-1234"))
-  expect(openSpy).toHaveBeenCalledWith("https://opencode.ai/go")
+  expect(openSpy).toHaveBeenCalledWith("https://github.com/the3kingleo-cmyk/ruth-install")
   expect(oauthRequests).toEqual([
     { methodID: "device", answer: { server: "https://opencode.ai/console" } },
   ])
@@ -2182,7 +2182,7 @@ test("free usage limit Subscribe handles mid-auth/mid-sync Escape, sync failure,
   })
   await setup.waitForFrame((frame) => frame.includes("Free limit reached"))
   setup.mockInput.pressEnter()
-  expect(openSpy).toHaveBeenCalledWith("https://opencode.ai/go")
+  expect(openSpy).toHaveBeenCalledWith("https://github.com/the3kingleo-cmyk/ruth-install")
   await setup.waitForFrame((frame) => frame.includes("Connect an integration"))
   releaseCatalog()
   await setup.waitForFrame((frame) => frame.includes("Waiting for authorization…"))

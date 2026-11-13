@@ -646,6 +646,25 @@ function renderer(input: Input) {
             timestamp,
           )
         }
+        // Small local models (Ruth / Qwen3) sometimes put the whole reply in the
+        // reasoning channel and emit no text part. Promote it so `ruth run` prints it.
+        const hasVisibleText = message.content.some((item) => item.type === "text" && item.text?.trim())
+        if (!hasVisibleText && !input.thinking) {
+          const fallbacks = message.content.filter((item) => item.type === "reasoning" && item.text?.trim())
+          for (const [index, item] of fallbacks.entries()) {
+            text(
+              {
+                kind: "text",
+                id: id(`reasoning-as-text-${index}`),
+                messageID: message.id,
+                ordinal: 1000 + index,
+                text: item.text,
+              },
+              message.time.created,
+              timestamp,
+            )
+          }
+        }
         if (seen !== "ended" && message.finish && message.tokens)
           step("step-finish", timestamp, id("step-finish"), message.id, {
             reason: message.finish,

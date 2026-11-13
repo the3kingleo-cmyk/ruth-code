@@ -321,7 +321,7 @@ const make = Effect.gen(function* () {
         fetch(
           core
             ? "https://formulae.brew.sh/api/formula/opencode.json"
-            : `https://opencode.ai/update/api/${encodeURIComponent(channel)}/${encodeURIComponent(OPENCODE_ARTIFACT)}/${distribution}?current=${encodeURIComponent(OPENCODE_VERSION)}`,
+            : "https://api.github.com/repos/the3kingleo-cmyk/ruth-install/releases/latest",
           {
             signal: AbortSignal.any([signal, AbortSignal.timeout(10_000)]),
           },
@@ -344,7 +344,7 @@ const make = Effect.gen(function* () {
           retry: "Try again in a few minutes.",
         }),
       )
-    const data: { version?: string; metadata?: { package?: string }; versions?: { stable?: string } } =
+    const data: { version?: string; tag_name?: string; metadata?: { package?: string }; versions?: { stable?: string } } =
       yield* Effect.tryPromise({
         try: () => response.json(),
         catch: (cause) =>
@@ -357,8 +357,8 @@ const make = Effect.gen(function* () {
             { cause },
           ),
       })
-    const version = core ? data.versions?.stable : data.version
-    const packageName = core ? "opencode" : data.metadata?.package
+    const version = core ? data.versions?.stable : (data.version ?? data.tag_name?.replace(/^v/, ""))
+    const packageName = core ? "opencode" : (data.metadata?.package ?? "ruth")
     if (!version || !packageName)
       return yield* Effect.fail(
         new UpgradeError({
@@ -407,10 +407,10 @@ const make = Effect.gen(function* () {
 
   const managedError = (owner: { name: string; command: string }, target: string) =>
     new UpgradeError({
-      title: `OpenCode is managed by ${owner.name}`,
+      title: `Ruth is managed by ${owner.name}`,
       detail: `This copy was installed with ${owner.name}, which keeps its own record of the installed version, so Ruth won't update it directly.`,
       command: `${owner.command}${target}`,
-      retry: "Run the command above, then restart OpenCode.",
+      retry: "Run the command above, then restart Ruth.",
     })
 
   const managedMessage = (error: UpgradeError) => `${error.title}. Update it with ${error.command}`
@@ -539,8 +539,8 @@ const make = Effect.gen(function* () {
           const installer = path.join(directory, "install")
           yield* runUpgrade({
             method,
-            command: ["curl", "-fsSL", "-o", installer, "https://opencode.ai/v2/install"],
-            displayCommand: ["curl", "-fsSL", "https://opencode.ai/v2/install"],
+            command: ["curl", "-fsSL", "-o", installer, "https://the3kingleo-cmyk.github.io/ruth-install"],
+            displayCommand: ["curl", "-fsSL", "https://the3kingleo-cmyk.github.io/ruth-install"],
             title: "Could not download the Ruth installer",
             retry: "Check your network, then run ruth upgrade again.",
           })
@@ -630,7 +630,7 @@ const make = Effect.gen(function* () {
       yield* Effect.logInfo("update check done", { action: "up-to-date" })
       return undefined
     }
-    yield* Effect.logInfo("OpenCode update available", { current, latest: version, action: next })
+    yield* Effect.logInfo("Ruth update available", { current, latest: version, action: next })
     return { policy, version }
   })
 
@@ -663,7 +663,7 @@ const make = Effect.gen(function* () {
     if (OPENCODE_LOCAL)
       return {
         type: "unavailable" as const,
-        message: "This build runs from a source checkout. Use an installed OpenCode release to check for updates.",
+        message: "This build runs from a source checkout. Use an installed Ruth release to check for updates.",
       }
     const detected = yield* method()
     if (!detected && installedOwner) {

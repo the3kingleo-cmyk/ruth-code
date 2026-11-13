@@ -65,10 +65,11 @@ export const QwenPlugin = make(
   "opencode.prompt.qwen",
   (model) => {
     const ids = [model.id, model.modelID, model.family].join(" ").toLowerCase()
-    if (!ids.includes("qwen")) return undefined
+    // Named Ruth models are Qwen3 under the hood; also match "ruth" so tool-call guidance still applies.
+    if (!ids.includes("qwen") && !ids.includes("ruth")) return undefined
     return PROMPT_QWEN
   },
-  "append",
+  "override",
 )
 
 export const Plugins = [OpenAIPlugin, AnthropicPlugin, KimiPlugin, ArceePlugin, MetaPlugin, QwenPlugin] as const

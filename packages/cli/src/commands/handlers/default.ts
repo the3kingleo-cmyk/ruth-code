@@ -15,12 +15,14 @@ import { Service } from "@opencode/client/effect/service"
 import { OpenCode } from "@opencode/client/promise"
 import { findSession } from "../../session-target"
 import { errorMessage } from "../../util/error"
+import { resolveLaunchDirectory } from "../../project-dir"
 
 export default Runtime.handler(Commands, (input) =>
   Effect.gen(function* () {
     const requestedDirectory = Option.getOrUndefined(input.directory)
     const requestedServer = Option.getOrUndefined(input.server)
-    if (requestedDirectory !== undefined) process.chdir(requestedDirectory)
+    const launch = resolveLaunchDirectory(requestedDirectory)
+    if (launch.directory !== process.cwd()) process.chdir(launch.directory)
     const preflight = UpdatePreflight.make()
     yield* Effect.addFinalizer(() => Effect.promise(() => preflight.close()))
     const serviceStarts = yield* Queue.unbounded<{
@@ -39,15 +41,11 @@ export default Runtime.handler(Commands, (input) =>
       onStart: (reason, previousVersion) => {
         Queue.offerUnsafe(serviceStarts, { reason, previousVersion })
         if (reason === "version-mismatch" && preflight.begin(previousVersion)) return
-        process.stderr.write(
-          reason === "version-mismatch"
-            ? "Restarting background server (version mismatch)...\n"
-            : "Starting background server...\n",
-        )
+        // Launch the TUI with no extra banner so `opencode` opens Ruth directly.
       },
     }).pipe(
       Effect.tapError(() =>
-        Effect.promise(() => preflight.fail("OpenCode update could not start the new background service")),
+        Effect.promise(() => preflight.fail("Ruth update could not start the new background service")),
       ),
     )
     const session = Option.getOrUndefined(input.session)

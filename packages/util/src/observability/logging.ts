@@ -3,7 +3,7 @@ import path from "path"
 import { Global } from "../global.js"
 import { runID } from "./shared.js"
 
-// One log file is shared by every opencode process on the machine and only ever appended to, so it
+// One log file is shared by every Ruth process on the machine and only ever appended to, so it
 // is bounded by compacting in place instead of rotating: once it passes LOG_MAX_BYTES the head is
 // dropped so roughly LOG_KEEP_BYTES remain, rounded forward to the next line boundary.
 export const LOG_MAX_BYTES = 50 * 1024 * 1024
@@ -57,8 +57,8 @@ function format(input: unknown) {
 }
 
 export function file(local = true, channel = "local") {
-  if (!local) return path.join(Global.Path.log, "opencode.log")
-  return path.join(Global.Path.log, `opencode-${channel.replace(/[^a-zA-Z0-9._-]/g, "-")}.log`)
+  if (!local) return path.join(Global.Path.log, "ruth.log")
+  return path.join(Global.Path.log, `ruth-${channel.replace(/[^a-zA-Z0-9._-]/g, "-")}.log`)
 }
 
 export function fileLogger(target = file(), id: string = runID()) {

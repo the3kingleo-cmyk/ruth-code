@@ -327,7 +327,7 @@ function UpdateFooter(props: {
   const statusSweep = createSweep()
   const runningHeader = () =>
     phrase(
-      ["OpenCode", colors.muted, true],
+      ["Ruth", colors.muted, true],
       ["is updating", colors.muted],
       ...(props.from
         ? ([
@@ -339,11 +339,11 @@ function UpdateFooter(props: {
       [OPENCODE_VERSION, colors.accent],
     )
   const completedHeader = phrase(
-    ["OpenCode", colors.muted, true],
+    ["Ruth", colors.muted, true],
     ["updated to", colors.muted],
     [OPENCODE_VERSION, colors.accent],
   )
-  const pausedHeader = phrase(["OpenCode", colors.muted, true], ["update paused", colors.muted])
+  const pausedHeader = phrase(["Ruth", colors.muted, true], ["update paused", colors.muted])
   const outcomeStatus = () =>
     props.outcome() === "success"
       ? [...styled("✓", colors.success), ...styled(" Ready", colors.text)]

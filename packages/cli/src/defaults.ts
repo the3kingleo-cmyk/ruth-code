@@ -3,26 +3,32 @@ import os from "os"
 import path from "path"
 import { env } from "@opencode/util/env"
 
-export const DEFAULT_CHAT_MODEL = "huihui_ai/qwen3-abliterated:1.7b"
-export const DEFAULT_TOOLS_MODEL = "huihui_ai/qwen3-abliterated:4b"
-export const DEFAULT_PROVIDER_MODEL = `ollama/${DEFAULT_CHAT_MODEL}`
+export const DEFAULT_CHAT_MODEL = "ruth"
+export const DEFAULT_TOOLS_MODEL = "ruth-pro"
+/** Base Ollama tags used to build the named Ruth models. Prefer 1.7b for 6.4GB RAM. */
+export const DEFAULT_BASE_CHAT_MODEL = "huihui_ai/qwen3-abliterated:1.7b"
+export const DEFAULT_BASE_TOOLS_MODEL = "huihui_ai/qwen3-abliterated:4b"
+export const DEFAULT_PROVIDER_MODEL = "ollama/ruth"
 export const DEFAULT_REPO_SLUG = "the3kingleo-cmyk/ruth-install"
 
 export function defaultRuthConfig(pluginPath?: string) {
   return {
-    $schema: "https://opencode.ai/config.json",
     $comment:
-      "Default Ruth config for local Ollama. 1.7b is the first-run chat model; prefer 4b when you need tools.",
+      "Default Ruth config. The local model is named Ruth (Ollama `ruth` on Qwen3 1.7B). Use `ruth-pro` (4B) for heavier tool work.",
     model: DEFAULT_PROVIDER_MODEL,
     small_model: DEFAULT_PROVIDER_MODEL,
     websearch: { provider: "random" },
+    // Deny `execute` so Code Mode stays off. 1.7B Ruth needs direct tool calls, not a JS catalog.
+    permissions: [{ action: "execute", resource: "*", effect: "deny" }],
     plugins: pluginPath ? [pluginPath] : [],
     provider: {
       ollama: {
         options: { headerTimeout: 1_200_000, chunkTimeout: false },
         models: {
-          [DEFAULT_TOOLS_MODEL]: { capabilities: { tools: true } },
           [DEFAULT_CHAT_MODEL]: { capabilities: { tools: true } },
+          [DEFAULT_TOOLS_MODEL]: { capabilities: { tools: true } },
+          [DEFAULT_BASE_TOOLS_MODEL]: { capabilities: { tools: true } },
+          [DEFAULT_BASE_CHAT_MODEL]: { capabilities: { tools: true } },
         },
       },
     },

@@ -9,7 +9,8 @@ import { hasConnectedProvider } from "../../util/connected-provider"
 export function SidebarOnboarding(props: { context: Plugin.Context; sessionID: string }) {
   const dimensions = useTerminalDimensions()
   const [onboarding, updateOnboarding] = props.context.storage.store("getting-started", {
-    initial: { dismissed: false },
+    // Ruth is ready with local Ollama; do not block the first TUI frame with a setup card.
+    initial: { dismissed: true },
   })
   const session = createMemo(() => props.context.data.session.get(props.sessionID))
   const integrations = createMemo(() =>

@@ -11,6 +11,7 @@ import {
   ensureDefaultConfig,
   findExistingConfig,
 } from "./defaults"
+import { ensureRuthModels, ollamaHasModel } from "./ruth-models"
 import { shouldEnableFilewatcher } from "./filewatcher-policy"
 import { doctorCloudChecks } from "./cloud"
 import { resolveGithubToken } from "./github-release"
@@ -27,16 +28,20 @@ export type DoctorReport = {
   checks: DoctorCheck[]
 }
 
-const PLUGIN_DIR = "oh-my-openagent"
 
 function home(): string {
   return env("TEST_HOME") || os.homedir()
 }
 
 function pluginDist(): string | undefined {
-  const dir = path.join(env("XDG_DATA_HOME") || path.join(home(), ".local", "share"), PLUGIN_DIR)
-  const file = path.join(dir, "dist", "index.js")
-  return fs.existsSync(file) ? dir : undefined
+  const data = env("XDG_DATA_HOME") || path.join(home(), ".local", "share")
+  const candidates = [
+    path.join(data, "ruth", "plugin"),
+    path.join(data, "oh-my-openagent"), // leftover path from earlier installs
+  ]
+  for (const dir of candidates) {
+    if (fs.existsSync(path.join(dir, "dist", "index.js"))) return dir
+  }
 }
 
 function pathHasLocalBin(): boolean {
@@ -58,18 +63,6 @@ function ensurePathInBashrc(): boolean {
   const block = `${text.endsWith("\n") || text === "" ? "" : "\n"}${text.includes(marker) ? "" : `${marker}\n`}${line}\n`
   fs.appendFileSync(bashrc, block)
   return true
-}
-
-function ollamaHasModel(name: string): boolean {
-  const result = spawnSync("ollama", ["list"], { encoding: "utf8", timeout: 15_000 })
-  if (result.status !== 0) return false
-  return (result.stdout || "").includes(name) || (result.stdout || "").includes(name.split(":")[0] ?? name)
-}
-
-function pullModel(name: string): { ok: boolean; detail: string } {
-  const result = spawnSync("ollama", ["pull", name], { encoding: "utf8", timeout: 600_000 })
-  if (result.status === 0) return { ok: true, detail: `pulled ${name}` }
-  return { ok: false, detail: (result.stderr || result.stdout || `ollama pull ${name} failed`).trim() }
 }
 
 function registerPlugin(configPath: string, pluginPath: string): boolean {
@@ -143,17 +136,19 @@ export function runDoctor(options: { repair?: boolean } = {}): DoctorReport {
   let modelDetail = "ollama is not installed or not on PATH"
   if (ollamaOk) {
     modelOk = ollamaHasModel(DEFAULT_CHAT_MODEL)
-    if (!modelOk && repair) {
-      const pulled = pullModel(DEFAULT_CHAT_MODEL)
-      modelRepaired = pulled.ok
-      modelOk = pulled.ok
-      modelDetail = pulled.ok
-        ? `Installed ${DEFAULT_CHAT_MODEL}. For tools, also run: ollama pull ${DEFAULT_TOOLS_MODEL}`
-        : pulled.detail
+    if (repair) {
+      const had = modelOk
+      const ensured = ensureRuthModels()
+      modelRepaired = ensured.ruth && !had
+      modelOk = ensured.ruth
+      modelDetail = ensured.detail
     } else {
+      const pro = ollamaHasModel(DEFAULT_TOOLS_MODEL)
       modelDetail = modelOk
-        ? `ollama has ${DEFAULT_CHAT_MODEL}`
-        : `Missing ${DEFAULT_CHAT_MODEL}. Run: ollama pull ${DEFAULT_CHAT_MODEL}`
+        ? (pro
+            ? "ollama has ruth and ruth-pro"
+            : "ollama has ruth. For heavier tools: ruth doctor --repair (builds ruth-pro on 4b)")
+        : "Missing Ollama model `ruth`. Run: ruth doctor --repair"
     }
   }
   checks.push({

@@ -99,6 +99,12 @@ const Root = Spec.make(typeof OPENCODE_CLI_NAME === "string" ? OPENCODE_CLI_NAME
     }),
     Spec.make("doctor", {
       description: "Check Ollama, the default model, config, plugin, PATH, disk, and the optional Ruth cloud tunnel, and repair what can be repaired",
+      params: {
+        repair: Flag.Boolean("repair").pipe(
+          Flag.withDescription("Repair config, PATH, plugin, and the named Ruth Ollama models (on by default)"),
+          Flag.withDefault(true),
+        ),
+      },
     }),
     Spec.make("cloud", {
       description: "Run Ollama in a GitHub Codespace and tunnel it to this machine",

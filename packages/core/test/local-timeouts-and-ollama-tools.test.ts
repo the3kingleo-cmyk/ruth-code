@@ -23,9 +23,11 @@ describe("local provider timeouts", () => {
 })
 
 describe("shouldAssumeOllamaTools", () => {
-  test("is off by default and on when configured", () => {
+  test("is on by default and can be turned off", () => {
+    expect(shouldAssumeOllamaTools()).toBe(true)
+    process.env.RUTH_OLLAMA_ASSUME_TOOLS = "0"
     expect(shouldAssumeOllamaTools()).toBe(false)
-    process.env.OPENCODE_OLLAMA_ASSUME_TOOLS = "1"
+    process.env.RUTH_OLLAMA_ASSUME_TOOLS = "1"
     expect(shouldAssumeOllamaTools()).toBe(true)
   })
 })
