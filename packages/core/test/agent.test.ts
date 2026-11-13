@@ -182,6 +182,7 @@ describe("Agent", () => {
         "compaction",
         "explore",
         "general",
+        "ruth",
         "summary",
         "title",
       ])

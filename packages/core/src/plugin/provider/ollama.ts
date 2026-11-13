@@ -92,8 +92,8 @@ export const make = createLocalProviderPlugin({
       )
     }),
   model: (item) => ({
-    id: item.model,
-    name: item.name || item.model,
+    id: item.model.endsWith(":latest") ? item.model.slice(0, -":latest".length) : item.model,
+    name: (item.name || item.model).replace(/:latest$/, ""),
     family: item.show.details?.family || item.details.family,
     tools: item.show.capabilities?.includes("tools") || shouldAssumeOllamaTools(),
     vision: item.show.capabilities?.includes("vision"),

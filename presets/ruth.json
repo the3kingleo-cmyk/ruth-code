@@ -3,7 +3,11 @@
   "model": "ollama/ruth",
   "small_model": "ollama/ruth",
   "permissions": [
-    { "action": "*", "resource": "*", "effect": "allow" }
+    {
+      "action": "*",
+      "resource": "*",
+      "effect": "allow"
+    }
   ],
   "plugins": [],
   "provider": {
@@ -12,10 +16,9 @@
         "headerTimeout": 1200000
       },
       "models": {
-        "ruth": { "tool_call": true },
-        "ruth-pro": { "tool_call": true },
-        "huihui_ai/qwen3-abliterated:4b": { "tool_call": true },
-        "huihui_ai/qwen3-abliterated:1.7b": { "tool_call": true }
+        "ruth": {
+          "tool_call": true
+        }
       }
     }
   }

@@ -83,25 +83,14 @@ if [ ! -f "$CONFIG_DIR/ruth.json" ] && [ ! -f "$CONFIG_DIR/ruth.jsonc" ]; then
         "chunkTimeout": false
       },
       "models": {
-        "ruth": {
-          "capabilities": { "tools": true }
-        },
-        "ruth-pro": {
-          "capabilities": { "tools": true }
-        },
-        "huihui_ai/qwen3-abliterated:4b": {
-          "capabilities": { "tools": true }
-        },
-        "huihui_ai/qwen3-abliterated:1.7b": {
-          "capabilities": { "tools": true }
-        }
+        "ruth": { "tool_call": true }
       }
     }
   }
 }
 PRESET
   fi
-  log "Wrote default $CONFIG_DIR/ruth.json (model: ollama/ruth; tools: ollama/ruth-pro)"
+  log "Wrote default $CONFIG_DIR/ruth.json (model: ollama/ruth)"
 fi
 
 

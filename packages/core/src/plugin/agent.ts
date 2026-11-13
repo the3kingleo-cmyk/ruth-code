@@ -62,6 +62,14 @@ export const Plugin = define({
       })
       editor.default(Agent.defaultID)
 
+      editor.update(Agent.ID.make("build"), (item) => {
+        item.name = Agent.Name.make("Build")
+        item.description = "The coding agent. Executes tools based on configured permissions."
+        item.mode = "primary"
+        item.hidden = false
+        item.permissions = [{ action: "*", resource: "*", effect: "allow" }]
+      })
+
       editor.update(Agent.ID.make("general"), (item) => {
         item.name = Agent.Name.make("General")
         item.description =

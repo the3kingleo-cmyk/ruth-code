@@ -251,12 +251,15 @@ const layer = Layer.effect(
             ]
           }),
         )
-        const hideFreeCatalog = disableFree || prefersLocalRuth(data, byProvider)
-        if (hideFreeCatalog)
+        // Only hide the free catalog when explicitly requested. A local Ruth
+        // default must not remove OpenCode Zen / OpenCode Go models from /models.
+        if (disableFree)
           for (const providerID of [Provider.ID.opencode, Provider.ID.make("opencode-go")])
             byProvider.get(providerID)?.forEach((model, id, models) => {
               if (!model.cost.some((cost) => cost.input > 0)) models.delete(id)
             })
+        dedupeOllamaLatest(byProvider)
+        hideUninstalledOptionalOllama(byProvider)
         // Non-chat models (image, decision…) only show up when listed by type, so nothing that
         // picks or resolves a session model can reach them.
         const other = new Map<Model.Type, Info[]>()
@@ -375,8 +378,37 @@ const layer = Layer.effect(
 export const node = makeLocationNode({ service: Service, layer, deps: [Provider.node, Bus.node, Location.node] })
 
 
-function isRuthModelID(id: string) {
-  return id === "ruth" || id === "ruth:latest" || id === "ruth-pro" || id === "ruth-pro:latest"
+
+/** Keep `ruth` or `ruth:latest`, not both, in the Ollama catalog. */
+function dedupeOllamaLatest(byProvider: Map<Provider.ID, Map<ID, Info>>) {
+  for (const providerID of ["ollama", "ollama-cloud"] as const) {
+    const models = byProvider.get(Provider.ID.make(providerID))
+    if (!models) continue
+    for (const id of [...models.keys()]) {
+      if (!id.endsWith(":latest")) continue
+      const bare = ID.make(id.slice(0, -":latest".length))
+      if (models.has(bare)) {
+        models.delete(id)
+        continue
+      }
+      const model = models.get(id)
+      if (!model) continue
+      models.delete(id)
+      models.set(bare, { ...model, id: bare })
+    }
+  }
+}
+
+
+/** Config may list ruth-pro / 4B even when Ollama never installed them. Keep those only when discovery set a family. */
+function hideUninstalledOptionalOllama(byProvider: Map<Provider.ID, Map<ID, Info>>) {
+  const models = byProvider.get(Provider.ID.make("ollama"))
+  if (!models) return
+  for (const [id, model] of [...models]) {
+    if (model.family) continue
+    if (id === "ruth" || id === "ruth:latest") continue
+    models.delete(id)
+  }
 }
 
 function isOpencodeFreeCatalog(model: Pick<Info, "providerID" | "cost">) {
@@ -384,26 +416,6 @@ function isOpencodeFreeCatalog(model: Pick<Info, "providerID" | "cost">) {
     (model.providerID === Provider.ID.opencode || model.providerID === "opencode-go") &&
     !model.cost.some((cost) => cost.input > 0)
   )
-}
-
-/** Config asks for ollama/ruth, or Ollama already has a named Ruth model. */
-function prefersLocalRuth(
-  data: Data,
-  byProvider: Map<Provider.ID, Map<ID, Info>>,
-) {
-  const requested = data.defaultModel
-  if (requested && (requested.providerID === "ollama" || requested.providerID === "ollama-cloud") && isRuthModelID(requested.modelID)) {
-    return true
-  }
-  if (requested && isRuthModelID(requested.modelID)) return true
-  for (const providerID of ["ollama", "ollama-cloud"] as const) {
-    const models = byProvider.get(Provider.ID.make(providerID))
-    if (!models) continue
-    for (const model of models.values()) {
-      if (isRuthModelID(model.id) || isRuthModelID(model.modelID)) return true
-    }
-  }
-  return false
 }
 
 // Signed out, only free OpenCode models are enabled. Clients default to the first available model, so keep

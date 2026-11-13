@@ -25,9 +25,6 @@ export function defaultRuthConfig(pluginPath?: string) {
         options: { headerTimeout: 1_200_000 },
         models: {
           [DEFAULT_CHAT_MODEL]: { tool_call: true },
-          [DEFAULT_TOOLS_MODEL]: { tool_call: true },
-          [DEFAULT_BASE_TOOLS_MODEL]: { tool_call: true },
-          [DEFAULT_BASE_CHAT_MODEL]: { tool_call: true },
         },
       },
     },
