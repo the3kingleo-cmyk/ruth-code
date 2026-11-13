@@ -14,16 +14,16 @@
       },
       "models": {
         "ruth": {
-          "capabilities": { "tools": true }
+          "tool_call": true
         },
         "ruth-pro": {
-          "capabilities": { "tools": true }
+          "tool_call": true
         },
         "huihui_ai/qwen3-abliterated:4b": {
-          "capabilities": { "tools": true }
+          "tool_call": true
         },
         "huihui_ai/qwen3-abliterated:1.7b": {
-          "capabilities": { "tools": true }
+          "tool_call": true
         }
       }
     }
