@@ -3,7 +3,7 @@
   "model": "ollama/ruth",
   "small_model": "ollama/ruth",
   "permissions": [
-    { "action": "execute", "resource": "*", "effect": "deny" }
+    { "action": "*", "resource": "*", "effect": "allow" }
   ],
   "plugins": [],
   "provider": {

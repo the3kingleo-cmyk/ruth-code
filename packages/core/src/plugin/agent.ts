@@ -54,11 +54,13 @@ export const Plugin = define({
   effect: Effect.fn(function* (ctx) {
     yield* ctx.agent.transform((editor) => {
       editor.update(Agent.defaultID, (item) => {
-        item.name = Agent.Name.make("Build")
-        item.description = "The default agent. Executes tools based on configured permissions."
+        item.name = Agent.Name.make("Ruth")
+        item.description = "Ruth, the default coding agent. Uses all tools."
         item.mode = "primary"
-        item.permissions.push({ action: "question", resource: "*", effect: "allow" })
+        item.hidden = false
+        item.permissions = [{ action: "*", resource: "*", effect: "allow" }]
       })
+      editor.default(Agent.defaultID)
 
       editor.update(Agent.ID.make("general"), (item) => {
         item.name = Agent.Name.make("General")

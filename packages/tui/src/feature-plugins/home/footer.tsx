@@ -91,12 +91,11 @@ function View(props: { context: Plugin.Context }) {
         gap={2}
       >
         <Mcp context={props.context} />
-        <Plugins context={props.context} />
         <Slot path="home.footer.status" />
         <box flexGrow={1} />
         <Show when={visibility().version}>
           <box flexShrink={0}>
-            <text fg={props.context.theme.text.muted}>{props.context.app.version}</text>
+            <text fg={props.context.theme.text.muted}>{"Ruth " + props.context.app.version}</text>
           </box>
         </Show>
       </box>

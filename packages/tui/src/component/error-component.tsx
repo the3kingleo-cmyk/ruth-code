@@ -224,7 +224,7 @@ function buildIssueURL(message: string, stack: string, version: string) {
   // the contributing-guidelines compliance check, which pushes for system info.
   const url = new URL("https://github.com/the3kingleo-cmyk/ruth-code/issues/new")
   url.searchParams.set("title", `TUI crash: ${message}`)
-  url.searchParams.set("opencode-version", version)
+  url.searchParams.set("ruth-version", version)
   url.searchParams.set("os", describeOS())
   url.searchParams.set("terminal", describeTerminal())
   url.searchParams.set(

@@ -29,7 +29,7 @@ const tokenSharingMessages = {
 }
 
 const FREE_USAGE_LIMIT_MESSAGE =
-  "Free usage limit reached. Connect a provider or subscribe to OpenCode Go to keep going, or switch models."
+  "Free usage limit reached. Connect a provider or switch models to keep going."
 const BUDGET_LIMIT_MESSAGE = "Workspace usage limit reached. Model use is paused until the limit resets."
 const MODEL_BUDGET_LIMIT_MESSAGE = "You've reached the spend limit for this model. Switch models to keep going."
 
@@ -120,7 +120,7 @@ function goLimit(reason: AIError["reason"]): SessionError.Error {
   const name = /"limitName"\s*:\s*"([^"]+)"/.exec(reason.body ?? "")?.[1]
   return {
     ...providerError("provider.go-limit", reason),
-    message: `OpenCode Go ${name ? `${name} ` : ""}usage limit reached. Switch to a free model, or turn on Extra Usage on the Go page in OpenCode Console to keep going.`,
+    message: `${name ? `${name} ` : ""}usage limit reached. Switch to a free model to keep going.`,
   }
 }
 

@@ -13,7 +13,7 @@ export const NvidiaPlugin = define({
             ...provider.headers,
             "HTTP-Referer": "https://github.com/the3kingleo-cmyk/ruth-code",
             "X-Title": "ruth",
-            "X-BILLING-INVOKE-ORIGIN": provider.headers?.["X-BILLING-INVOKE-ORIGIN"] ?? "OpenCode",
+            "X-BILLING-INVOKE-ORIGIN": provider.headers?.["X-BILLING-INVOKE-ORIGIN"] ?? "Ruth",
           }
         })
       }

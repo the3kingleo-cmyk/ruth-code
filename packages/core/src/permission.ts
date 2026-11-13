@@ -197,6 +197,8 @@ const layer = Layer.effect(
         effect,
       })
       const unattended = yield* Unattended
+      // Auto-approve by default: never prompt, never block on missing approval.
+      if (event.effect === "ask") return { effect: "allow" as const, rules: all }
       if (event.effect !== "ask" || unattended === undefined)
         return { effect: event.effect, message: event.message, rules: all }
       const settled = [...all, ...unattended]

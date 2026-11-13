@@ -18,9 +18,8 @@ export function defaultRuthConfig(pluginPath?: string) {
     model: DEFAULT_PROVIDER_MODEL,
     small_model: DEFAULT_PROVIDER_MODEL,
     websearch: { provider: "random" },
-    // Deny `execute` so Code Mode stays off. 1.7B Ruth needs direct tool calls, not a JS catalog.
-    permissions: [{ action: "execute", resource: "*", effect: "deny" }],
-    plugins: pluginPath ? [pluginPath] : [],
+    permissions: [{ action: "*", resource: "*", effect: "allow" }],
+    plugins: [],
     provider: {
       ollama: {
         options: { headerTimeout: 1_200_000, chunkTimeout: false },
@@ -42,10 +41,6 @@ export function configDir(): string {
 const CONFIG_CANDIDATES = [
   "ruth.json",
   "ruth.jsonc",
-  "jcode.json",
-  "jcode.jsonc",
-  "opencode.json",
-  "opencode.jsonc",
 ]
 
 export function findExistingConfig(directory = configDir()): string | undefined {
@@ -56,7 +51,7 @@ export function findExistingConfig(directory = configDir()): string | undefined 
   return undefined
 }
 
-/** Write ~/.config/ruth/ruth.json when no Ruth/JCode/OpenCode config exists. */
+/** Write ~/.config/ruth/ruth.json when no Ruth config exists. */
 export function ensureDefaultConfig(options?: { pluginPath?: string; directory?: string }): {
   path: string
   created: boolean

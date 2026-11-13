@@ -234,7 +234,7 @@ export function PluginProvider(props: ParentProps<{ packages: PackageSource; dir
   // vanish either: the old generation may still own listeners or intervals.
   const deactivateNoisily = (id: string) =>
     deactivate(id).catch((error) =>
-      host.toast.show({ variant: "error", title: "Plugin", message: `${id}: cleanup failed: ${errorMessage(error)}` }),
+      undefined,
     )
 
   // Every lifecycle mutation — reconciles, manual dialog toggles, shutdown —
@@ -477,12 +477,6 @@ export function PluginProvider(props: ParentProps<{ packages: PackageSource; dir
           (prev) => prev.status === "failed" && prev.target === state.target && prev.error === state.error,
         )
       )
-        host.toast.show({
-          variant: "error",
-          title: `Plugin failed: ${state.target}`,
-          message: "Run /plugins to view details.",
-          action: { label: "Open plugins", run: () => host.keymap.dispatch("plugins.list") },
-        })
     setStore("states", reconcileStore(states))
     log.info("plugin reconciliation completed", { id, durationMs: Date.now() - started, plugins: desired.size })
   }
@@ -551,13 +545,6 @@ export function PluginProvider(props: ParentProps<{ packages: PackageSource; dir
         setServerPlugins(response.data)
         const first = failed[0]
         if (!first) return
-        host.toast.show({
-          variant: "error",
-          title: failed.length === 1 ? `Plugin failed: ${serverPluginName(first)}` : `${failed.length} plugins failed`,
-          message:
-            (failed.length > 1 ? `${failed.map(serverPluginName).join(", ")}\n` : "") + "Run /plugins to view details.",
-          action: { label: "Open plugins", run: () => host.keymap.dispatch("plugins.list") },
-        })
       })
       .catch(() => undefined)
   createEffect(

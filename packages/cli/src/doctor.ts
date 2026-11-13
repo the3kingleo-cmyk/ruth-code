@@ -101,12 +101,9 @@ export function runDoctor(options: { repair?: boolean } = {}): DoctorReport {
   })
 
   let configCreated = false
-  const plugin = pluginDist()
   const before = findExistingConfig()
-  const ensured = repair ? ensureDefaultConfig({ pluginPath: plugin }) : { path: before ?? path.join(configDir(), "ruth.json"), created: false }
+  const ensured = repair ? ensureDefaultConfig() : { path: before ?? path.join(configDir(), "ruth.json"), created: false }
   configCreated = ensured.created
-  let pluginRepaired = false
-  if (repair && plugin && ensured.path) pluginRepaired = registerPlugin(ensured.path, plugin)
   checks.push({
     name: "config",
     ok: fs.existsSync(ensured.path),
@@ -120,13 +117,9 @@ export function runDoctor(options: { repair?: boolean } = {}): DoctorReport {
 
   checks.push({
     name: "plugin",
-    ok: Boolean(plugin),
-    repaired: pluginRepaired,
-    detail: plugin
-      ? pluginRepaired
-        ? `Registered plugin ${plugin} in config`
-        : `Plugin present at ${plugin}`
-      : "Oh My OpenCode plugin is not installed. Re-run scripts/install.sh (INSTALL_PLUGIN defaults to 1).",
+    ok: true,
+    repaired: false,
+    detail: "No extra plugins (default)",
   })
 
   const ollama = spawnSync("which", ["ollama"], { encoding: "utf8" })

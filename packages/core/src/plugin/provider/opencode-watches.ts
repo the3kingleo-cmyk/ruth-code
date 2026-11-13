@@ -601,7 +601,7 @@ function expectOk(response: HttpClientResponse.HttpClientResponse) {
         body?.limit !== undefined
           ? `This member already keeps the most watches Console allows (${body.limit}). Stop one with unwatch first.`
           : response.status === 404
-            ? "Event watches are off for this OpenCode Console workspace."
+            ? "Event watches are off for this workspace."
             : (body?.message ?? `OpenCode Console answered ${response.status}`)
       return Effect.fail(new ToolFailure({ message, metadata: { status: response.status } }))
     }),

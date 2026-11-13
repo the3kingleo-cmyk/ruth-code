@@ -10,7 +10,7 @@ export const ID = Agent.ID
 export type ID = typeof ID.Type
 export const Name = Agent.Name
 export type Name = Agent.Name
-export const defaultID = ID.make("build")
+export const defaultID = ID.make("ruth")
 
 export const Color = Agent.Color
 
