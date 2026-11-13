@@ -1897,7 +1897,7 @@ test("free usage limit offers OpenCode Go once per 24h, transitions Subscribe to
   await setup.waitForFrame((frame) => frame.includes("Free limit reached"))
   const upsell = setup.captureCharFrame()
   expect(upsell).toContain("OpenCode Go gives you reliable access")
-  expect(upsell).toContain("███ ███")
+  expect(upsell).toContain("█ ██ █ ██")
   expect(upsell).toContain("github.com/the3kingleo-cmyk/ruth-install")
   expect(upsell).toContain("don't show again")
   expect(upsell).toContain("dismiss")
