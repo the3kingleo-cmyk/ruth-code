@@ -1,3 +1,37 @@
+# Jarvis Code
+
+Personal, Chromebook-oriented fork of [OpenCode](https://github.com/anomalyco/opencode) by [anomalyco](https://github.com/anomalyco), maintained for David Anderson (the3kingleo-cmyk).
+
+- **CLI:** `jcode` (not `jarvis` — that name is already used by a different launcher)
+- **Config:** `jcode.json` / `jcode.jsonc` in the project or `~/.config/jcode/` (falls back to `opencode.json` and `~/.config/opencode/`)
+- **Data:** `~/.local/share/jcode`
+- **Env:** `JCODE_*`, with `OPENCODE_*` accepted as a fallback
+- **License:** MIT. The original copyright notice is kept; David's copyright is added above it. See `LICENSE` and `NOTICE`.
+
+This tree includes local-model patches: a configurable SSE idle timeout (default 10 minutes), `idle-timeout` retry capping, a 20-minute Ollama header timeout, a 128-token title cap, a conservative text tool-call extractor, a short Qwen system prompt, and an Ollama tools override (`JCODE_OLLAMA_ASSUME_TOOLS=1`).
+
+Install (private repo, uses a GitHub token from the prompt or `GITHUB_TOKEN`). Do not use the public `https://opencode.ai/v2/install` command from the upstream README below; that installs official OpenCode, not this fork.
+
+Plugin + `jcode` binary (recommended):
+
+```bash
+read -rsp "GitHub token: " GITHUB_TOKEN; echo
+export GITHUB_TOKEN
+curl -fsSL -H "Authorization: Bearer $GITHUB_TOKEN" -H "Accept: application/vnd.github.raw" "https://api.github.com/repos/the3kingleo-cmyk/oh-my-openagent/contents/scripts/install-chromebook.sh?ref=chromebook-lite" | bash
+```
+
+`jcode` binary only:
+
+```bash
+read -rsp "GitHub token: " GITHUB_TOKEN; echo
+export GITHUB_TOKEN
+curl -fsSL -H "Authorization: Bearer $GITHUB_TOKEN" -H "Accept: application/vnd.github.raw" "https://api.github.com/repos/the3kingleo-cmyk/jarvis-code/contents/scripts/install-chromebook.sh?ref=chromebook-lite" | bash
+```
+
+The upstream OpenCode README follows.
+
+---
+
 <p align="center">
   <a href="https://opencode.ai">
     <picture>

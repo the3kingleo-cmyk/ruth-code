@@ -64,6 +64,11 @@ const unreachableSchedule = Schedule.max([
 // dead provider hold a call for most of an hour. Cap those attempts well below it.
 const MAX_TIMEOUT_RETRIES = 3
 
+const TIMEOUT_CODES = new Set(["Timeout", "idle-timeout"])
+
+/** Transport codes that already waited out a stall and must share the short retry cap. */
+export const isTimeoutCode = (code: string | undefined) => code !== undefined && TIMEOUT_CODES.has(code)
+
 export const policy = Effect.gen(function* () {
   const step = yield* Schedule.toStep(schedule)
   const unreachable = yield* Schedule.toStep(unreachableSchedule)
@@ -79,7 +84,7 @@ export const policy = Effect.gen(function* () {
       if (!next) return undefined
       const [, duration] = next
       attempt++
-      if (input.cause.reason._tag === "Transport" && input.cause.reason.code === "Timeout") timeouts++
+      if (input.cause.reason._tag === "Transport" && isTimeoutCode(input.cause.reason.code)) timeouts++
       return {
         attempt,
         delay: Math.ceil(Duration.toMillis(duration)),

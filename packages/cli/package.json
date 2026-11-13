@@ -1,10 +1,11 @@
 {
   "$schema": "https://json.schemastore.org/package.json",
-  "name": "@opencode/cli",
+  "name": "@jarvis-code/cli",
   "version": "2.3.0",
   "type": "module",
   "license": "MIT",
   "bin": {
+    "jcode": "./bin/jcode.cjs",
     "opencode": "./bin/opencode.cjs",
     "opencode2": "./bin/opencode2.cjs"
   },

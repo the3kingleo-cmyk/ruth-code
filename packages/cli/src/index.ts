@@ -1,5 +1,8 @@
 #!/usr/bin/env bun
 
+import { applyJcodeEnvFallbacks } from "@opencode/util/env"
+applyJcodeEnvFallbacks()
+
 import { ensurePluginRuntime } from "@opencode/plugin/runtime"
 import { NodeRuntime, NodeServices } from "@effect/platform-node"
 import { Cause, Effect } from "effect"

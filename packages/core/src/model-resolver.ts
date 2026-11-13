@@ -246,7 +246,7 @@ const resolveCatalogModel = Effect.fn("ModelResolver.resolveCatalogModel")(funct
   return yield* Effect.try({
     try: () => {
       const runtime = module.model(resolved.modelID ?? resolved.id, settings)
-      const timeouts = Provider.timeouts(configured)
+      const timeouts = Provider.timeouts(configured, resolved.providerID)
       return LanguageModel.update(runtime, {
         provider: resolved.canonical ?? resolved.providerID,
         capabilities: resolved.compatibility

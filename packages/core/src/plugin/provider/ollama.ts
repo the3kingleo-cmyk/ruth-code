@@ -33,6 +33,16 @@ const ShowResponse = Schema.Struct({
   model_info: Schema.Record(Schema.String, Schema.Unknown).pipe(Schema.optional),
 })
 
+
+/** Treat Ollama models as tool-capable when /api/show omits the tools capability. */
+export function shouldAssumeOllamaTools(): boolean {
+  const env =
+    (typeof process !== "undefined" &&
+      (process.env?.JCODE_OLLAMA_ASSUME_TOOLS ?? process.env?.OPENCODE_OLLAMA_ASSUME_TOOLS)) ||
+    undefined
+  return env === "1" || env === "true" || env === "yes"
+}
+
 type DiscoveredModel = typeof RemoteModel.Type & { show: typeof ShowResponse.Type }
 type ShowCache = {
   apiKey?: string
@@ -81,7 +91,7 @@ export const make = createLocalProviderPlugin({
     id: item.model,
     name: item.name || item.model,
     family: item.show.details?.family || item.details.family,
-    tools: item.show.capabilities?.includes("tools"),
+    tools: item.show.capabilities?.includes("tools") || shouldAssumeOllamaTools(),
     vision: item.show.capabilities?.includes("vision"),
     context: Object.entries(item.show.model_info ?? {}).flatMap(([key, value]) =>
       key.endsWith(".context_length") && typeof value === "number" && value > 0 ? [value] : [],

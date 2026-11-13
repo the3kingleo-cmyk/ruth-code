@@ -32,7 +32,27 @@ export type ClientConnectionOptions = {
 const connectTimeout = 2_000
 const reconnectDelay = 1_000
 const connectionHistoryLimit = 50
-export const defaultIdleTimeout = 45_000
+/** Default stall watchdog: 10 minutes. Local models often stay quiet longer than 45s. */
+export const defaultIdleTimeout = 600_000
+
+/**
+ * Resolve the event-stream idle timeout in milliseconds.
+ * `OPENCODE_SSE_IDLE_TIMEOUT` (or later `JCODE_SSE_IDLE_TIMEOUT`) overrides the default.
+ * Use `0`, `false`, or `off` to disable the watchdog.
+ */
+export function resolveIdleTimeoutMs(override?: number): number {
+  if (override !== undefined) return override
+  const env =
+    (typeof process !== "undefined" &&
+      (process.env?.JCODE_SSE_IDLE_TIMEOUT ?? process.env?.OPENCODE_SSE_IDLE_TIMEOUT)) ||
+    undefined
+  if (env === "0" || env === "false" || env === "off") return 0
+  if (env !== undefined && env !== "") {
+    const n = Number(env)
+    if (Number.isFinite(n) && n >= 0) return n
+  }
+  return defaultIdleTimeout
+}
 // Longer than one server keepalive interval: a stream that is silent this long when the page
 // returns to the foreground is probably half-open after the device slept.
 export const foregroundIdleThreshold = 20_000
@@ -40,7 +60,7 @@ export const foregroundIdleThreshold = 20_000
 export function createClientConnection(initialApi: OpenCodeClient, options: ClientConnectionOptions) {
   const abort = new AbortController()
   const history: ClientConnectionEvent[] = []
-  const idleTimeout = options.idleTimeout ?? defaultIdleTimeout
+  const idleTimeout = resolveIdleTimeoutMs(options.idleTimeout)
   const [connection, setConnection] = createStore<{
     status: ClientConnectionStatus
     attempt: number
@@ -88,7 +108,9 @@ export function createClientConnection(initialApi: OpenCodeClient, options: Clie
       lastActivity = Date.now()
       if (connectedAt === undefined) return
       clearTimeout(watchdog)
-      watchdog = setTimeout(() => request.abort(new Error("Event stream stalled")), idleTimeout)
+      if (idleTimeout > 0) {
+        watchdog = setTimeout(() => request.abort(new Error("Event stream stalled")), idleTimeout)
+      }
     }
 
     try {

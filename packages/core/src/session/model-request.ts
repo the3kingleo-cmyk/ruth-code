@@ -61,6 +61,9 @@ const ESTIMATE_ERROR = 0.15
 // tokens more than we do (chat template, tool schemas), and strict ones reject input plus output past the window.
 // Compaction sizes its summary against its own reserve instead.
 const WINDOW_HEADROOM = 0.01
+
+/** Bound title-generation output so local thinking models cannot run away (issue 54401). */
+export const TITLE_MAX_TOKENS = 128
 // Never ask for less; only reachable with automatic compaction off, since it keeps the window from filling this far.
 const OUTPUT_TOKEN_MIN = 1_024
 
@@ -289,8 +292,8 @@ export const layer = Layer.effect(
           (t) => [{ description: t.description, input: JSON.parse(JSON.stringify(t.inputSchema)) }, t] as const,
         ),
       )
-      // Hooks see the default output limit and may change or remove it. Titles and generate keep the provider default,
-      // because their reasoning is hard to budget.
+      // Hooks see the default output limit and may change or remove it. Title requests are hard-capped so a local
+      // thinking model cannot run away (issue 54401). Generate still keeps the provider default.
       const shaped = yield* shape(
         {
           sessionID: session.id,
@@ -302,7 +305,9 @@ export const layer = Layer.effect(
               ? { maxTokens: outputLimit(model.limit, input.inputTokens, WINDOW_HEADROOM) }
               : kind === "compaction"
                 ? { maxTokens: outputLimit(model.limit, input.inputTokens) }
-                : {},
+                : kind === "title"
+                  ? { maxTokens: TITLE_MAX_TOKENS }
+                  : {},
         },
         Object.fromEntries(Array.from(given, ([d, t]) => [t.name, d])),
       )

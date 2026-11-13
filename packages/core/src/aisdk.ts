@@ -134,7 +134,7 @@ function prepareOptions(model: RuntimeInfo, pkg: string, outbound: Fetch) {
   }
 
   const customFetch = settings.fetch
-  const timeouts = Provider.timeouts(settings)
+  const timeouts = Provider.timeouts(settings, model.providerID)
   const tls = Provider.tls(settings)
   options.fetch = async (input: Parameters<typeof fetch>[0], init?: RequestInit) => {
     const opts = { ...(init ?? {}) }

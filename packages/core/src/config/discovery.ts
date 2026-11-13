@@ -9,7 +9,7 @@ import { Location } from "../location.js"
 import { AbsolutePath } from "../schema.js"
 import type { Options } from "../config.js"
 
-export const names = ["opencode.json", "opencode.jsonc"]
+export const names = ["jcode.json", "jcode.jsonc", "opencode.json", "opencode.jsonc"]
 
 /** Eligible sources in priority order, including paths that may appear later. */
 export interface Sources {

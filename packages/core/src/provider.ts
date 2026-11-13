@@ -243,6 +243,19 @@ const decodeTimeout = Schema.decodeUnknownOption(HttpTimeout)
 /** Applied to `headerTimeout` when provider settings leave it unset or invalid. */
 export const DEFAULT_TIMEOUT_MS = 300_000
 
+/** 20 minutes: local models can sit quiet a long time before the first token. */
+export const DEFAULT_LOCAL_HEADER_TIMEOUT_MS = 1_200_000
+
+const LOCAL_PROVIDER_IDS = new Set(["ollama", "lmstudio", "llama.cpp", "llamacpp", "local"])
+
+export function isLocalProvider(providerID: string | undefined): boolean {
+  if (!providerID) return false
+  const id = providerID.toLowerCase()
+  if (LOCAL_PROVIDER_IDS.has(id)) return true
+  return id.includes("ollama") || id.includes("lmstudio") || id.includes("llama.cpp")
+}
+
+
 /**
  * Applied to `chunkTimeout` when provider settings leave it unset or invalid. Some providers, such as DeepSeek, have
  * specifically asked clients to allow at least 15 minutes, because their models can stream nothing for minutes while
@@ -256,10 +269,11 @@ export function timeout(value: unknown) {
 }
 
 /** Request timeouts from provider settings, resolved for every route. `timeout` has no default. */
-export function timeouts(settings: Readonly<Record<string, unknown>>) {
+export function timeouts(settings: Readonly<Record<string, unknown>>, providerID?: string) {
+  const local = isLocalProvider(providerID)
   return {
     timeout: timeout(settings.timeout),
-    headerTimeout: timeout(settings.headerTimeout) ?? DEFAULT_TIMEOUT_MS,
+    headerTimeout: timeout(settings.headerTimeout) ?? (local ? DEFAULT_LOCAL_HEADER_TIMEOUT_MS : DEFAULT_TIMEOUT_MS),
     chunkTimeout: timeout(settings.chunkTimeout) ?? DEFAULT_CHUNK_TIMEOUT_MS,
   }
 }

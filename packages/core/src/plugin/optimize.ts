@@ -12,6 +12,7 @@ import PROMPT_KIMI from "./system-prompt/kimi.txt"
 import PROMPT_META from "./system-prompt/meta.txt"
 import PROMPT_TRINITY from "./system-prompt/trinity.txt"
 import PROMPT_ANTHROPIC from "./system-prompt/anthropic.txt"
+import PROMPT_QWEN from "./system-prompt/qwen-local.txt"
 
 export const OpenAIPlugin = make("opencode.prompt.openai", (model) => {
   const id = model.id.toLowerCase()
@@ -59,7 +60,18 @@ export const MetaPlugin = make("opencode.prompt.meta", (model) => {
   return PROMPT_META.replaceAll("{{MODEL_NAME}}", model.name)
 })
 
-export const Plugins = [OpenAIPlugin, AnthropicPlugin, KimiPlugin, ArceePlugin, MetaPlugin] as const
+
+export const QwenPlugin = make(
+  "opencode.prompt.qwen",
+  (model) => {
+    const ids = [model.id, model.modelID, model.family].join(" ").toLowerCase()
+    if (!ids.includes("qwen")) return undefined
+    return PROMPT_QWEN
+  },
+  "append",
+)
+
+export const Plugins = [OpenAIPlugin, AnthropicPlugin, KimiPlugin, ArceePlugin, MetaPlugin, QwenPlugin] as const
 
 const models = new WeakMap<SessionHooks["context"], Model.Info>()
 

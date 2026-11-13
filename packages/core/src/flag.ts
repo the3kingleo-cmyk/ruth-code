@@ -2,6 +2,7 @@ export * as Flag from "./flag.js"
 
 import { Context, Effect, Layer, Record } from "effect"
 import { makeLocationNode } from "@opencode/util/effect/app-node"
+import { env } from "@opencode/util/env"
 import { ConfigFlag } from "@opencode/schema/config/flag"
 import type { Document, Entry } from "@opencode/schema/config"
 import { App } from "./app.js"
@@ -28,7 +29,7 @@ export class Service extends Context.Service<Service, Interface>()("@opencode/Fl
  * `all` turns every flag on unless the same list opts one out, as in `all,-media_blob`.
  */
 export const Overrides = Context.Reference<string | undefined>("@opencode/Flag/Overrides", {
-  defaultValue: () => process.env.OPENCODE_FLAGS,
+  defaultValue: () => env("FLAGS"),
 })
 
 // Any other channel, such as a release or a branch preview build, keeps flags off so none turns on by accident.

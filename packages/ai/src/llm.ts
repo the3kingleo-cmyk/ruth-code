@@ -39,6 +39,7 @@ import {
 import { tool, type ExecutableTool, type Tool, type ToolSchema } from "./tool.js"
 import { runTools } from "./tool-runtime.js"
 import { addUsage, nextRequest, pendingCalls } from "./loop.js"
+import { toolNamesFrom, withTextToolCalls } from "./tool-call-extract.js"
 
 /** Input accepted by `ai.request`, `ai.generate`, `ai.stream` and `ai.compact`. An `LLMRequest` is also a valid input. */
 export type LLMRequestInput<Model extends LanguageModel = LanguageModel> = TextRequestFields<Model> & PromptOrMessages
@@ -222,11 +223,12 @@ const driveLoop = (
   usage: Usage | undefined,
 ): Stream.Stream<LLMEvent, AIError, Service> =>
   stepStream(request, steps.length, context.options, (step) => {
-    const total = addUsage(usage, step.response.usage)
-    const calls = pendingCalls(step.response, context.output && OBJECT_TOOL)
-    const done = [...steps, step.response]
+    const response = withTextToolCalls(step.response, toolNamesFrom(request.tools))
+    const total = addUsage(usage, response.usage)
+    const calls = pendingCalls(response, context.output && OBJECT_TOOL)
+    const done = [...steps, response]
     if (calls.length === 0 || context.until?.({ steps: done }))
-      return Stream.fromEffect(finishStep(step, total, calls.length === 0 ? context.output : undefined))
+      return Stream.fromEffect(finishStep({ ...step, response }, total, calls.length === 0 ? context.output : undefined))
     return Stream.unwrap(
       runTools(context.tools, calls).pipe(
         Effect.map((results) =>
@@ -234,7 +236,7 @@ const driveLoop = (
             Stream.concat(
               driveLoop(
                 context,
-                nextRequest(request, step.response, calls, results, context.output !== undefined),
+                nextRequest(request, response, calls, results, context.output !== undefined),
                 done,
                 total,
               ),
