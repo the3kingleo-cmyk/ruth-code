@@ -88,18 +88,21 @@ export function Home() {
       >
         <box flexGrow={1} minHeight={0} />
         <box height={3} minHeight={0} flexShrink={1} />
-        <box
-          flexShrink={0}
-          onSizeChange={function () {
-            setLogoWidth(this.width)
-          }}
-        >
-          <Logo />
-        </box>
-        <box height={1} flexShrink={0} />
-        <UpdateNotification width={logoWidth()} />
-        <box width="100%" maxWidth={75} zIndex={1000} paddingTop={1} flexShrink={0} position="relative">
-          <Prompt ref={bind} placeholders={placeholder} disabled={forms().length > 0} />
+        {/* Even max width so the 26-col wordmark has equal margins inside the prompt column. */}
+        <box width="100%" maxWidth={76} alignItems="center" flexShrink={0}>
+          <box
+            flexShrink={0}
+            onSizeChange={function () {
+              setLogoWidth(this.width)
+            }}
+          >
+            <Logo />
+          </box>
+          <box height={1} flexShrink={0} />
+          <UpdateNotification width={logoWidth()} />
+          <box width="100%" zIndex={1000} paddingTop={1} flexShrink={0} position="relative">
+            <Prompt ref={bind} placeholders={placeholder} disabled={forms().length > 0} />
+          </box>
         </box>
         <box flexGrow={1} minHeight={0} />
       </box>
