@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test } from "bun:test"
-import { applyJcodeEnvFallbacks, env } from "../src/env.ts"
+import { applyJcodeEnvFallbacks, env } from "../src/env.js"
 
 afterEach(() => {
   delete process.env.JCODE_SAMPLE
