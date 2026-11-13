@@ -20,15 +20,13 @@ ruth auth login
 
 You can also set provider keys in the environment (for example `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`) if a provider documents that. Do not commit keys.
 
-Install (private repo, uses a GitHub token from the prompt or `GITHUB_TOKEN`). Do not use the public `https://opencode.ai/v2/install` command from the upstream README below; that installs official OpenCode, not this fork.
+Install from the public [ruth-install](https://github.com/the3kingleo-cmyk/ruth-install) repo (no GitHub token required). Do not use the public `https://opencode.ai/v2/install` command from the upstream README below; that installs official OpenCode, not this fork.
 
 ```bash
-read -rsp "GitHub token: " GITHUB_TOKEN; echo
-export GITHUB_TOKEN
-curl -fsSL -H "Authorization: Bearer $GITHUB_TOKEN" -H "Accept: application/vnd.github.raw" "https://api.github.com/repos/the3kingleo-cmyk/ruth-code/contents/scripts/install.sh?ref=main" | bash
+curl -fsSL https://raw.githubusercontent.com/the3kingleo-cmyk/ruth-install/main/install.sh | bash
 ```
 
-The installer places `ruth` in `~/.local/bin`, adds that directory to `PATH`, writes a default Ollama config, pulls `huihui_ai/qwen3-abliterated:1.7b` if Ollama is present (and offers 4b for tools), and installs the Chromebook-lite Oh My OpenCode plugin unless you set `INSTALL_PLUGIN=0`. Then run `ruth run 'hello'`. Use `ruth doctor` to check and repair the setup, and `ruth upgrade` or `ruth self-update` to install a newer GitHub release (sha256-verified, with rollback).
+The installer places `ruth` in `~/.local/bin`, adds that directory to `PATH`, writes a default Ollama config, installs Ollama if it is missing, pulls `huihui_ai/qwen3-abliterated:1.7b`, and installs the Chromebook-lite Oh My OpenCode plugin unless you set `INSTALL_PLUGIN=0`. Then run `ruth run 'hello'`. Use `ruth doctor` to check and repair the setup, and `ruth upgrade` or `ruth self-update` to install a newer public release (sha256-verified, with rollback). A token is optional and only needed if you point those commands at a private repo.
 
 A default Ollama preset is in `presets/ruth.json`. The 1.7b model is included for light chat; **4b is recommended when you need tools**.
 

@@ -43,7 +43,13 @@ The OpenCode provider id (`opencode`) is unchanged so OpenCode Zen cloud models 
 After install: `source ~/.bashrc`, then `ruth run 'hello'`, `ruth doctor`, and later `ruth auth login` for cloud providers.
 
 
-Use `scripts/install.sh` with a GitHub token that can read `the3kingleo-cmyk/ruth-code`. Do not use `https://opencode.ai/v2/install`.
+Install with no token:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/the3kingleo-cmyk/ruth-install/main/install.sh | bash
+```
+
+Do not use `https://opencode.ai/v2/install`.
 
 ## Cloud providers
 

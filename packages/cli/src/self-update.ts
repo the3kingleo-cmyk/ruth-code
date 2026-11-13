@@ -133,15 +133,6 @@ export async function selfUpdate(options: SelfUpdateOptions = {}): Promise<SelfU
   const currentVersion = (options.currentVersion ?? "").replace(/^v/, "")
   const extract = options.extract ?? defaultExtract
 
-  if (!token) {
-    return {
-      ok: false,
-      action: "failed",
-      detail:
-        "A GitHub token is required to download private Ruth releases. Set GITHUB_TOKEN or save it to ~/.config/ruth/github-token.",
-    }
-  }
-
   try {
     const release = await fetchLatestRelease({ token, fetchImpl: options.fetchImpl })
     const tag = release.tag.replace(/^v/, "")

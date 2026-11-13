@@ -6,7 +6,7 @@ import { env } from "@opencode/util/env"
 export const DEFAULT_CHAT_MODEL = "huihui_ai/qwen3-abliterated:1.7b"
 export const DEFAULT_TOOLS_MODEL = "huihui_ai/qwen3-abliterated:4b"
 export const DEFAULT_PROVIDER_MODEL = `ollama/${DEFAULT_CHAT_MODEL}`
-export const DEFAULT_REPO_SLUG = "the3kingleo-cmyk/ruth-code"
+export const DEFAULT_REPO_SLUG = "the3kingleo-cmyk/ruth-install"
 
 export function defaultRuthConfig(pluginPath?: string) {
   return {

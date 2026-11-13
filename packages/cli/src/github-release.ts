@@ -50,19 +50,23 @@ export async function fetchLatestRelease(
     headers: headers(token),
   })
   if (!response.ok) {
-    throw new Error(`Could not read ${slug} releases (${response.status}). A GitHub token is required for the private repo.`)
+    const hint = token
+      ? `Could not read ${slug} releases (${response.status}).`
+      : `Could not read ${slug} releases (${response.status}). Public ruth-install releases do not need a token; set GITHUB_TOKEN only if you pointed RUTH_REPO_SLUG at a private repo.`
+    throw new Error(hint)
   }
   const json = (await response.json()) as {
     tag_name?: string
     name?: string
-    assets?: Array<{ name: string; url: string; digest?: string }>
+    assets?: Array<{ name: string; url: string; browser_download_url?: string; digest?: string }>
   }
   return {
     tag: json.tag_name ?? "unknown",
     name: json.name ?? json.tag_name ?? "unknown",
     assets: (json.assets ?? []).map((asset) => ({
       name: asset.name,
-      url: asset.url,
+      // Prefer the public browser URL so self-update works without a token.
+      url: asset.browser_download_url || asset.url,
       digest: asset.digest,
     })),
   }

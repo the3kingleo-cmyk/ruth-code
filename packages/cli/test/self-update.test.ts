@@ -107,6 +107,55 @@ describe("self-update", () => {
     fs.rmSync(root, { recursive: true, force: true })
   })
 
+
+  test("downloads a public release without a GitHub token", async () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "ruth-update-public-"))
+    const current = path.join(root, "ruth")
+    const incoming = path.join(root, "incoming", "ruth")
+    fs.mkdirSync(path.dirname(incoming), { recursive: true })
+    writeScript(current, 'echo "ruth v1"')
+    writeScript(incoming, 'echo "ruth v2"')
+    const sha = createHash("sha256").update("ARCHIVE").digest("hex")
+    const result = await selfUpdate({
+      currentVersion: "1",
+      currentBinary: current,
+      chatCheck: false,
+      fetchImpl: async (input) => {
+        const url = String(input)
+        if (url.endsWith("/releases/latest")) {
+          return new Response(
+            JSON.stringify({
+              tag_name: "v2",
+              assets: [
+                {
+                  name: "ruth-linux-x64.tar.gz",
+                  url: "https://api.github.com/repos/the3kingleo-cmyk/ruth-install/releases/assets/1",
+                  browser_download_url: "https://github.com/the3kingleo-cmyk/ruth-install/releases/download/v2/ruth-linux-x64.tar.gz",
+                  digest: `sha256:${sha}`,
+                },
+              ],
+            }),
+            { status: 200 },
+          )
+        }
+        if (!url.includes("github.com/the3kingleo-cmyk/ruth-install")) {
+          return new Response("wrong url " + url, { status: 404 })
+        }
+        return new Response("ARCHIVE", { status: 200 })
+      },
+      extract: () => incoming,
+      run: (cmd, args) => {
+        if (String(cmd).includes("ruth") && args?.[0] === "--version") {
+          return { status: 0, stdout: "ruth v2\n", stderr: "" } as ReturnType<typeof import("child_process").spawnSync>
+        }
+        return { status: 1, stdout: "", stderr: "no" } as ReturnType<typeof import("child_process").spawnSync>
+      },
+    })
+    expect(result.ok).toBe(true)
+    expect(result.action).toBe("updated")
+    fs.rmSync(root, { recursive: true, force: true })
+  })
+
   test("healthCheck fails a binary that cannot print a version", () => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), "ruth-health-"))
     const binary = path.join(root, "ruth")

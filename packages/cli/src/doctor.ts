@@ -205,10 +205,10 @@ export function runDoctor(options: { repair?: boolean } = {}): DoctorReport {
   const token = resolveGithubToken()
   checks.push({
     name: "github-token",
-    ok: Boolean(token),
+    ok: true,
     detail: token
-      ? "GitHub token is available for private releases (not printed)"
-      : "No GitHub token. Set GITHUB_TOKEN or write ~/.config/ruth/github-token so `ruth upgrade` / `ruth self-update` can work.",
+      ? "GitHub token is available (optional; public the3kingleo-cmyk/ruth-install releases do not need one)"
+      : "No GitHub token; that is fine. `ruth upgrade` / `ruth self-update` use the public the3kingleo-cmyk/ruth-install releases.",
   })
 
   const required = new Set(["path", "config", "ollama", "model", "disk", "plugin"])
