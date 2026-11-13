@@ -1,26 +1,18 @@
-import { For } from "solid-js"
+import { TextAttributes } from "@opentui/core"
 import { useTerminalDimensions } from "@opentui/solid"
 import { useTheme } from "../context/theme"
-import { compact, logo } from "../logo"
 
+/** Home-screen wordmark: plain lowercase "ruth" in the terminal's normal font. */
 export function Logo() {
   const theme = useTheme()
   const dimensions = useTerminalDimensions()
 
-  const lines = () => (dimensions().width < logo[0].length ? compact : logo)
-
   return (
     <box>
       {dimensions().height < 12 ? null : (
-        <For each={[...lines()]}>
-          {(line) => (
-            <box flexDirection="row">
-              <text fg={theme.text.base} selectable={false}>
-                {line}
-              </text>
-            </box>
-          )}
-        </For>
+        <text fg={theme.text.base} attributes={TextAttributes.BOLD} selectable={false}>
+          ruth
+        </text>
       )}
     </box>
   )
