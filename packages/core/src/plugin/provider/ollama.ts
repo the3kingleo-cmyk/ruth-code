@@ -38,7 +38,7 @@ const ShowResponse = Schema.Struct({
 export function shouldAssumeOllamaTools(): boolean {
   const env =
     (typeof process !== "undefined" &&
-      (process.env?.JCODE_OLLAMA_ASSUME_TOOLS ?? process.env?.OPENCODE_OLLAMA_ASSUME_TOOLS)) ||
+      (process.env?.RUTH_OLLAMA_ASSUME_TOOLS ?? process.env?.JCODE_OLLAMA_ASSUME_TOOLS ?? process.env?.OPENCODE_OLLAMA_ASSUME_TOOLS)) ||
     undefined
   return env === "1" || env === "true" || env === "yes"
 }

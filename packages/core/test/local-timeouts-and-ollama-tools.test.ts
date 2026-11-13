@@ -6,6 +6,7 @@ import { TITLE_MAX_TOKENS } from "../src/session/model-request.ts"
 afterEach(() => {
   delete process.env.OPENCODE_OLLAMA_ASSUME_TOOLS
   delete process.env.JCODE_OLLAMA_ASSUME_TOOLS
+  delete process.env.RUTH_OLLAMA_ASSUME_TOOLS
 })
 
 describe("local provider timeouts", () => {

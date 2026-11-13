@@ -17,13 +17,13 @@ export default Runtime.handler(
       if (!method)
         return yield* Effect.fail(
           (yield* updater.managed(Option.getOrUndefined(input.target))) ??
-            new Error("Could not detect the installation method. Pass --method to choose how to upgrade Jarvis Code."),
+            new Error("Could not detect the installation method. Pass --method to choose how to upgrade Ruth."),
         )
 
       if (method === "curl") {
         return yield* Effect.fail(
           new Error(
-            "Jarvis Code is a private build. Re-run the Chromebook install script to upgrade; the public OpenCode installer is not used.",
+            "Ruth is a private build. Re-run scripts/install.sh to upgrade; the public OpenCode installer is not used.",
           ),
         )
       }
@@ -31,7 +31,7 @@ export default Runtime.handler(
       const target = Option.getOrUndefined(input.target) ?? (yield* updater.latest(method))
       const version = target.trim().replace(/^v/, "")
       if (version === OPENCODE_VERSION) {
-        log.warn(`Jarvis Code upgrade skipped: ${version} is already installed`)
+        log.warn(`Ruth upgrade skipped: ${version} is already installed`)
         outro("Done")
         return
       }

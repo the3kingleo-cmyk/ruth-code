@@ -1,15 +1,18 @@
-Jarvis Code is a personal fork of OpenCode.
+Ruth is a personal fork of OpenCode.
 
 Upstream project: https://github.com/anomalyco/opencode
 Upstream license: MIT (see LICENSE)
 Upstream copyright: Copyright (c) 2025 opencode
 
 This fork adds Chromebook and local-Ollama patches and rebrands the user-facing
-product as Jarvis Code (`jcode`). It is not affiliated with or endorsed by
-anomalyco or the OpenCode project.
+product as Ruth (`ruth`). It is not affiliated with or endorsed by anomalyco
+or the OpenCode project.
 
 Internal package names such as `@opencode/core` and the `@opencode-ai/plugin`
 SDK import path are kept so existing plugins (including Oh My OpenCode /
 oh-my-openagent) continue to load. The official OpenCode provider id
-(`opencode`) and URLs such as models.dev / models.opencode.ai are unchanged
-because they must still resolve.
+(`opencode`, used for OpenCode Zen cloud models) and URLs such as models.dev /
+models.opencode.ai are unchanged because they must still resolve.
+
+`ruth auth login` is the supported way to sign in to cloud providers. This
+repository does not ship third-party API keys.

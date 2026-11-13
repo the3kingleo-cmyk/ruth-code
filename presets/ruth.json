@@ -1,0 +1,23 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "$comment": "Default Ruth config for a 6–8 GB Chromebook with local Ollama. 4b is recommended for tool use; 1.7b is for light chat. plugins is filled in when you run scripts/install.sh with INSTALL_PLUGIN=1.",
+  "model": "ollama/huihui_ai/qwen3-abliterated:1.7b",
+  "small_model": "ollama/huihui_ai/qwen3-abliterated:1.7b",
+  "plugins": [],
+  "provider": {
+    "ollama": {
+      "options": {
+        "headerTimeout": 1200000,
+        "chunkTimeout": false
+      },
+      "models": {
+        "huihui_ai/qwen3-abliterated:4b": {
+          "capabilities": { "tools": true }
+        },
+        "huihui_ai/qwen3-abliterated:1.7b": {
+          "capabilities": { "tools": true }
+        }
+      }
+    }
+  }
+}

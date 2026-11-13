@@ -37,14 +37,14 @@ export const defaultIdleTimeout = 600_000
 
 /**
  * Resolve the event-stream idle timeout in milliseconds.
- * `OPENCODE_SSE_IDLE_TIMEOUT` (or later `JCODE_SSE_IDLE_TIMEOUT`) overrides the default.
+ * `RUTH_SSE_IDLE_TIMEOUT` (then `JCODE_SSE_IDLE_TIMEOUT`, then `OPENCODE_SSE_IDLE_TIMEOUT`) overrides the default.
  * Use `0`, `false`, or `off` to disable the watchdog.
  */
 export function resolveIdleTimeoutMs(override?: number): number {
   if (override !== undefined) return override
   const env =
     (typeof process !== "undefined" &&
-      (process.env?.JCODE_SSE_IDLE_TIMEOUT ?? process.env?.OPENCODE_SSE_IDLE_TIMEOUT)) ||
+      (process.env?.RUTH_SSE_IDLE_TIMEOUT ?? process.env?.JCODE_SSE_IDLE_TIMEOUT ?? process.env?.OPENCODE_SSE_IDLE_TIMEOUT)) ||
     undefined
   if (env === "0" || env === "false" || env === "off") return 0
   if (env !== undefined && env !== "") {

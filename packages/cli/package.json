@@ -1,13 +1,14 @@
 {
   "$schema": "https://json.schemastore.org/package.json",
-  "name": "@jarvis-code/cli",
+  "name": "@ruth/cli",
   "version": "2.3.0",
   "type": "module",
   "license": "MIT",
   "bin": {
     "jcode": "./bin/jcode.cjs",
     "opencode": "./bin/opencode.cjs",
-    "opencode2": "./bin/opencode2.cjs"
+    "opencode2": "./bin/opencode2.cjs",
+    "ruth": "./bin/ruth.cjs"
   },
   "files": [
     "bin"

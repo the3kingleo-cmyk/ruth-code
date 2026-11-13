@@ -13,14 +13,14 @@ export class Service extends Context.Service<Service, Info>()("@opencode/App") {
 
 export function make(input: Partial<Info> = {}): Info {
   return {
-    name: input.name ?? "jcode",
+    name: input.name ?? "ruth",
     version: input.version ?? "unknown",
     channel: input.channel ?? "unknown",
   }
 }
 
 export function useragent(app: Info) {
-  return `jcode/${app.channel}/${app.version}/${app.name}`
+  return `ruth/${app.channel}/${app.version}/${app.name}`
 }
 
 export const layer = (input?: Partial<Info>) => Layer.succeed(Service, make(input))

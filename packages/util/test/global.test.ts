@@ -27,7 +27,7 @@ describe("global", () => {
     })
 
     expect(result.exitCode, result.stderr.toString()).toBe(0)
-    directories.forEach((directory) => expect(fs.existsSync(path.join(directory, "jcode"))).toBe(false))
+    directories.forEach((directory) => expect(fs.existsSync(path.join(directory, "ruth"))).toBe(false))
     fs.rmSync(root, { recursive: true, force: true })
   })
 
@@ -83,15 +83,15 @@ describe("global", () => {
     expect(result.exitCode, result.stderr.toString()).toBe(0)
     // The layer canonicalizes through the native realpath, which on Windows also expands 8.3 short
     // names such as RUNNER~1 that the JavaScript realpathSync leaves in place.
-    expect(result.stdout.toString()).toBe(fs.realpathSync.native(path.join(directories[4], "jcode")))
+    expect(result.stdout.toString()).toBe(fs.realpathSync.native(path.join(directories[4], "ruth")))
     const created = [
-      path.join(directories[0], "jcode"),
-      path.join(directories[1], "jcode", "bin"),
-      path.join(directories[2], "jcode"),
-      path.join(directories[3], "jcode"),
-      path.join(directories[0], "jcode", "log"),
-      path.join(directories[0], "jcode", "repos"),
-      path.join(directories[4], "jcode"),
+      path.join(directories[0], "ruth"),
+      path.join(directories[1], "ruth", "bin"),
+      path.join(directories[2], "ruth"),
+      path.join(directories[3], "ruth"),
+      path.join(directories[0], "ruth", "log"),
+      path.join(directories[0], "ruth", "repos"),
+      path.join(directories[4], "ruth"),
     ]
     created.forEach((directory) => expect(fs.statSync(directory).isDirectory()).toBe(true))
     fs.rmSync(root, { recursive: true, force: true })

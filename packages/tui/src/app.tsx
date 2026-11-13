@@ -640,23 +640,23 @@ function App() {
     if (!terminalTitleEnabled()) return
 
     if (route.data.type === "home") {
-      setTerminalTitle(renderer, "Jarvis Code")
+      setTerminalTitle(renderer, "Ruth")
       return
     }
 
     if (route.data.type === "session") {
       const title = session?.title
       if (!title || isFallbackTitle(title)) {
-        setTerminalTitle(renderer, "Jarvis Code")
+        setTerminalTitle(renderer, "Ruth")
         return
       }
 
-      setTerminalTitle(renderer, `JC | ${title.length > 40 ? title.slice(0, 37) + "…" : title}`)
+      setTerminalTitle(renderer, `Ruth | ${title.length > 40 ? title.slice(0, 37) + "…" : title}`)
       return
     }
 
     if (route.data.type === "plugin") {
-      setTerminalTitle(renderer, `JC | ${route.data.name}`)
+      setTerminalTitle(renderer, `Ruth | ${route.data.name}`)
     }
   })
 

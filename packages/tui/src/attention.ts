@@ -32,7 +32,7 @@ type AttentionHost = Attention & {
   dispose(): void
 }
 
-const DEFAULT_TITLE = "Jarvis Code"
+const DEFAULT_TITLE = "Ruth"
 const TITLE_LIMIT = 80
 const MESSAGE_LIMIT = 240
 const BUILTIN_SOUNDS: Record<AttentionSoundName, string> = {

@@ -10,7 +10,7 @@ import { Flock } from "./flock.js"
 import { env } from "./env.js"
 import { makeGlobalNode } from "./effect/app-node.js"
 
-const app = "jcode"
+const app = "ruth"
 const { data, cache, config, state, tmp } = roots(app)
 
 const paths = {

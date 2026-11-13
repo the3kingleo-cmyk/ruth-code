@@ -1,32 +1,36 @@
-# Jarvis Code
+# Ruth
 
 Personal, Chromebook-oriented fork of [OpenCode](https://github.com/anomalyco/opencode) by [anomalyco](https://github.com/anomalyco), maintained for David Anderson (the3kingleo-cmyk).
 
-- **CLI:** `jcode` (not `jarvis` — that name is already used by a different launcher)
-- **Config:** `jcode.json` / `jcode.jsonc` in the project or `~/.config/jcode/` (falls back to `opencode.json` and `~/.config/opencode/`)
-- **Data:** `~/.local/share/jcode`
-- **Env:** `JCODE_*`, with `OPENCODE_*` accepted as a fallback
+This is the coding-agent product named **Ruth**. The public GitHub repo `the3kingleo-cmyk/ruth` is a different project and is not this tree. This private repo is `the3kingleo-cmyk/ruth-code`.
+
+- **CLI:** `ruth`
+- **Config:** `ruth.json` / `ruth.jsonc` in the project or `~/.config/ruth/` (falls back to `jcode.json`, `opencode.json`, `.ruth/`, and `.opencode/`)
+- **Data:** `~/.local/share/ruth`
+- **Env:** `RUTH_*`, with `JCODE_*` and `OPENCODE_*` accepted as fallbacks
 - **License:** MIT. The original copyright notice is kept; David's copyright is added above it. See `LICENSE` and `NOTICE`.
 
-This tree includes local-model patches: a configurable SSE idle timeout (default 10 minutes), `idle-timeout` retry capping, a 20-minute Ollama header timeout, a 128-token title cap, a conservative text tool-call extractor, a short Qwen system prompt, and an Ollama tools override (`JCODE_OLLAMA_ASSUME_TOOLS=1`).
+This tree includes local-model patches: a configurable SSE idle timeout (default 10 minutes), `idle-timeout` retry capping, a 20-minute Ollama header timeout, a 128-token title cap, a conservative text tool-call extractor, a short Qwen system prompt, and an Ollama tools override (`RUTH_OLLAMA_ASSUME_TOOLS=1`).
+
+OpenCode Zen and other cloud providers still work. This repo does not include API keys. Sign in with:
+
+```bash
+ruth auth login
+```
+
+You can also set provider keys in the environment (for example `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`) if a provider documents that. Do not commit keys.
 
 Install (private repo, uses a GitHub token from the prompt or `GITHUB_TOKEN`). Do not use the public `https://opencode.ai/v2/install` command from the upstream README below; that installs official OpenCode, not this fork.
 
-Plugin + `jcode` binary (recommended):
-
 ```bash
 read -rsp "GitHub token: " GITHUB_TOKEN; echo
 export GITHUB_TOKEN
-curl -fsSL -H "Authorization: Bearer $GITHUB_TOKEN" -H "Accept: application/vnd.github.raw" "https://api.github.com/repos/the3kingleo-cmyk/oh-my-openagent/contents/scripts/install-chromebook.sh?ref=chromebook-lite" | bash
+curl -fsSL -H "Authorization: Bearer $GITHUB_TOKEN" -H "Accept: application/vnd.github.raw" "https://api.github.com/repos/the3kingleo-cmyk/ruth-code/contents/scripts/install.sh?ref=main" | bash
 ```
 
-`jcode` binary only:
+The installer places `ruth` in `~/.local/bin` and adds that directory to `PATH`. Set `INSTALL_PLUGIN=1` to also build the Chromebook-lite Oh My OpenCode plugin and register it in `~/.config/ruth/ruth.json`.
 
-```bash
-read -rsp "GitHub token: " GITHUB_TOKEN; echo
-export GITHUB_TOKEN
-curl -fsSL -H "Authorization: Bearer $GITHUB_TOKEN" -H "Accept: application/vnd.github.raw" "https://api.github.com/repos/the3kingleo-cmyk/jarvis-code/contents/scripts/install-chromebook.sh?ref=chromebook-lite" | bash
-```
+A default Ollama preset is in `presets/ruth.json`. The 1.7b model is included for light chat; **4b is recommended when you need tools**.
 
 The upstream OpenCode README follows.
 

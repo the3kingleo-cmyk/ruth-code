@@ -1,0 +1,23 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "$comment": "Ruth Ollama preset that prefers the 4b model for tool use. Copy over ruth.json or merge as needed.",
+  "model": "ollama/huihui_ai/qwen3-abliterated:4b",
+  "small_model": "ollama/huihui_ai/qwen3-abliterated:1.7b",
+  "plugins": [],
+  "provider": {
+    "ollama": {
+      "options": {
+        "headerTimeout": 1200000,
+        "chunkTimeout": false
+      },
+      "models": {
+        "huihui_ai/qwen3-abliterated:4b": {
+          "capabilities": { "tools": true }
+        },
+        "huihui_ai/qwen3-abliterated:1.7b": {
+          "capabilities": { "tools": true }
+        }
+      }
+    }
+  }
+}

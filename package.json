@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/package.json",
-  "name": "jarvis-code",
+  "name": "ruth",
   "description": "AI-powered development tool",
   "version": "2.3.0",
   "private": true,

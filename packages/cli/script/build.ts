@@ -17,7 +17,7 @@ import { NativeArch } from "../../../script/native-arch"
 import { bundledModelsSnapshot, modelsSnapshotPlugin } from "../../core/script/models-snapshot"
 
 const dir = path.resolve(import.meta.dirname, "..")
-const binary = "jcode"
+const binary = "ruth"
 const outdir = path.resolve(
   dir,
   process.argv.find((arg) => arg.startsWith("--outdir="))?.slice("--outdir=".length) ?? "dist",
@@ -29,7 +29,7 @@ await rm(outdir, { recursive: true, force: true })
 
 const singleFlag = process.argv.includes("--single")
 const baselineFlag = process.argv.includes("--baseline")
-const requestedTarget = process.env.JCODE_TARGET ?? process.env.OPENCODE_TARGET
+const requestedTarget = process.env.RUTH_TARGET ?? process.env.JCODE_TARGET ?? process.env.OPENCODE_TARGET
 const skipInstall = process.argv.includes("--skip-install")
 const skipWebUi = process.argv.includes("--skip-web-ui")
 const solidPlugin = createSolidTransformPlugin()
@@ -198,7 +198,7 @@ export default { path: file, version: ${JSON.stringify(opencodePty.version)}, sh
       outfile: path.join(outdir, name, "bin", binary),
       execArgv: [
         "--smol",
-        `--user-agent=jcode/${Script.channel}/${Script.version}/cli`,
+        `--user-agent=ruth/${Script.channel}/${Script.version}/cli`,
         "--use-system-ca",
         "--no-warnings",
         "--",
@@ -207,7 +207,7 @@ export default { path: file, version: ${JSON.stringify(opencodePty.version)}, sh
     },
     define: {
       OPENCODE_VERSION: `'${Script.version}'`,
-      OPENCODE_CLI_NAME: "'jcode'",
+      OPENCODE_CLI_NAME: "'ruth'",
       OPENCODE_CHANNEL: `'${Script.channel}'`,
       OPENCODE_ARTIFACT: `'cli'`,
       ...(highlights ? { OPENCODE_RELEASE_HIGHLIGHTS: JSON.stringify(highlights) } : {}),
@@ -229,10 +229,10 @@ export default { path: file, version: ${JSON.stringify(opencodePty.version)}, sh
     path.join(outdir, name, "package.json"),
     JSON.stringify(
       {
-        name: `@jarvis-code/${name}`,
+        name: `@ruth/${name}`,
         version: Script.version,
         license: "MIT",
-        repository: { type: "git", url: "git+https://github.com/the3kingleo-cmyk/jarvis-code.git" },
+        repository: { type: "git", url: "git+https://github.com/the3kingleo-cmyk/ruth-code.git" },
         os: [item.os],
         cpu: [item.arch],
       },

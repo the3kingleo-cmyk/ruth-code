@@ -1,14 +1,14 @@
 #!/usr/bin/env bun
 /**
  * Small-model smoke test against a local Ollama instance.
- * Uses huihui_ai/qwen3-abliterated:1.7b (or $JCODE_SMOKE_MODEL) on a few tool-using prompts.
+ * Uses huihui_ai/qwen3-abliterated:1.7b (or $RUTH_SMOKE_MODEL) on a few tool-using prompts.
  * Reports native tool-call presence (typical "before" behavior of a small model)
- * and whether the Jarvis Code text extractor can lift a {name, arguments} object ("after").
+ * and whether the Ruth text extractor can lift a {name, arguments} object ("after").
  */
 import { extractToolCallFromText } from "../packages/ai/src/tool-call-extract.ts"
 
 const host = process.env.OLLAMA_HOST ?? "http://127.0.0.1:11434"
-const model = process.env.JCODE_SMOKE_MODEL ?? process.env.OPENCODE_SMOKE_MODEL ?? "huihui_ai/qwen3-abliterated:1.7b"
+const model = process.env.RUTH_SMOKE_MODEL ?? process.env.JCODE_SMOKE_MODEL ?? process.env.OPENCODE_SMOKE_MODEL ?? "huihui_ai/qwen3-abliterated:1.7b"
 const tools = [
   {
     type: "function",

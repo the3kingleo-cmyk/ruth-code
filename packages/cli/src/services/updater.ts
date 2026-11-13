@@ -49,7 +49,7 @@ const decodeManifestVersion = Schema.decodeUnknownOption(
 )
 
 const installNames: Record<Method, string> = {
-  curl: "The Jarvis Code installer",
+  curl: "The Ruth installer",
   npm: "npm",
   pnpm: "pnpm",
   bun: "Bun",
@@ -244,9 +244,9 @@ const make = Effect.gen(function* () {
     if (bash && (yield* fs.exists(bash).pipe(Effect.orElseSucceed(() => false)))) return bash
     return yield* Effect.fail(
       new UpgradeError({
-        title: "Git Bash is required to update Jarvis Code",
-        detail: "The Jarvis Code installer runs with Git Bash on Windows, and it was not found.",
-        retry: "Install Git for Windows or set JCODE_GIT_BASH_PATH or OPENCODE_GIT_BASH_PATH, then run jcode upgrade again.",
+        title: "Git Bash is required to update Ruth",
+        detail: "The Ruth installer runs with Git Bash on Windows, and it was not found.",
+        retry: "Install Git for Windows or set RUTH_GIT_BASH_PATH, JCODE_GIT_BASH_PATH, or OPENCODE_GIT_BASH_PATH, then run ruth upgrade again.",
       }),
     )
   })
@@ -329,9 +329,9 @@ const make = Effect.gen(function* () {
       catch: (cause) =>
         new UpgradeError(
           {
-            title: "Could not check for Jarvis Code updates",
+            title: "Could not check for Ruth updates",
             detail: errorDetail(cause),
-            retry: "Check your network, then run jcode upgrade again.",
+            retry: "Check your network, then run ruth upgrade again.",
           },
           { cause },
         ),
@@ -339,7 +339,7 @@ const make = Effect.gen(function* () {
     if (!response.ok)
       return yield* Effect.fail(
         new UpgradeError({
-          title: "Could not check for Jarvis Code updates",
+          title: "Could not check for Ruth updates",
           detail: `The update service returned HTTP ${response.status}.`,
           retry: "Try again in a few minutes.",
         }),
@@ -350,7 +350,7 @@ const make = Effect.gen(function* () {
         catch: (cause) =>
           new UpgradeError(
             {
-              title: "Could not read the Jarvis Code update information",
+              title: "Could not read the Ruth update information",
               detail: errorDetail(cause),
               retry: "Try again in a few minutes.",
             },
@@ -362,7 +362,7 @@ const make = Effect.gen(function* () {
     if (!version || !packageName)
       return yield* Effect.fail(
         new UpgradeError({
-          title: "Could not read the Jarvis Code update information",
+          title: "Could not read the Ruth update information",
           detail: "The update service returned incomplete release information.",
           retry: "Try again in a few minutes.",
         }),
@@ -375,10 +375,10 @@ const make = Effect.gen(function* () {
     const failure = (detail: string, cause?: unknown) =>
       new UpgradeError(
         {
-          title: "Could not check for Jarvis Code updates",
+          title: "Could not check for Ruth updates",
           detail,
           command: ["winget", "search", ...wingetArgs].join(" "),
-          retry: "Fix the issue above, then run jcode upgrade again.",
+          retry: "Fix the issue above, then run ruth upgrade again.",
         },
         cause === undefined ? undefined : { cause },
       )
@@ -408,7 +408,7 @@ const make = Effect.gen(function* () {
   const managedError = (owner: { name: string; command: string }, target: string) =>
     new UpgradeError({
       title: `OpenCode is managed by ${owner.name}`,
-      detail: `This copy was installed with ${owner.name}, which keeps its own record of the installed version, so Jarvis Code won't update it directly.`,
+      detail: `This copy was installed with ${owner.name}, which keeps its own record of the installed version, so Ruth won't update it directly.`,
       command: `${owner.command}${target}`,
       retry: "Run the command above, then restart OpenCode.",
     })
@@ -456,10 +456,10 @@ const make = Effect.gen(function* () {
     const failure = (detail: string, cause?: unknown) =>
       new UpgradeError(
         {
-          title: input.title ?? `${installNames[input.method]} could not install Jarvis Code`,
+          title: input.title ?? `${installNames[input.method]} could not install Ruth`,
           detail,
           command: (input.displayCommand ?? input.command).join(" "),
-          retry: input.retry ?? "Fix the issue above, then run jcode upgrade again.",
+          retry: input.retry ?? "Fix the issue above, then run ruth upgrade again.",
         },
         cause === undefined ? undefined : { cause },
       )
@@ -541,16 +541,16 @@ const make = Effect.gen(function* () {
             method,
             command: ["curl", "-fsSL", "-o", installer, "https://opencode.ai/v2/install"],
             displayCommand: ["curl", "-fsSL", "https://opencode.ai/v2/install"],
-            title: "Could not download the Jarvis Code installer",
-            retry: "Check your network, then run jcode upgrade again.",
+            title: "Could not download the Ruth installer",
+            retry: "Check your network, then run ruth upgrade again.",
           })
           return yield* retaining(
             method,
             runUpgrade({
               method,
               command: [bash, installer, "--version", version, "--no-modify-path"],
-              displayCommand: ["jcode", "upgrade", version, "--method", "curl"],
-              title: "The Jarvis Code installer failed",
+              displayCommand: ["ruth", "upgrade", version, "--method", "curl"],
+              title: "The Ruth installer failed",
             }),
           )
         }
@@ -579,9 +579,9 @@ const make = Effect.gen(function* () {
           ? cause
           : new UpgradeError(
               {
-                title: "Could not prepare the Jarvis Code upgrade",
+                title: "Could not prepare the Ruth upgrade",
                 detail: errorDetail(cause),
-                retry: "Fix the issue above, then run jcode upgrade again.",
+                retry: "Fix the issue above, then run ruth upgrade again.",
               },
               { cause },
             ),
@@ -597,9 +597,9 @@ const make = Effect.gen(function* () {
     if (installed !== version)
       return yield* Effect.fail(
         new UpgradeError({
-          title: `${installNames[method]} did not update this copy of Jarvis Code`,
+          title: `${installNames[method]} did not update this copy of Ruth`,
           detail: `${installNames[method]} reported success, but ${executable} is still version ${installed ?? "unknown"}.`,
-          retry: `Update the copy at ${executable} with the package manager that installed it, then run jcode upgrade again.`,
+          retry: `Update the copy at ${executable} with the package manager that installed it, then run ruth upgrade again.`,
         }),
       )
   })
