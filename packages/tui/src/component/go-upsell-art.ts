@@ -7,7 +7,6 @@ import {
   type RenderContext,
 } from "@opentui/core"
 import { extend } from "@opentui/solid"
-import { go } from "../logo"
 
 // Ported from the v1 TUI's Go upsell (bg-pulse-render.ts): rings radiate from the GO logo while a shimmer crosses it.
 const PERIOD = 4600
@@ -22,8 +21,8 @@ const BREATH_SPEED = 0.0008
 const PHASE_OFFSET = 0.29
 // The frame shown when animations are off.
 const STILL = PERIOD * 0.5
-const LOGO_LEFT_WIDTH = go.left[0]?.length ?? 0
-const LOGO_LINES = go.left.map((line, index) => line + " " + go.right[index])
+const LOGO_LINES = ["◆ ruth"]
+const LOGO_LEFT_WIDTH = 1
 const LOGO_WIDTH = LOGO_LINES[0]?.length ?? 0
 const LOGO_HEIGHT = LOGO_LINES.length
 const LOGO_REACH = Math.hypot(LOGO_WIDTH, LOGO_HEIGHT * 2) + 3

@@ -4,7 +4,7 @@ import { epilogue } from "../../src/util/presentation"
 const rows = (text: string | undefined) =>
   Bun.stripANSI(text ?? "")
     .split("\n")
-    .filter((line) => line.trim() && !/[▀▄█]/.test(line))
+    .filter((line) => line.trim())
 
 test("prints nothing without a session or update", () => {
   expect(epilogue({})).toBeUndefined()
@@ -12,17 +12,19 @@ test("prints nothing without a session or update", () => {
 
 test("formats session continuation summary", () => {
   expect(rows(epilogue({ session: { title: "A session", sessionID: "ses_123" } }))).toEqual([
+    "  ◆ ruth",
     "  Session   A session",
     "  Continue  ruth -s ses_123",
   ])
 })
 
 test("tells the user to start Ruth again after an update", () => {
-  expect(rows(epilogue({ updatedVersion: "2.0.0" }))).toEqual(["  Run ruth to use 2.0.0"])
+  expect(rows(epilogue({ updatedVersion: "2.0.0" }))).toEqual(["  ◆ ruth", "  Run ruth to use 2.0.0"])
 })
 
 test("keeps the session continuation after an update", () => {
   expect(rows(epilogue({ session: { title: "A session", sessionID: "ses_123" }, updatedVersion: "2.0.0" }))).toEqual([
+    "  ◆ ruth",
     "  Run ruth to use 2.0.0",
     "  Session   A session",
     "  Continue  ruth -s ses_123",

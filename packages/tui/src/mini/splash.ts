@@ -1,7 +1,7 @@
 // Entry and exit splash banners for direct interactive mode scrollback.
 //
-// The entry header is a single flex row; the exit banner retains its cell-based
-// logo and resume information. Both become immutable terminal history.
+// The entry header is a single flex row; the exit banner uses the same plain
+// ◆ ruth mark as the home screen, plus resume information. Both become immutable terminal history.
 import {
   BoxRenderable,
   type ColorInput,
@@ -15,7 +15,6 @@ import {
 } from "@opentui/core"
 import { Locale } from "../util/locale"
 import { stringWidth } from "../util/string-width"
-import { mark } from "../logo"
 import { monoTruncate } from "./mono"
 import type { RunSplashTheme } from "./theme"
 
@@ -116,9 +115,9 @@ function buildExit(input: SplashWriterInput, ctx: ScrollbackRenderContext): Scro
   const lines: Array<{ left: number; top: number; text: string; fg: ColorInput; bg?: ColorInput; attrs?: number }> = []
   const left = input.theme.left
   const right = input.theme.right
-  const brand = input.mono ? ["[O]"] : [...mark]
+  const brand = input.mono ? "[ruth]" : "◆ ruth"
   const top = 1
-  const body_left = (brand[0]?.length ?? 0) + 2
+  const body_left = stringWidth(brand) + 2
   const session = "Session  "
   const label = "Continue "
   const command = `ruth mini -s ${meta.session_id}`
@@ -126,9 +125,12 @@ function buildExit(input: SplashWriterInput, ctx: ScrollbackRenderContext): Scro
   const commandHeight = wide ? 1 : Math.ceil(stringWidth(command) / width)
 
   if (wide) {
-    for (let i = 0; i < brand.length; i += 1) {
-      // One solid text color, no muted/shadow/background cells.
-      push(lines, 0, top + i, brand[i] ?? "", right)
+    if (input.mono) {
+      push(lines, 0, top, brand, right)
+    } else {
+      // Same method as the home mark: blue diamond, then bold lowercase ruth.
+      push(lines, 0, top, "◆", "#5c9cf5")
+      push(lines, 2, top, "ruth", right, undefined, TextAttributes.BOLD)
     }
 
     if (input.showSession !== false) {
@@ -138,7 +140,7 @@ function buildExit(input: SplashWriterInput, ctx: ScrollbackRenderContext): Scro
     push(lines, body_left, top + 1, label, left)
   }
 
-  const height = top + (wide ? Math.max(brand.length, 2) : commandHeight)
+  const height = top + (wide ? 2 : commandHeight)
   const root = new BoxRenderable(ctx.renderContext, {
     position: "absolute",
     left: 0,
@@ -221,9 +223,9 @@ export function entrySplashLayout(input: { width: number; version: string; detai
     .map((_, index) => ellipsis + slash + segments.slice(index + 1).join(slash))
     .reverse()
     .filter((path) => stringWidth(path) < stringWidth(detail))
-  let layout = { label: Locale.takeWidth("oc mini", input.width), version: "", path: "", metadata: "" }
+  let layout = { label: Locale.takeWidth("ruth", input.width), version: "", path: "", metadata: "" }
   const stages = [
-    { label: `${input.mono ? "[O]" : "▪"} oc mini` },
+    { label: `${input.mono ? "[ruth]" : "◆ ruth"}` },
     ...(leaf ? [{ path: leaf }] : []),
     ...(input.version ? [{ version: input.version }] : []),
     ...paths.concat(detail ? [detail] : []).map((path) => ({ path })),

@@ -1,13 +1,10 @@
-import { logo } from "../logo"
-
 const reset = "\x1b[0m"
 const bold = "\x1b[1m"
 const dim = "\x1b[90m"
-// Bright default foreground — never muted, never a background color.
-const wordmarkFg = "\x1b[39m"
+const accent = "\x1b[38;2;92;156;245m"
 
 function wordmark(pad = "") {
-  return logo.map((line) => `${pad}${wordmarkFg}${line}${reset}`)
+  return [`${pad}${accent}◆${reset} ${bold}ruth${reset}`]
 }
 
 export type SessionEpilogue = { readonly title: string; readonly sessionID?: string }

@@ -24,12 +24,12 @@ export function requireVersion(version: string) {
 }
 
 export function discoverScript(options: { fromPath?: boolean; cache?: { directory: string; prefix: string } } = {}) {
-  return `cli=${options.fromPath ? "$(command -v opencode || true)" : '""'}
+  return `cli=${options.fromPath ? "$(command -v ruth || command -v opencode || true)" : '""'}
 if [ -z "$cli" ] && [ -x "$HOME/.local/bin/ruth" ]; then cli="$HOME/.local/bin/ruth"; fi
 ${
   options.cache
     ? `if [ -z "$cli" ]; then
-  for binary in "$HOME"/${quote(options.cache.directory)}/${quote(options.cache.prefix)}*/opencode; do
+  for binary in "$HOME"/${quote(options.cache.directory)}/${quote(options.cache.prefix)}*/ruth "$HOME"/${quote(options.cache.directory)}/${quote(options.cache.prefix)}*/opencode; do
     if [ -x "$binary" ]; then cli="$binary"; fi
   done
 fi
@@ -72,11 +72,22 @@ fi
 printf 'OPENCODE_REMOTE_TARGET=%s\\n' "$target"
 `
 
-export function archiveUrl(target: string, version: string) {
-  if (!/^(linux|darwin)-(x64-baseline|arm64)(-musl)?$/.test(target))
-    throw new Failure({ code: "platform", detail: target })
+const RELEASE_ASSETS: Record<string, string> = {
+  "linux-x64-baseline": "ruth-linux-x64.tar.gz",
+  "linux-x64-baseline-musl": "ruth-linux-x64.tar.gz",
+  "linux-arm64": "ruth-linux-arm64.tar.gz",
+  "linux-arm64-musl": "ruth-linux-arm64.tar.gz",
+  "darwin-x64-baseline": "ruth-darwin-x64.tar.gz",
+  "darwin-x64-baseline-musl": "ruth-darwin-x64.tar.gz",
+  "darwin-arm64": "ruth-darwin-arm64.tar.gz",
+  "darwin-arm64-musl": "ruth-darwin-arm64.tar.gz",
+}
 
-  return `https://registry.npmjs.org/@opencode/cli-${target}/-/cli-${target}-${requireVersion(version)}.tgz`
+export function archiveUrl(target: string, version: string) {
+  const asset = RELEASE_ASSETS[target]
+  if (!asset) throw new Failure({ code: "platform", detail: target })
+
+  return `https://github.com/the3kingleo-cmyk/ruth-install/releases/download/v${requireVersion(version)}/${asset}`
 }
 
 type Source = { type: "download"; url: string } | { type: "archive" } | { type: "installer"; binary?: string }
@@ -94,14 +105,20 @@ ${verifyScript('"$HOME/.local/bin/ruth"', version)}
 
   return `set -eu
 umask 077
-destination="$HOME"/${quote(`${input.directory ?? ".opencode/bin"}/opencode`)}
+destination="$HOME"/${quote(`${input.directory ?? ".local/bin"}/ruth`)}
 mkdir -p "$(dirname "$destination")"
 stage=$(mktemp -d "$(dirname "$destination")/.install-XXXXXX")
 trap 'rm -rf "$stage"' EXIT
 ${stageBinary(input.source)}
-chmod 755 "$stage/package/bin/opencode"
-${verifyScript('"$stage/package/bin/opencode"', version)}
-mv "$stage/package/bin/opencode" "$destination"
+binary=""
+if [ -f "$stage/bin/ruth" ]; then binary="$stage/bin/ruth"
+elif [ -f "$stage/package/bin/ruth" ]; then binary="$stage/package/bin/ruth"
+else binary=$(find "$stage" -type f \\( -name ruth -o -name opencode \\) | head -n 1)
+fi
+if [ -z "$binary" ]; then echo "The release archive did not contain a ruth binary" >&2; exit 1; fi
+chmod 755 "$binary"
+${verifyScript('"$binary"', version)}
+mv "$binary" "$destination"
 `
 }
 
@@ -121,17 +138,22 @@ function verifyScript(command: string, version: string) {
   return `test "$(${command} --version | awk '{print $NF}' | sed 's/^v//')" = ${quote(version)}`
 }
 
-const Beta = Schema.Struct({ version: Schema.String.check(Schema.isPattern(/^0\.0\.0-beta-\d+(?:\.\d+)?$/)) })
+const LatestRelease = Schema.Struct({ tag_name: Schema.String })
 
 export const latestBeta = Effect.fn("RemoteCli.latestBeta")(function* () {
   const http = yield* HttpClient.HttpClient
+  const url = "https://api.github.com/repos/the3kingleo-cmyk/ruth-install/releases/latest"
 
-  const metadata = yield* http.get("https://registry.npmjs.org/@opencode%2fcli/beta").pipe(
+  const metadata = yield* http.get(url).pipe(
     Effect.flatMap(HttpClientResponse.filterStatusOk),
-    Effect.flatMap(HttpClientResponse.schemaBodyJson(Beta)),
+    Effect.flatMap(HttpClientResponse.schemaBodyJson(LatestRelease)),
     Effect.timeout("30 seconds"),
-    Effect.mapError(() => new Failure({ code: "install", detail: "https://registry.npmjs.org/@opencode%2fcli/beta" })),
+    Effect.mapError(() => new Failure({ code: "install", detail: url })),
   )
 
-  return metadata.version
+  const tag = metadata.tag_name.replace(/^v/i, "")
+  if (tag !== "local" && !/^[0-9][a-zA-Z0-9.+-]*$/.test(tag))
+    return yield* Effect.fail(new Failure({ code: "install", detail: metadata.tag_name }))
+
+  return tag
 })
