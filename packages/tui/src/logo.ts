@@ -4,10 +4,10 @@
 // - at least one empty column between letters
 // - a single foreground color is applied by the renderer (theme text, never muted/bg)
 export const logo = [
-  "█████  █   █  █████  █   █",
+  "████   █   █  █████  █   █",
   "█   █  █   █    █    █   █",
   "████   █   █    █    █████",
-  "█   █  █   █    █    █   █",
+  "█  █   █   █    █    █   █",
   "█   █  █████    █    █   █",
 ] as const
 
