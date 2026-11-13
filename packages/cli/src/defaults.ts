@@ -15,6 +15,7 @@ export function defaultRuthConfig(pluginPath?: string) {
       "Default Ruth config for local Ollama. 1.7b is the first-run chat model; prefer 4b when you need tools.",
     model: DEFAULT_PROVIDER_MODEL,
     small_model: DEFAULT_PROVIDER_MODEL,
+    websearch: false,
     plugins: pluginPath ? [pluginPath] : [],
     provider: {
       ollama: {
