@@ -80,6 +80,17 @@ describe("updater", () => {
     expect(action("1.0.0-9007199254740991", "1.0.0-9007199254740992", "notify")).toBe("notify")
   })
 
+
+  test("treats 0.0.0-main-STAMP and v0.0.0-STAMP as the same release", () => {
+    expect(action("0.0.0-main-202611132109", "0.0.0-202611132109", "notify")).toBe("none")
+    expect(action("0.0.0-main-202611132109", "v0.0.0-202611132109", "notify")).toBe("none")
+    expect(action("v0.0.0-202611132109", "0.0.0-main-202611132109", "notify")).toBe("none")
+  })
+
+  test("offers a stamp-based update only when the latest stamp is newer", () => {
+    expect(action("0.0.0-main-202611132100", "0.0.0-202611132109", "notify")).toBe("notify")
+    expect(action("0.0.0-main-202611132200", "v0.0.0-202611132109", "notify")).toBe("none")
+  })
   test("rejects versions longer than semver's limit before trimming", () => {
     expect(action("1.2.3", `${" ".repeat(251)}1.2.3`, "notify")).toBe("none")
     expect(action("1.2.3", `1.2.4+${"a".repeat(250)}`, "notify")).toBe("notify")

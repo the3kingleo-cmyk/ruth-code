@@ -118,7 +118,9 @@ const layer = Layer.effect(
     const providers = yield* Provider.Service
     const bus = yield* Bus.Service
     const location = yield* Location.Service
-    const disableFree = ["1", "true"].includes(process.env.OPENCODE_DISABLE_FREE_MODELS?.toLowerCase() ?? "")
+    const disableFree = ["1", "true"].includes(
+      (process.env.RUTH_DISABLE_FREE_MODELS ?? process.env.OPENCODE_DISABLE_FREE_MODELS ?? "").toLowerCase(),
+    )
     let input: Provider.Snapshot | undefined
     const state: State.Interface<Data, Editor> = State.create<Data, Editor>({
       name: "model",
@@ -249,7 +251,8 @@ const layer = Layer.effect(
             ]
           }),
         )
-        if (disableFree)
+        const hideFreeCatalog = disableFree || prefersLocalRuth(data, byProvider)
+        if (hideFreeCatalog)
           for (const providerID of [Provider.ID.opencode, Provider.ID.make("opencode-go")])
             byProvider.get(providerID)?.forEach((model, id, models) => {
               if (!model.cost.some((cost) => cost.input > 0)) models.delete(id)
@@ -345,7 +348,12 @@ const layer = Layer.effect(
             ),
           )
           .find(Boolean)
-        return local ?? value.available.find(supportsText)
+        if (local) return local
+        // Never fall back to OpenCode free-catalog models when a local Ruth default is configured.
+        const requestedLocal = requested?.providerID === "ollama" || requested?.providerID === "ollama-cloud"
+        return value.available.find(
+          (item) => supportsText(item) && !(requestedLocal && isOpencodeFreeCatalog(item)),
+        )
       }),
       small: Effect.fn("Model.small")(function* (providerID) {
         const value = yield* read()
@@ -365,6 +373,38 @@ const layer = Layer.effect(
 )
 
 export const node = makeLocationNode({ service: Service, layer, deps: [Provider.node, Bus.node, Location.node] })
+
+
+function isRuthModelID(id: string) {
+  return id === "ruth" || id === "ruth:latest" || id === "ruth-pro" || id === "ruth-pro:latest"
+}
+
+function isOpencodeFreeCatalog(model: Pick<Info, "providerID" | "cost">) {
+  return (
+    (model.providerID === Provider.ID.opencode || model.providerID === "opencode-go") &&
+    !model.cost.some((cost) => cost.input > 0)
+  )
+}
+
+/** Config asks for ollama/ruth, or Ollama already has a named Ruth model. */
+function prefersLocalRuth(
+  data: Data,
+  byProvider: Map<Provider.ID, Map<ID, Info>>,
+) {
+  const requested = data.defaultModel
+  if (requested && (requested.providerID === "ollama" || requested.providerID === "ollama-cloud") && isRuthModelID(requested.modelID)) {
+    return true
+  }
+  if (requested && isRuthModelID(requested.modelID)) return true
+  for (const providerID of ["ollama", "ollama-cloud"] as const) {
+    const models = byProvider.get(Provider.ID.make(providerID))
+    if (!models) continue
+    for (const model of models.values()) {
+      if (isRuthModelID(model.id) || isRuthModelID(model.modelID)) return true
+    }
+  }
+  return false
+}
 
 // Signed out, only free OpenCode models are enabled. Clients default to the first available model, so keep
 // these free models ahead of each new free launch instead of letting release order pick the default.
