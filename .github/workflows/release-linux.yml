@@ -44,7 +44,7 @@ jobs:
       - name: Install dependencies
         env:
           BUN_INSTALL_CONCURRENCY: "2"
-        run: bun install --frozen-lockfile
+        run: bun install
 
       - name: Compile ruth linux-x64
         env:
