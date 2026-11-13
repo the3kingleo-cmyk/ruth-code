@@ -15,7 +15,7 @@ import {
 } from "@opentui/core"
 import { Locale } from "../util/locale"
 import { stringWidth } from "../util/string-width"
-import { go } from "../logo"
+import { mark } from "../logo"
 import { monoTruncate } from "./mono"
 import type { RunSplashTheme } from "./theme"
 
@@ -36,35 +36,6 @@ type SplashWriterInput = SplashInput & {
 export type SplashMeta = {
   title: string
   session_id: string
-}
-
-type Cell = {
-  char: string
-  mark: "text" | "full" | "mix" | "top"
-}
-
-function cells(line: string): Cell[] {
-  const list: Cell[] = []
-  for (const char of line) {
-    if (char === "_") {
-      list.push({ char: " ", mark: "full" })
-      continue
-    }
-
-    if (char === "^") {
-      list.push({ char: "▀", mark: "mix" })
-      continue
-    }
-
-    if (char === "~") {
-      list.push({ char: "▀", mark: "top" })
-      continue
-    }
-
-    list.push({ char, mark: "text" })
-  }
-
-  return list
 }
 
 function title(text: string | undefined, mono = false): string {
@@ -175,10 +146,9 @@ function buildExit(input: SplashWriterInput, ctx: ScrollbackRenderContext): Scro
   const lines: Array<{ left: number; top: number; text: string; fg: ColorInput; bg?: ColorInput; attrs?: number }> = []
   const left = input.theme.left
   const right = input.theme.right
-  const leftShadow = input.theme.leftShadow
-  const mark = input.mono ? ["[O]"] : go.right.slice(1)
+  const brand = input.mono ? ["[O]"] : [...mark]
   const top = 1
-  const body_left = (mark[0]?.length ?? 0) + 2
+  const body_left = (brand[0]?.length ?? 0) + 2
   const session = "Session  "
   const label = "Continue "
   const command = `ruth mini -s ${meta.session_id}`
@@ -186,13 +156,9 @@ function buildExit(input: SplashWriterInput, ctx: ScrollbackRenderContext): Scro
   const commandHeight = wide ? 1 : Math.ceil(stringWidth(command) / width)
 
   if (wide) {
-    for (let i = 0; i < mark.length; i += 1) {
-      draw(lines, mark[i] ?? "", {
-        left: 0,
-        top: top + i,
-        fg: left,
-        shadow: leftShadow,
-      })
+    for (let i = 0; i < brand.length; i += 1) {
+      // One solid text color, no muted/shadow/background cells.
+      push(lines, 0, top + i, brand[i] ?? "", right)
     }
 
     if (input.showSession !== false) {
@@ -202,7 +168,7 @@ function buildExit(input: SplashWriterInput, ctx: ScrollbackRenderContext): Scro
     push(lines, body_left, top + 1, label, left)
   }
 
-  const height = top + (wide ? Math.max(mark.length, 2) : commandHeight)
+  const height = top + (wide ? Math.max(brand.length, 2) : commandHeight)
   const root = new BoxRenderable(ctx.renderContext, {
     position: "absolute",
     left: 0,
