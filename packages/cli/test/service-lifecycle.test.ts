@@ -107,27 +107,55 @@ serviceTest(
 )
 
 serviceTest(
-  "an unrelated process on the port gets an actionable error, then the service starts",
+  "an unrelated process on the port makes the service pick a free port and start",
   async () => {
     await using home = await serviceHome()
     using listener = Bun.serve({ hostname: "127.0.0.1", port: home.port, fetch: () => new Response("unrelated") })
 
-    const conflict = await cli(home, "service", "start").then(
-      () => undefined,
-      (error: Error) => error.message,
-    )
-    expect(conflict).toContain(
-      `Managed service port ${home.port} on 127.0.0.1 is already in use by ${
-        process.platform !== "win32" && Bun.which("lsof") ? `PID ${process.pid} (` : "another process"
-      }`,
-    )
-    expect(conflict).toContain("opencode service set port <port>")
-    expect(await servers(home)).toEqual([])
-    expect(await Bun.file(home.registration).exists()).toBe(false)
+    await cli(home, "service", "start")
+    const info = await Bun.file(home.registration).json()
+    const bound = Number(new URL(info.url).port)
+    expect(bound).not.toBe(home.port)
+    expect(await Bun.file(path.join(home.root, "config", "service-local.json")).json()).toMatchObject({ port: bound })
+    expect(await servers(home)).toEqual([info.pid])
 
     await listener.stop(true)
-    await cli(home, "service", "start")
-    await settled(home)
+    await Effect.runPromise(Service.stop({ file: home.registration }).pipe(Effect.provide(NodeFileSystem.layer)))
+  },
+  120_000,
+)
+
+serviceTest(
+  "a stale ruth service on the port is killed and the new service starts there",
+  async () => {
+    await using home = await serviceHome()
+    const fake = path.join(home.root, "ruth")
+    await fs.copyFile(process.execPath, fake)
+    await fs.chmod(fake, 0o755)
+    const stale = Bun.spawn(
+      [
+        fake,
+        "-e",
+        `Bun.serve({ hostname: "127.0.0.1", port: ${home.port}, fetch: () => new Response("stale") }); await Bun.sleep(Infinity)`,
+      ],
+      { stdout: "ignore", stderr: "ignore" },
+    )
+    try {
+      await until(async () => {
+        try {
+          await fetch(`http://127.0.0.1:${home.port}/`, { signal: AbortSignal.timeout(200) })
+          return true
+        } catch {
+          return undefined
+        }
+      })
+      await cli(home, "service", "start")
+      await settled(home)
+      await stale.exited
+    } finally {
+      stale.kill("SIGKILL")
+      await stale.exited.catch(() => undefined)
+    }
     await stopped(home)
   },
   120_000,
@@ -191,7 +219,7 @@ async function serviceHome(options: { readonly failBoot?: boolean } = {}) {
     root,
     port,
     entry: homeEntry,
-    registration: path.join(root, "state", "opencode", "service-local.json"),
+    registration: path.join(root, "state", "ruth", "service-local.json"),
     env: Object.fromEntries(
       Object.entries(isolatedEnv(root, overrides)).filter((entry): entry is [string, string] => entry[1] !== undefined),
     ),

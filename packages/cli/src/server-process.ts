@@ -99,7 +99,7 @@ const processEffect = Effect.fnUntraced(function* (options: Options) {
       const instanceID = randomUUID()
       const transform = yield* WebUi.handler()
       const remote = { urls: [] as ReadonlyArray<string> }
-      const launch = start(
+      const launch = (bindPort?: number) => start(
         {
           app: {
             name: process.env.OPENCODE_CLIENT ?? OPENCODE_ARTIFACT,
@@ -107,7 +107,7 @@ const processEffect = Effect.fnUntraced(function* (options: Options) {
             channel: OPENCODE_CHANNEL,
           },
           hostname,
-          port,
+          port: bindPort,
           cors: options.cors ?? config.cors,
           password,
           pty: { handoff },
@@ -162,29 +162,41 @@ const processEffect = Effect.fnUntraced(function* (options: Options) {
         transform,
         () => remote.urls,
       )
-      const server = yield* launch.pipe(
+      const bind = (bindPort?: number) => launch(bindPort).pipe(Effect.catchIf(addressInUse, () => Effect.void))
+
+      const takeOverOrRelocate = Effect.fnUntraced(function* (cause: unknown) {
+        if (findIncumbent === undefined) return yield* Effect.fail(cause)
+        const found = yield* findIncumbent.pipe(Effect.timeoutOption("2 seconds"))
+        if (Option.isSome(found) && found.value !== undefined) return
+        if (port !== undefined) {
+          const owner = yield* PortOwner.inspect(port, hostname)
+          if (owner !== undefined && owner.pid !== process.pid && PortOwner.isManagedService(owner.command)) {
+            yield* Effect.logInfo("Stopping stale managed service on the configured port", {
+              pid: owner.pid,
+              port,
+              command: owner.command,
+            })
+            yield* PortOwner.terminate(owner.pid)
+            yield* PortOwner.waitUntilFree(port, hostname)
+            const retried = yield* bind(port)
+            if (retried !== undefined) return retried
+          }
+        }
+        // Unrelated process, unknown owner, or the stale service did not release the port: move.
+        const relocated = yield* bind(undefined)
+        if (relocated === undefined) return yield* Effect.fail(cause)
+        if (NetAddress.isInetAddress(relocated.address)) {
+          const next = relocated.address.port
+          yield* ServiceConfig.savePort(next)
+          yield* Effect.logInfo("Configured service port was busy; moved to a free port", { from: port, to: next })
+        }
+        return relocated
+      })
+
+      const server = yield* launch(port).pipe(
         Effect.catch((error) => {
-          if (findIncumbent === undefined || !addressInUse(error)) return Effect.fail(error)
-          return Effect.gen(function* () {
-            const deadline = Date.now() + 15_000
-            while (Date.now() < deadline) {
-              const found = yield* findIncumbent.pipe(Effect.timeoutOption(deadline - Date.now()))
-              if (Option.isSome(found) && found.value !== undefined) return
-              yield* Effect.sleep("100 millis")
-              if (Date.now() >= deadline) break
-              // Failed binds close their scope; a successful bind may take longer than this window to boot.
-              const server = yield* launch.pipe(Effect.catchIf(addressInUse, () => Effect.void))
-              if (server !== undefined) return server
-            }
-            const owner = port === undefined ? undefined : yield* PortOwner.describe(port, hostname)
-            return yield* Effect.fail(
-              new Error(
-                `Managed service port ${port} on ${hostname} is already in use by ${owner ?? "another process"}. ` +
-                  "Configure another port with `ruth service set port <port>` and start the service again.",
-                { cause: error },
-              ),
-            )
-          })
+          if (!addressInUse(error)) return Effect.fail(error)
+          return takeOverOrRelocate(error)
         }),
       )
       if (server === undefined) return

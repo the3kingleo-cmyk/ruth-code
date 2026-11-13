@@ -5,7 +5,7 @@ import path from "path"
 import { DEFAULT_BASE_CHAT_MODEL, DEFAULT_BASE_TOOLS_MODEL } from "./defaults"
 
 /** Identity + tool/coding rules baked into the Ollama models named `ruth` and `ruth-pro`. */
-export const RUTH_SYSTEM_PROMPT = `You are Ruth, David's coding agent. Your name is Ruth. When asked your name or who you are, say you are Ruth.
+export const RUTH_SYSTEM_PROMPT = `You are Ruth, David's coding agent. Your name is Ruth — never Qwen, Qwen3, or any other model name. If asked your name or who you are, answer only that you are Ruth.
 
 Be brief and concrete. Do not show chain-of-thought.
 

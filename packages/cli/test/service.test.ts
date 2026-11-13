@@ -613,11 +613,12 @@ test("unresponsive managed port occupancy reports a bounded conflict", async () 
       return new Promise<Response>(() => {})
     },
   })
-  const registration = path.join(root, "state", "opencode", "service-local.json")
-  await fs.mkdir(path.join(root, "config", "opencode"), { recursive: true })
+  const registration = path.join(root, "state", "ruth", "service-local.json")
+  const configFile = path.join(root, "config", "ruth", "service-local.json")
+  await fs.mkdir(path.dirname(configFile), { recursive: true })
   await fs.mkdir(path.dirname(registration), { recursive: true })
   await fs.writeFile(
-    path.join(root, "config", "opencode", "service-local.json"),
+    configFile,
     JSON.stringify({ port: listener.port, env: { XDG_STATE_HOME: path.join(root, "elsewhere") } }),
   )
   const stale = {
@@ -645,16 +646,24 @@ test("unresponsive managed port occupancy reports a bounded conflict", async () 
 
   try {
     expect(await Promise.race([recognizing.promise.then(() => true), Bun.sleep(20_000).then(() => false)])).toBe(true)
-    const exitCode = await Promise.race([contender.exited, Bun.sleep(20_000).then(() => undefined)])
-    expect(exitCode).toBe(1)
-    const output = (await new Response(contender.stdout).text()) + (await new Response(contender.stderr).text())
-    expect(output).toContain(
-      `Managed service port ${listener.port} on 127.0.0.1 is already in use by ${
-        lsof ? `PID ${process.pid} (` : "another process"
-      }`,
-    )
+    const info = await Promise.race([
+      (async () => {
+        for (let i = 0; i < 200; i++) {
+          const current = await Bun.file(registration)
+            .json()
+            .catch(() => undefined)
+          if (current && current.id !== "stale") return current
+          await Bun.sleep(100)
+        }
+        return undefined
+      })(),
+      Bun.sleep(20_000).then(() => undefined),
+    ])
+    expect(info).toBeDefined()
+    expect(Number(new URL(info.url).port)).not.toBe(listener.port)
+    expect(await Bun.file(configFile).json()).toMatchObject({ port: Number(new URL(info.url).port) })
+    expect(contender.exitCode).toBe(null)
     if (lsof) expect(await Bun.file(path.join(root, "inherited-state")).text()).toBe(path.join(root, "state"))
-    expect(await Bun.file(registration).json()).toEqual(stale)
   } finally {
     contender.kill("SIGTERM")
     await contender.exited
@@ -662,37 +671,18 @@ test("unresponsive managed port occupancy reports a bounded conflict", async () 
   }
 }, 45_000)
 
-test("port contender recognizes an incumbent registered during the bind race", async () => {
+test("port contender relocates when an unrelated listener holds the configured port", async () => {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "opencode-service-bind-race-"))
-  const recognizing = Promise.withResolvers<void>()
-  const requests = { count: 0 }
   using listener = Bun.serve({
     hostname: "127.0.0.1",
     port: 0,
-    fetch() {
-      requests.count += 1
-      if (requests.count === 2) recognizing.resolve()
-      return Response.json(
-        { version: OPENCODE_VERSION, pid: process.pid, urls: [], paths: { tmp: "/tmp/opencode" } },
-        { status: 503 },
-      )
-    },
+    fetch: () => new Response("unrelated"),
   })
-  const registration = path.join(root, "state", "opencode", "service-local.json")
-  const config = path.join(root, "config", "opencode", "service-local.json")
+  const registration = path.join(root, "state", "ruth", "service-local.json")
+  const config = path.join(root, "config", "ruth", "service-local.json")
   await fs.mkdir(path.dirname(config), { recursive: true })
   await fs.writeFile(config, JSON.stringify({ port: listener.port }))
   await fs.mkdir(path.dirname(registration), { recursive: true })
-  await fs.writeFile(
-    registration,
-    JSON.stringify({
-      id: "stale",
-      version: OPENCODE_VERSION,
-      url: "http://127.0.0.1:1",
-      pid: 2_147_483_647,
-      password: "stale",
-    }),
-  )
   const contender = Bun.spawn([process.execPath, path.join(import.meta.dir, "../src/index.ts"), "serve", "--service"], {
     env: serviceEnv(root),
     stderr: "pipe",
@@ -700,19 +690,22 @@ test("port contender recognizes an incumbent registered during the bind race", a
   })
 
   try {
-    expect(await Promise.race([recognizing.promise.then(() => true), Bun.sleep(20_000).then(() => false)])).toBe(true)
-    await Bun.sleep(8_000)
-    const info = {
-      id: "incumbent",
-      version: OPENCODE_VERSION,
-      url: `http://127.0.0.1:${listener.port}`,
-      pid: process.pid,
-      password: "incumbent",
-    }
-    await fs.writeFile(registration, JSON.stringify(info))
-
-    expect(await Promise.race([contender.exited, Bun.sleep(20_000).then(() => undefined)])).toBe(0)
-    expect(await Bun.file(registration).json()).toEqual(info)
+    const info = await Promise.race([
+      (async () => {
+        for (let i = 0; i < 200; i++) {
+          const current = await Bun.file(registration)
+            .json()
+            .catch(() => undefined)
+          if (current?.url) return current
+          await Bun.sleep(100)
+        }
+        return undefined
+      })(),
+      Bun.sleep(20_000).then(() => undefined),
+    ])
+    expect(info).toBeDefined()
+    expect(Number(new URL(info.url).port)).not.toBe(listener.port)
+    expect(contender.exitCode).toBe(null)
   } finally {
     contender.kill("SIGTERM")
     await contender.exited

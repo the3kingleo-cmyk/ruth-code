@@ -180,6 +180,11 @@ const write = Effect.fn("cli.service-config.write")(function* (value: Info) {
   yield* fs.rename(temp, configFile).pipe(Effect.retry({ times: 20, schedule: Schedule.spaced("10 millis") }))
 })
 
+export const savePort = Effect.fn("cli.service-config.save-port")(function* (port: number) {
+  if (!Number.isInteger(port) || port < 1 || port > 65_535) throw new Error("Port must be between 1 and 65535")
+  yield* write({ ...(yield* read()), port })
+})
+
 export const password = Effect.fn("cli.service-config.password")(function* (value?: string) {
   const existing = yield* read()
   if (value === undefined && existing.password) return existing.password
