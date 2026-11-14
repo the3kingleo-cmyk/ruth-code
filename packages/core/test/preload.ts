@@ -1,2 +1,2 @@
-process.env.OPENCODE_DB = ":memory:"
+process.env.RUTH_DB = ":memory:"
 process.env.NPM_CONFIG_AUDIT = "false"

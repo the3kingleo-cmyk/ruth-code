@@ -7,7 +7,7 @@ import {
   CloudflareWorkersAI,
   Google,
   OpenAI,
-  OpenCode,
+  Ruth,
   OpenRouter,
   TypeSafeAI,
   VercelAIGateway,
@@ -154,7 +154,7 @@ describe("Decision", () => {
   it.effect("sends a lone input object as the System One state and maps boolean choices back", () =>
     ai.decision
       .generate({
-        model: OpenCode.configure({ apiKey: "opencode-key", baseURL: "https://opencode.test/v1" }).decision("jev-1.13"),
+        model: Ruth.configure({ apiKey: "ruth-key", baseURL: "https://ruth.test/v1" }).decision("jev-1.13"),
         input: { ticket: "hello" },
         questions: [
           {
@@ -185,8 +185,8 @@ describe("Decision", () => {
         ),
         Effect.provide(
           client((input) => {
-            expect(input.request.url).toBe("https://opencode.test/v1/systemone")
-            expect(input.request.headers.authorization).toBe("Bearer opencode-key")
+            expect(input.request.url).toBe("https://ruth.test/v1/systemone")
+            expect(input.request.headers.authorization).toBe("Bearer ruth-key")
             expect(input.request.headers["typesafe-danger-zone-images"]).toBe("true")
             expect(JSON.parse(input.text)).toEqual({
               model: "jev-1.13",

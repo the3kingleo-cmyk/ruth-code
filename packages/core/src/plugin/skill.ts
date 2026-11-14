@@ -2,26 +2,26 @@
 
 export * as SkillPlugin from "./skill.js"
 
-import { define, type Context } from "@opencode/plugin/effect/plugin"
-import { Document } from "@opencode/schema/config"
+import { define, type Context } from "@ruth/plugin/effect/plugin"
+import { Document } from "@ruth/schema/config"
 import { Effect } from "effect"
 import { AbsolutePath } from "../schema.js"
 import { Skill } from "../skill.js"
 import { Config } from "../config.js"
 import os from "os"
-import opencodeContent from "./skill/opencode.md" with { type: "text" }
+import ruthContent from "./skill/ruth.md" with { type: "text" }
 import reportContent from "./skill/report.md" with { type: "text" }
 
-export const OpencodeContent = opencodeContent
+export const RuthContent = ruthContent
 export const ReportContent = reportContent
 
-export const OpencodeDescription =
+export const RuthDescription =
   "Use this skill for any question about Ruth itself, including how Ruth works, using or configuring it, troubleshooting it, developing plugins or integrations, using the Ruth SDK, clients, server, or API, and contributing to the Ruth codebase. Also use it for Ruth agents, commands, skills, tools, permissions, MCP servers, providers, models, themes, keybinds, formatters, the CLI, and TUI."
 const REPORT_DESCRIPTION =
   "Use when the user wants to report a Ruth issue or bug. Collect standard diagnostics, add user-specific reproduction context, and publish the issue with GitHub CLI."
 
 export const Plugin = define({
-  id: "opencode.skill",
+  id: "ruth.skill",
   effect: Effect.fn(function* (ctx) {
     const reportContent = yield* reportContentWithDiagnostics(ctx.app)
     yield* ctx.skill.transform((editor) => {
@@ -29,9 +29,9 @@ export const Plugin = define({
         Skill.Info.make({
           id: Skill.ID.make("ruth"),
           name: Skill.Name.make("Ruth"),
-          description: OpencodeDescription,
+          description: RuthDescription,
           path: AbsolutePath.make("skill://ruth/SKILL.md"),
-          content: OpencodeContent,
+          content: RuthContent,
         }),
       )
       editor.add(

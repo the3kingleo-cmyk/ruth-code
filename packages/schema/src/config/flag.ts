@@ -1,11 +1,11 @@
 export * as ConfigFlag from "./flag.js"
 
-/** The `OPENCODE_FLAGS` entry that turns every flag on, as in `all,-media_blob`. It is not a flag key. */
+/** The `RUTH_FLAGS` entry that turns every flag on, as in `all,-media_blob`. It is not a flag key. */
 export const wildcard = "all"
 
 /**
  * Every feature flag, by key, with what it turns on. A flag is on in local and dev builds and off in released ones;
- * `experimental.<key>` in config and `OPENCODE_FLAGS` override that, and `OPENCODE_FLAGS=all` or
+ * `experimental.<key>` in config and `RUTH_FLAGS` override that, and `RUTH_FLAGS=all` or
  * `experimental.all_flags: true` turn every flag on. Read one with Core's `Flag.enabled("<key>")`.
  */
 export const registry = {
@@ -16,7 +16,7 @@ export const registry = {
   schedules: "Enable experimental scheduled tasks that wake a session with a prompt.",
   artifacts: "Enable experimental artifacts backed by pluggable providers.",
   console_watches:
-    "Watch Slack threads, GitHub pull requests, issues, commits and Actions runs, and the workspace's MCP servers' events through OpenCode Console, and wake sessions when they change.",
+    "Watch Slack threads, GitHub pull requests, issues, commits and Actions runs, and the workspace's MCP servers' events through Zen Console, and wake sessions when they change.",
   mcp_events:
     "Enable experimental MCP Events, a draft MCP extension: declare support to MCP servers and read the events of servers that offer them.",
 } as const satisfies Record<string, string>

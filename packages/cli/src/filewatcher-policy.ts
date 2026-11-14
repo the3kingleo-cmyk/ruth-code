@@ -1,5 +1,5 @@
-import { env } from "@opencode/util/env"
-import { isLowMemory, readMemAvailableKiB } from "@opencode/util/meminfo"
+import { env } from "@ruth/util/env"
+import { isLowMemory, readMemAvailableKiB } from "@ruth/util/meminfo"
 
 function truthy(value: string | undefined): boolean {
   if (value === undefined) return false

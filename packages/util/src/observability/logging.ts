@@ -90,7 +90,7 @@ export const trim = Effect.fn("Logging.trim")(function* (
   const max = options.max ?? LOG_MAX_BYTES
   const keep = options.keep ?? LOG_KEEP_BYTES
   const fs = yield* FileSystem.FileSystem
-  // Every opencode process on the machine runs this against the same file. Two trimmers racing
+  // Every ruth process on the machine runs this against the same file. Two trimmers racing
   // would have one compute its cut from a size the other already shrank, so only one may proceed
   // and the rest skip until the next interval. mkdir is the atomic primitive on every platform.
   // acquireRelease keeps the mkdir uninterruptible, so a scope closing mid-call cannot leave a lock
@@ -157,12 +157,12 @@ function lineStart(handle: FileSystem.File, from: number) {
 }
 
 const stderrLogger = Logger.make((options) => {
-  if (process.env.OPENCODE_PRINT_LOGS !== "1") return
+  if (process.env.RUTH_PRINT_LOGS !== "1") return
   process.stderr.write(formatter().log(options) + "\n")
 })
 
 export function minimumLogLevel() {
-  const value = process.env.OPENCODE_LOG_LEVEL?.toUpperCase()
+  const value = process.env.RUTH_LOG_LEVEL?.toUpperCase()
   const levels = {
     DEBUG: "Debug",
     INFO: "Info",

@@ -1,8 +1,8 @@
 import { describe, expect } from "bun:test"
-import type { Job } from "@opencode/core/job"
-import { SessionMessage } from "@opencode/core/session/message"
-import { SessionSchema } from "@opencode/core/session/schema"
-import { SubagentCompletion } from "@opencode/core/session/subagent-completion"
+import type { Job } from "@ruth/core/job"
+import { SessionMessage } from "@ruth/core/session/message"
+import { SessionSchema } from "@ruth/core/session/schema"
+import { SubagentCompletion } from "@ruth/core/session/subagent-completion"
 import { Effect } from "effect"
 import { it } from "./lib/effect"
 

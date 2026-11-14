@@ -1,10 +1,10 @@
-import { FileSystem } from "@opencode/core/filesystem"
-import { Location } from "@opencode/core/location"
-import { Plugin } from "@opencode/core/plugin"
-import { LocationServiceMap } from "@opencode/core/location-services"
-import { AbsolutePath } from "@opencode/core/schema"
-import { Session } from "@opencode/core/session"
-import { LocationNotFoundError, InvalidRequestError, ServiceUnavailableError } from "@opencode/protocol/errors"
+import { FileSystem } from "@ruth/core/filesystem"
+import { Location } from "@ruth/core/location"
+import { Plugin } from "@ruth/core/plugin"
+import { LocationServiceMap } from "@ruth/core/location-services"
+import { AbsolutePath } from "@ruth/core/schema"
+import { Session } from "@ruth/core/session"
+import { LocationNotFoundError, InvalidRequestError, ServiceUnavailableError } from "@ruth/protocol/errors"
 import { Effect, Layer, Schema } from "effect"
 import { HttpServerRequest } from "effect/http"
 import { HttpApiMiddleware } from "effect/http-api"
@@ -13,7 +13,7 @@ import { missingSession } from "./handlers/session-error"
 export type LocationServices = Layer.Success<ReturnType<(typeof LocationServiceMap.Service)["get"]>>
 
 export class LocationMiddleware extends HttpApiMiddleware.Service<LocationMiddleware, { provides: LocationServices }>()(
-  "@opencode/HttpApiLocation",
+  "@ruth/HttpApiLocation",
   { error: [LocationNotFoundError] },
 ) {}
 
@@ -75,7 +75,7 @@ export function requestRef(request: HttpServerRequest.HttpServerRequest): Locati
   const query = new URL(request.url, "http://localhost").searchParams
   const directory =
     query.get("location[directory]") ||
-    (request.headers["x-opencode-directory"] ? decode(request.headers["x-opencode-directory"]) : process.cwd())
+    (request.headers["x-ruth-directory"] ? decode(request.headers["x-ruth-directory"]) : process.cwd())
   return Location.Ref.make({
     directory: AbsolutePath.make(directory),
   })

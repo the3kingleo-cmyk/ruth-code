@@ -1,5 +1,5 @@
-import { CrossSpawnSpawner } from "@opencode/util/cross-spawn-spawner"
-import { makeLocationNode } from "@opencode/util/effect/app-node"
+import { CrossSpawnSpawner } from "@ruth/util/cross-spawn-spawner"
+import { makeLocationNode } from "@ruth/util/effect/app-node"
 import { Context, Effect, Layer } from "effect"
 import { ChildProcessSpawner } from "effect/process/ChildProcessSpawner"
 import type { Files } from "./files.js"
@@ -13,7 +13,7 @@ export interface Interface {
   readonly spawner: ChildProcessSpawner["Service"]
 }
 
-export class Service extends Context.Service<Service, Interface>()("@opencode/Environment") {}
+export class Service extends Context.Service<Service, Interface>()("@ruth/Environment") {}
 
 const layer = Layer.effect(
   Service,

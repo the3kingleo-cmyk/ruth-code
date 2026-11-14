@@ -6,19 +6,19 @@ import {
   type JsonValue,
   type LocationRef,
   type ModelRef,
-  type OpenCodeClient,
+  type RuthClient,
   type PermissionRequest,
   type SessionMessageAssistantTool,
   type SessionMessageIdle,
   type SessionMessageInfo,
-} from "@opencode/client/promise"
-import { SessionMessage } from "@opencode/schema/session-message"
+} from "@ruth/client/promise"
+import { SessionMessage } from "@ruth/schema/session-message"
 import { EOL } from "node:os"
-import { toolOutputText, type MiniToolPart } from "@opencode/tui/mini/tool"
+import { toolOutputText, type MiniToolPart } from "@ruth/tui/mini/tool"
 import { UI } from "./ui"
 
 type Input = {
-  client: OpenCodeClient
+  client: RuthClient
   sessionID: string
   location: LocationRef
   message: string
@@ -145,7 +145,7 @@ export async function runNonInteractivePrompt(input: Input) {
         { sessionID: form.sessionID, formID: form.id, ...(message ? { message } : {}) },
         // A global form is found through its location.
         ...(form.sessionID === "global"
-          ? [{ headers: { "x-opencode-directory": encodeURIComponent(input.location.directory) } }]
+          ? [{ headers: { "x-ruth-directory": encodeURIComponent(input.location.directory) } }]
           : []),
       )
       .catch((error) => {
@@ -356,7 +356,7 @@ function terminalOutcome(event: Event): Outcome | undefined {
   }
 }
 
-async function projectedMessages(client: OpenCodeClient, sessionID: string, messageID: string) {
+async function projectedMessages(client: RuthClient, sessionID: string, messageID: string) {
   const messages: SessionMessageInfo[] = []
   let cursor: string | undefined
   while (true) {

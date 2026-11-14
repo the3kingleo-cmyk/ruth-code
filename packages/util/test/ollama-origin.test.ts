@@ -8,7 +8,7 @@ import {
   cloudOriginFromState,
   resolveOllamaOrigin,
   writeCloudState,
-} from "../src/ollama-origin"
+} from "../src/ollama-origin.js"
 
 const temp = fs.mkdtempSync(path.join(os.tmpdir(), "ruth-origin-"))
 
@@ -16,10 +16,10 @@ afterEach(() => {
   delete process.env.RUTH_TEST_HOME
   delete process.env.RUTH_XDG_STATE_HOME
   delete process.env.JCODE_XDG_STATE_HOME
-  delete process.env.OPENCODE_XDG_STATE_HOME
+  delete process.env.RUTH_XDG_STATE_HOME
   delete process.env.RUTH_OLLAMA_ORIGIN
   delete process.env.JCODE_OLLAMA_ORIGIN
-  delete process.env.OPENCODE_OLLAMA_ORIGIN
+  delete process.env.RUTH_OLLAMA_ORIGIN
 })
 
 function isolate() {
@@ -40,7 +40,7 @@ describe("resolveOllamaOrigin", () => {
   test("prefers a healthy cloud tunnel", () => {
     isolate()
     writeCloudState({ localPort: 11435, name: "ruth-ollama-abc" })
-    expect(resolveOllamaOrigin({ probe: (origin) => origin.includes("11435") })).toBe("http://127.0.0.1:11435")
+    expect(resolveOllamaOrigin({ probe: (origin: string) => origin.includes("11435") })).toBe("http://127.0.0.1:11435")
   })
 
   test("falls back to local when the tunnel is down", () => {

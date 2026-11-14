@@ -1,9 +1,5 @@
-# linux-x64 release for the private Ruth fork.
-# Official OpenCode publish/deploy workflows stay in
-# .github/workflows-upstream-disabled: they assume anomalyco AWS roles,
-# npm tokens, and R2 credentials that this repo does not have and must
-# not use. This workflow only builds the ruth binary and, on a v* tag,
-# attaches it to a GitHub release in this private repo.
+# linux-x64 release for Ruth.
+# Builds the ruth binary and, on a v* tag, attaches it to a GitHub release.
 name: Release linux-x64
 
 on:

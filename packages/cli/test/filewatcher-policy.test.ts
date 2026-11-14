@@ -3,9 +3,9 @@ import { shouldEnableFilewatcher } from "../src/filewatcher-policy"
 
 const keys = [
   "RUTH_FILEWATCHER_DISABLE",
-  "OPENCODE_FILEWATCHER_DISABLE",
+  "RUTH_FILEWATCHER_DISABLE",
   "RUTH_DISABLE_FILEWATCHER",
-  "OPENCODE_DISABLE_FILEWATCHER",
+  "RUTH_DISABLE_FILEWATCHER",
 ]
 
 afterEach(() => {

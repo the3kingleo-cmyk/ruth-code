@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test"
-import { ShellResult } from "@opencode/core/shell/result"
-import { Shell } from "@opencode/schema/shell"
+import { ShellResult } from "@ruth/core/shell/result"
+import { Shell } from "@ruth/schema/shell"
 
 const info = (status: Shell.Status): Shell.Info => ({
   id: Shell.ID.make("sh_result"),

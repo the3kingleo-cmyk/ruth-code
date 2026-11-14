@@ -1,17 +1,17 @@
 import fs from "fs/promises"
 import { expect } from "bun:test"
-import { App } from "@opencode/core/app"
-import { Bus } from "@opencode/core/bus"
-import { Database } from "@opencode/core/database/database"
-import { Watcher } from "@opencode/core/filesystem/watcher"
-import { LocationServiceMap } from "@opencode/core/location-service-map"
-import { ModelsDev } from "@opencode/core/models-dev"
-import { Session } from "@opencode/core/session"
-import { SessionExecution } from "@opencode/core/session/execution"
-import { Location } from "@opencode/schema/location"
-import { AbsolutePath } from "@opencode/schema/schema"
-import { LayerNode } from "@opencode/util/effect/layer-node"
-import { Global } from "@opencode/util/global"
+import { App } from "@ruth/core/app"
+import { Bus } from "@ruth/core/bus"
+import { Database } from "@ruth/core/database/database"
+import { Watcher } from "@ruth/core/filesystem/watcher"
+import { LocationServiceMap } from "@ruth/core/location-service-map"
+import { ModelsDev } from "@ruth/core/models-dev"
+import { Session } from "@ruth/core/session"
+import { SessionExecution } from "@ruth/core/session/execution"
+import { Location } from "@ruth/schema/location"
+import { AbsolutePath } from "@ruth/schema/schema"
+import { LayerNode } from "@ruth/util/effect/layer-node"
+import { Global } from "@ruth/util/global"
 import { Context, Effect, Layer, RcMap } from "effect"
 import { HttpEffect, HttpRouter, HttpServer } from "effect/http"
 import { tempGlobalLayer } from "../../core/test/fixture/global"
@@ -52,7 +52,7 @@ it.live("admits synthetic messages and compaction requests without booting or re
     const post = (route: string, body: unknown) =>
       Effect.promise(() =>
         handler(
-          new Request(`http://opencode.local${route}`, {
+          new Request(`http://ruth.local${route}`, {
             method: "POST",
             headers: { "content-type": "application/json" },
             body: JSON.stringify(body),

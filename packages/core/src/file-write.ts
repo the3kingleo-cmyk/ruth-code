@@ -1,8 +1,8 @@
 export * as FileWrite from "./file-write.js"
 
-import { makeLocationNode } from "@opencode/util/effect/app-node"
-import type { FileDiff } from "@opencode/schema/file-diff"
-import { Bom } from "@opencode/util/bom"
+import { makeLocationNode } from "@ruth/util/effect/app-node"
+import type { FileDiff } from "@ruth/schema/file-diff"
+import { Bom } from "@ruth/util/bom"
 import { Context, Effect, Layer } from "effect"
 import { Environment } from "./environment/index.js"
 import { FileAccess } from "./file-access.js"
@@ -49,7 +49,7 @@ export interface Interface {
   >
 }
 
-export class Service extends Context.Service<Service, Interface>()("@opencode/FileWrite") {}
+export class Service extends Context.Service<Service, Interface>()("@ruth/FileWrite") {}
 
 const layer = Layer.effect(
   Service,

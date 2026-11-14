@@ -2,7 +2,6 @@ import { Argument, Flag, GlobalFlag } from "effect/cli"
 import { Schema } from "effect"
 import { CliFlag } from "../framework/flag"
 import { Spec } from "../framework/spec"
-import { Updater } from "../services/updater"
 
 export const PrintLogs = GlobalFlag.Setting("print-logs")({
   flag: Flag.Boolean("print-logs").pipe(
@@ -27,7 +26,7 @@ export const Server = GlobalFlag.Setting("server")({
 
 const ServerFlags = [Standalone, Server] as const
 
-declare const OPENCODE_CLI_NAME: string | undefined
+declare const RUTH_CLI_NAME: string | undefined
 
 const ServerParams = {
   standalone: Standalone.flag,
@@ -46,7 +45,7 @@ const PermissionParams = {
   ),
 }
 
-const Root = Spec.make(typeof OPENCODE_CLI_NAME === "string" ? OPENCODE_CLI_NAME : "ruth", {
+const Root = Spec.make(typeof RUTH_CLI_NAME === "string" ? RUTH_CLI_NAME : "ruth", {
   description: "Ruth command line interface",
   params: {
     ...ServerParams,
@@ -75,11 +74,6 @@ const Root = Spec.make(typeof OPENCODE_CLI_NAME === "string" ? OPENCODE_CLI_NAME
         target: Argument.String("target").pipe(
           Argument.withDescription("Version to upgrade to (with or without a leading v)"),
           Argument.optional,
-        ),
-        method: Flag.Literals("method", Updater.methods).pipe(
-          Flag.withAlias("m"),
-          Flag.withDescription("Installation method to use"),
-          Flag.optional,
         ),
       },
     }),

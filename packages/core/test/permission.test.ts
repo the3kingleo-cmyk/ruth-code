@@ -1,21 +1,21 @@
 import { describe, expect, test } from "bun:test"
 import { Cause, Deferred, Effect, Fiber, Layer, Schema } from "effect"
-import { Agent } from "@opencode/core/agent"
-import { Database } from "@opencode/core/database/database"
-import { AppNodeBuilder } from "@opencode/core/effect/app-node-builder"
-import { LayerNode } from "@opencode/util/effect/layer-node"
-import { Bus } from "@opencode/core/bus"
-import { Location } from "@opencode/core/location"
-import { Permission } from "@opencode/core/permission"
-import { PermissionTable } from "@opencode/core/permission/sql"
-import { PermissionSaved } from "@opencode/core/permission/saved"
-import { Project } from "@opencode/core/project"
-import { ProjectTable } from "@opencode/core/project/sql"
-import { AbsolutePath } from "@opencode/core/schema"
-import { Session } from "@opencode/core/session"
-import { SessionTable } from "@opencode/core/session/sql"
-import { SessionStore } from "@opencode/core/session/store"
-import { ShellParse } from "@opencode/core/shell/parse"
+import { Agent } from "@ruth/core/agent"
+import { Database } from "@ruth/core/database/database"
+import { AppNodeBuilder } from "@ruth/core/effect/app-node-builder"
+import { LayerNode } from "@ruth/util/effect/layer-node"
+import { Bus } from "@ruth/core/bus"
+import { Location } from "@ruth/core/location"
+import { Permission } from "@ruth/core/permission"
+import { PermissionTable } from "@ruth/core/permission/sql"
+import { PermissionSaved } from "@ruth/core/permission/saved"
+import { Project } from "@ruth/core/project"
+import { ProjectTable } from "@ruth/core/project/sql"
+import { AbsolutePath } from "@ruth/core/schema"
+import { Session } from "@ruth/core/session"
+import { SessionTable } from "@ruth/core/session/sql"
+import { SessionStore } from "@ruth/core/session/store"
+import { ShellParse } from "@ruth/core/shell/parse"
 import { eq } from "drizzle-orm"
 import { location } from "./fixture/location"
 import { testEffect } from "./lib/effect"
@@ -195,7 +195,7 @@ describe("Permission", () => {
     }),
   )
 
-  it.effect("uses build permissions when the Session agent is omitted", () =>
+  it.effect("uses the default agent's permissions when the Session agent is omitted", () =>
     Effect.gen(function* () {
       yield* setup()
       const { db } = yield* Database.Service
@@ -207,7 +207,7 @@ describe("Permission", () => {
         .pipe(Effect.orDie)
       const agents = yield* Agent.Service
       yield* agents.transform((editor) =>
-        editor.update(Agent.ID.make("build"), (agent) => {
+        editor.update(Agent.defaultID, (agent) => {
           agent.permissions = [{ action: "custom", resource: "*", effect: "allow" }]
         }),
       )

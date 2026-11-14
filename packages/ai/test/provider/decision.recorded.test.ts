@@ -8,7 +8,7 @@ import {
   DigitalOcean,
   Google,
   OpenAI,
-  OpenCode,
+  Ruth,
   OpenRouter,
   TypeSafeAI,
 } from "../../src/providers.js"
@@ -48,11 +48,11 @@ const typesafe = recordedTests({
   metadata: { model: "jev-latest" },
 })
 
-const opencode = recordedTests({
-  prefix: "opencode-decision",
+const ruth = recordedTests({
+  prefix: "ruth-decision",
   provider: "opencode",
   protocol: "system-one",
-  requires: ["OPENCODE_API_KEY"],
+  requires: ["RUTH_ZEN_API_KEY"],
   metadata: { model: "jev-1.13-free" },
 })
 
@@ -123,8 +123,8 @@ describe("Decision recorded", () => {
     assertDecision(TypeSafeAI.configure({ apiKey: process.env.TYPESAFE_API_KEY ?? "fixture" }).decision("jev-latest")),
   )
 
-  opencode.effect("decides choice score and predicate questions", () =>
-    assertDecision(OpenCode.configure({ apiKey: process.env.OPENCODE_API_KEY ?? "fixture" }).decision("jev-1.13-free")),
+  ruth.effect("decides choice score and predicate questions", () =>
+    assertDecision(Ruth.configure({ apiKey: process.env.RUTH_ZEN_API_KEY ?? "fixture" }).decision("jev-1.13-free")),
   )
 
   openrouter.effect("decides choice score and predicate questions", () =>

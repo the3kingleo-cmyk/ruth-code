@@ -1,12 +1,12 @@
 {
   "$schema": "https://json.schemastore.org/package.json",
-  "name": "@opencode/util",
+  "name": "@ruth/util",
   "version": "2.3.0",
   "type": "module",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/anomalyco/opencode.git",
+    "url": "git+https://github.com/the3kingleo-cmyk/ruth-code.git",
     "directory": "packages/util"
   },
   "publishConfig": {

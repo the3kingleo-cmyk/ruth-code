@@ -13,8 +13,8 @@ import {
   readCloudState,
   resolveOllamaOrigin,
   writeCloudState,
-} from "@opencode/util/ollama-origin"
-import { env } from "@opencode/util/env"
+} from "@ruth/util/ollama-origin"
+import { env } from "@ruth/util/env"
 import { resolveGithubToken } from "./github-release"
 
 export const DEFAULT_CLOUD_REPO = "the3kingleo-cmyk/ruth-codespace"

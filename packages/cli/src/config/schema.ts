@@ -1,4 +1,4 @@
-import { Config } from "@opencode/tui/config"
+import { Config } from "@ruth/tui/config"
 import { Schema } from "effect"
 
 export const SchemaURL = "https://github.com/the3kingleo-cmyk/ruth-install"

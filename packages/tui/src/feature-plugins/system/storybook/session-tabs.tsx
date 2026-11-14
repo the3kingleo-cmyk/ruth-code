@@ -1,4 +1,4 @@
-import { Plugin } from "@opencode/plugin/tui"
+import { Plugin } from "@ruth/plugin/tui"
 import { useTerminalDimensions } from "@opentui/solid"
 import { batch, createSignal, For, Show } from "solid-js"
 import { createStore, reconcile } from "solid-js/store"
@@ -30,18 +30,18 @@ import type { Story } from "./index"
 type FixtureStatus = ReturnType<SessionTabsController["status"]>
 
 const FIXTURE_TABS = [
-  { sessionID: "fixture-1", title: "Implement session tabs", project: "opencode" },
-  { sessionID: "fixture-2", title: "Investigate rendering", project: "opencode" },
-  { sessionID: "fixture-3", title: "A deliberately long session title for truncation", project: "opencode-slack" },
-  { sessionID: "fixture-4", title: "Fix provider state", project: "opencode" },
-  { sessionID: "fixture-5", title: "Review animation", project: "opencode-slack" },
-  { sessionID: "fixture-6", title: "Untitled behavior", project: "opencode-drive" },
-  { sessionID: "fixture-7", title: "Queue follow-up work", project: "opencode" },
-  { sessionID: "fixture-8", title: "Check narrow layout", project: "opencode-drive" },
-  { sessionID: "fixture-9", title: "Profile terminal output", project: "opencode" },
-  { sessionID: "fixture-10", title: "Handle permission", project: "opencode-slack" },
-  { sessionID: "fixture-11", title: "Run focused tests", project: "opencode" },
-  { sessionID: "fixture-12", title: "Prepare review", project: "opencode-drive" },
+  { sessionID: "fixture-1", title: "Implement session tabs", project: "ruth" },
+  { sessionID: "fixture-2", title: "Investigate rendering", project: "ruth" },
+  { sessionID: "fixture-3", title: "A deliberately long session title for truncation", project: "ruth-slack" },
+  { sessionID: "fixture-4", title: "Fix provider state", project: "ruth" },
+  { sessionID: "fixture-5", title: "Review animation", project: "ruth-slack" },
+  { sessionID: "fixture-6", title: "Untitled behavior", project: "ruth-drive" },
+  { sessionID: "fixture-7", title: "Queue follow-up work", project: "ruth" },
+  { sessionID: "fixture-8", title: "Check narrow layout", project: "ruth-drive" },
+  { sessionID: "fixture-9", title: "Profile terminal output", project: "ruth" },
+  { sessionID: "fixture-10", title: "Handle permission", project: "ruth-slack" },
+  { sessionID: "fixture-11", title: "Run focused tests", project: "ruth" },
+  { sessionID: "fixture-12", title: "Prepare review", project: "ruth-drive" },
 ]
 
 const FIXTURE_STATUSES: Record<string, FixtureStatus> = {

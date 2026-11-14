@@ -2,15 +2,15 @@ import { expect } from "bun:test"
 import { Deferred, Effect, Fiber, Layer, Queue, Scope, Sink, Stream } from "effect"
 import { ChildProcessSpawner } from "effect/process"
 import { ExitCode, makeHandle, ProcessId } from "effect/process/ChildProcessSpawner"
-import { AppNodeBuilder } from "@opencode/core/effect/app-node-builder"
-import { Config } from "@opencode/core/config"
-import { Environment } from "@opencode/core/environment/index"
-import { Location } from "@opencode/core/location"
-import { AbsolutePath } from "@opencode/core/schema"
-import { Shell } from "@opencode/core/shell"
-import { Workspace } from "@opencode/core/workspace"
-import { Global } from "@opencode/util/global"
-import { PersistentPty } from "@opencode/core/persistent-pty"
+import { AppNodeBuilder } from "@ruth/core/effect/app-node-builder"
+import { Config } from "@ruth/core/config"
+import { Environment } from "@ruth/core/environment/index"
+import { Location } from "@ruth/core/location"
+import { AbsolutePath } from "@ruth/core/schema"
+import { Shell } from "@ruth/core/shell"
+import { Workspace } from "@ruth/core/workspace"
+import { Global } from "@ruth/util/global"
+import { PersistentPty } from "@ruth/core/persistent-pty"
 import { disabledPersistentPtyLayer } from "./fixture/persistent-pty"
 import { hostEnvironmentLayer } from "./fixture/environment"
 import { tempGlobalLayer } from "./fixture/global"
@@ -144,7 +144,7 @@ it.live("does not inherit host process.env when creating a shell in a workspace-
     expect(process.env.PATH).toBeDefined()
     expect(capturedEnv).toEqual({
       TERM: "xterm-256color",
-      OPENCODE_TERMINAL: "1",
+      RUTH_TERMINAL: "1",
     })
   }),
 )

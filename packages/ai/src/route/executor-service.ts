@@ -21,7 +21,7 @@ export type HttpMiddleware = (
 ) => Effect.Effect<HttpClientResponse.HttpClientResponse, Error>
 
 export class RequestExecutorService extends Context.Service<RequestExecutorService, Interface>()(
-  "@opencode/AI/RequestExecutor",
+  "@ruth/AI/RequestExecutor",
 ) {}
 export const Service = RequestExecutorService
 
@@ -29,7 +29,7 @@ export const Service = RequestExecutorService
  * The client certificate for the HTTP request being executed. Transports set it from `http.tls`; the executor's HTTP
  * client presents it, since only the runtime's fetch can.
  */
-export const CurrentTls = Context.Reference<ClientTls | undefined>("@opencode/AI/RequestExecutor/CurrentTls", {
+export const CurrentTls = Context.Reference<ClientTls | undefined>("@ruth/AI/RequestExecutor/CurrentTls", {
   defaultValue: () => undefined,
 })
 export type Service = RequestExecutorService

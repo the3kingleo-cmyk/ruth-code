@@ -1,8 +1,8 @@
 export * as McpEventTools from "./mcp-events.js"
 
-import { ToolFailure } from "@opencode/ai/effect"
-import type { Context } from "@opencode/plugin/effect/plugin"
-import { Hash } from "@opencode/util/hash"
+import { ToolFailure } from "@ruth/ai/effect"
+import type { Context } from "@ruth/plugin/effect/plugin"
+import { Hash } from "@ruth/util/hash"
 import { Effect, Schedule, Schema, Scope, Stream } from "effect"
 import { Flag } from "../../flag.js"
 import { McpClient } from "../../mcp/client.js"
@@ -27,7 +27,7 @@ const reopen = Schedule.max([Schedule.exponential("1 second"), Schedule.recurs(3
 )
 
 export const Plugin = {
-  id: "opencode.tools.mcp-events",
+  id: "ruth.tools.mcp-events",
   effect: Effect.fn("McpEventTools.Plugin")(function* (ctx: Context) {
     if (!(yield* Flag.enabled("mcp_events"))) return
     const mcp = yield* Mcp.Service
@@ -38,7 +38,7 @@ export const Plugin = {
       .transform((editor) => {
         editor.add({
           name: "watch_mcp_event",
-          options: { namespace: "opencode", codemode: true },
+          options: { namespace: "ruth", codemode: true },
           description:
             "Experimental. Wake this session when an MCP server sends an event, such as a finished job or a new message, instead of polling. Omit event to list the event types connected servers offer and the arguments each takes.",
           input: Schema.Struct({
@@ -78,7 +78,7 @@ export const Plugin = {
                     )
                   : [input.server]
               yield* permission.assert({
-                action: "opencode_watch_mcp_event",
+                action: "ruth_watch_mcp_event",
                 resources: servers,
                 save: servers,
                 metadata: {},

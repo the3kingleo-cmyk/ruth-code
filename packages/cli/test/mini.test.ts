@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test"
-import { ClientError, OpenCode } from "@opencode/client/promise"
-import { OPENCODE_VERSION } from "../src/version"
+import { ClientError, Ruth } from "@ruth/client/promise"
+import { RUTH_VERSION } from "../src/version"
 import path from "node:path"
 import { createMiniConnection, mergeInput as mergeInteractiveInput, resolveMiniTarget } from "../src/mini"
 import { mergeInput as mergeNonInteractiveInput, parseRunModel } from "../src/run/run"
@@ -32,10 +32,10 @@ describe("mini command", () => {
       port: 0,
       fetch() {
         return Response.json({
-          version: OPENCODE_VERSION,
+          version: RUTH_VERSION,
           pid: process.pid,
           urls: [],
-          paths: { tmp: "/tmp/opencode" },
+          paths: { tmp: "/tmp/ruth" },
         })
       },
     })
@@ -44,10 +44,10 @@ describe("mini command", () => {
       fetch(request) {
         authorization.push(request.headers.get("authorization"))
         return Response.json({
-          version: OPENCODE_VERSION,
+          version: RUTH_VERSION,
           pid: process.pid,
           urls: [],
-          paths: { tmp: "/tmp/opencode" },
+          paths: { tmp: "/tmp/ruth" },
         })
       },
     })
@@ -80,8 +80,8 @@ describe("mini command", () => {
   })
 
   test("re-resolves a managed target when the endpoint moves before transport construction", async () => {
-    const initial = OpenCode.make({ baseUrl: "https://initial.opencode.test" })
-    const replacement = OpenCode.make({ baseUrl: "https://replacement.opencode.test" })
+    const initial = Ruth.make({ baseUrl: "https://initial.ruth.test" })
+    const replacement = Ruth.make({ baseUrl: "https://replacement.ruth.test" })
     const controller = new AbortController()
     const seen: (typeof initial)[] = []
     let reconnects = 0
@@ -159,10 +159,10 @@ describe("mini command", () => {
         requests.push(url.pathname)
         if (url.pathname === "/api/info")
           return Response.json({
-            version: OPENCODE_VERSION,
+            version: RUTH_VERSION,
             pid: process.pid,
             urls: [],
-            paths: { tmp: "/tmp/opencode" },
+            paths: { tmp: "/tmp/ruth" },
           })
         if (url.pathname === "/api/location")
           return Response.json({ directory: process.cwd(), project: { id: "global", directory: process.cwd() } })
@@ -209,7 +209,7 @@ describe("mini command", () => {
           version: "incompatible",
           pid: process.pid,
           urls: [],
-          paths: { tmp: "/tmp/opencode" },
+          paths: { tmp: "/tmp/ruth" },
         })
       },
     })

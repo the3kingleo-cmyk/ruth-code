@@ -6,8 +6,8 @@
  */
 export * as WriteTool from "./write.js"
 
-import type { Context } from "@opencode/plugin/effect/plugin"
-import { ToolFailure } from "@opencode/ai/effect"
+import type { Context } from "@ruth/plugin/effect/plugin"
+import { ToolFailure } from "@ruth/ai/effect"
 import { Effect, Schema } from "effect"
 import { FileWrite } from "../../file-write.js"
 
@@ -30,7 +30,7 @@ export type Output = typeof Output.Type
 // TODO: Add LSP notification and diagnostics after LSP runtime exists.
 
 export const Plugin = {
-  id: "opencode.tool.write",
+  id: "ruth.tool.write",
   effect: Effect.fn("WriteTool.Plugin")(function* (ctx: Context) {
     const fileWrite = yield* FileWrite.Service
 

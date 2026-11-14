@@ -30,15 +30,15 @@ function run(target) {
   })
 }
 
-const envPath = process.env.RUTH_BIN_PATH || process.env.JCODE_BIN_PATH || process.env.OPENCODE_BIN_PATH
+const envPath = process.env.RUTH_BIN_PATH || process.env.JCODE_BIN_PATH
 const scriptDir = path.dirname(fs.realpathSync(__filename))
 const command = path.basename(__filename).replace(/\.cjs$/, "")
-const nodeBuild = command === "ruth-node" || command === "jcode-node" || command === "opencode-node"
-const sourceCommand = nodeBuild ? (command.includes("ruth") ? "ruth-node" : "jcode-node") : command === "opencode" ? "opencode" : command === "jcode" ? "jcode" : "ruth"
+const nodeBuild = command === "ruth-node" || command === "jcode-node" || command === "ruth-node"
+const sourceCommand = nodeBuild ? (command.includes("ruth") ? "ruth-node" : "jcode-node") : command === "ruth" ? "ruth" : command === "jcode" ? "jcode" : "ruth"
 const cached = path.join(scriptDir, `.${command}`)
 const platform = { darwin: "darwin", linux: "linux", win32: "windows" }[os.platform()] || os.platform()
 const arch = { x64: "x64", arm64: "arm64", arm: "arm" }[os.arch()] || os.arch()
-const scope = command === "opencode" ? "@opencode/cli" : command === "jcode" ? "@jarvis-code/cli" : "@ruth/cli"
+const scope = command === "ruth" ? "@ruth/cli" : command === "jcode" ? "@jarvis-code/cli" : "@ruth/cli"
 const base = `${scope}${nodeBuild ? "-node" : ""}-` + platform + "-" + arch
 const binary = platform === "windows" ? `${sourceCommand}.exe` : sourceCommand
 

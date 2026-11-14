@@ -1,11 +1,11 @@
 export * as UsageLimits from "./usage-limits.js"
 
-import { Model } from "@opencode/schema/model"
-import { Money } from "@opencode/schema/money"
-import { Provider } from "@opencode/schema/provider"
-import { UsageLimits } from "@opencode/schema/usage-limits"
-import { makeLocationNode } from "@opencode/util/effect/app-node"
-import { httpClient } from "@opencode/util/effect/app-node-platform"
+import { Model } from "@ruth/schema/model"
+import { Money } from "@ruth/schema/money"
+import { Provider } from "@ruth/schema/provider"
+import { UsageLimits } from "@ruth/schema/usage-limits"
+import { makeLocationNode } from "@ruth/util/effect/app-node"
+import { httpClient } from "@ruth/util/effect/app-node-platform"
 import { Context, Duration, Effect, Layer, Schema } from "effect"
 import { HttpClient, HttpClientRequest, HttpClientResponse } from "effect/http"
 import { ConsoleAccess } from "./console-access.js"
@@ -20,11 +20,11 @@ export class UnavailableError extends Schema.TaggedError<UnavailableError>()("Us
 }) {}
 
 export interface Interface {
-  /** The usage limits of the OpenCode Console workspace this location is signed in to, if it is. */
+  /** The usage limits of the Zen Console workspace this location is signed in to, if it is. */
   readonly get: () => Effect.Effect<Info | undefined, UnavailableError>
 }
 
-export class Service extends Context.Service<Service, Interface>()("@opencode/UsageLimits") {}
+export class Service extends Context.Service<Service, Interface>()("@ruth/UsageLimits") {}
 
 export const layer = Layer.effect(
   Service,

@@ -161,7 +161,10 @@ const TEXTILES: Definition[] = [
         ink: color,
         ground,
         over: r() < 0.35 ? 1 : 0,
-        overColor: pick(r, all.slice(1).filter((c) => c !== color && c !== ground)),
+        overColor: pick(
+          r,
+          all.slice(1).filter((c) => c !== color && c !== ground),
+        ),
         dir: r() < 0.5 ? 1 : -1,
         ox: int(r, 0, 7),
         oy: int(r, 0, 7),
@@ -296,10 +299,12 @@ const TEXTILES: Definition[] = [
     paint: (pixels, p, t) => {
       const cycle = colors(p, "z", p.count)
       const rand = mulberry32(p.seed)
+
       const walk = Array.from({ length: 16 }).reduce<number[]>(
         (list) => [...list, (list[list.length - 1] ?? 0) + pick(rand, [-2, -1, 1, 1, 2, 2])],
         [],
       )
+
       const shift = t * 4
 
       pixels.each((cx, cy) => {
@@ -387,10 +392,7 @@ const TEXTILES: Definition[] = [
         seedX: r() * 40,
         seedY: r() * 40,
         count: rainbow ? count : 4,
-        ...prefixed(
-          "d",
-          rainbow ? Array.from({ length: count }, (_, i) => hsl(hue + i / count, 0.85, 0.55)) : inks,
-        ),
+        ...prefixed("d", rainbow ? Array.from({ length: count }, (_, i) => hsl(hue + i / count, 0.85, 0.55)) : inks),
       }
     },
     paint: (pixels, p) => {
@@ -446,15 +448,18 @@ const TEXTILES: Definition[] = [
     },
     paint: (pixels, p) => {
       const rand = mulberry32(p.seed)
+
       const webs = Array.from({ length: p.centers }, () => ({
         x: range(rand, 6, 26),
         y: range(rand, 6, 26),
         r: range(rand, 7, 12),
       }))
+
       const size = 32 / p.cells
 
       pixels.each((x, y) => {
         const n = fbm(x * 0.2 + p.seedX, y * 0.2 + p.seedY)
+
         const kinds = [
           () => {
             const u = ((x + 0.5) % size) / size - 0.5
@@ -532,6 +537,7 @@ const PRINT: Definition[] = [
           const along = u * cos + v * sin
 
           if (kind === 1) return Math.floor((along + 2) * bands) % 2
+
           if (kind === 2) return along > 0 ? 1 : 0
           const d = Math.hypot(u, v)
 
@@ -664,7 +670,8 @@ const PRINT: Definition[] = [
         ]
 
         if (motifs[p.motif]()) {
-          const gouge = p.motif === 1 ? Y > p.my - p.size * 0.2 && (x + y) % 4 === 0 : p.motif === 3 && (x - y * 2) % 6 === 0
+          const gouge =
+            p.motif === 1 ? Y > p.my - p.size * 0.2 && (x + y) % 4 === 0 : p.motif === 3 && (x - y * 2) % 6 === 0
 
           return gouge ? p.ink : p.paper
         }
@@ -774,7 +781,10 @@ const ART: Definition[] = [
 
       const extent = p.turn ? px * 1.5 : px
       split(-gap / 2, -gap / 2, extent + gap, extent + gap, p.depth)
-      const fills = shuffle(rand, leaves.map((_, i) => i)).slice(0, Math.max(1, Math.round(leaves.length * 0.4)))
+      const fills = shuffle(
+        rand,
+        leaves.map((_, i) => i),
+      ).slice(0, Math.max(1, Math.round(leaves.length * 0.4)))
 
       ctx.save()
 
@@ -814,12 +824,14 @@ const ART: Definition[] = [
       ctx.lineCap = "round"
       ctx.lineJoin = "round"
       ctx.lineWidth = px * 0.075
+
       const spots = shuffle(rand, [
         [0.28, 0.28],
         [0.72, 0.3],
         [0.3, 0.72],
         [0.72, 0.72],
       ])
+
       const kinds = shuffle(rand, [0, 1, 2, 3, 4, 5])
 
       spots.slice(0, p.count).forEach(([u, v], i) => {
@@ -842,7 +854,10 @@ const ART: Definition[] = [
           () => {
             const turn = rand() * Math.PI * 2
             Array.from({ length: 3 }, (_, k) =>
-              ctx.lineTo(x + Math.cos(turn + (k * Math.PI * 2) / 3) * s, y + Math.sin(turn + (k * Math.PI * 2) / 3) * s),
+              ctx.lineTo(
+                x + Math.cos(turn + (k * Math.PI * 2) / 3) * s,
+                y + Math.sin(turn + (k * Math.PI * 2) / 3) * s,
+              ),
             )
             ctx.fill()
           },
@@ -855,7 +870,9 @@ const ART: Definition[] = [
           },
           () => {
             ctx.moveTo(x - s * 1.1, y + s * 0.3)
-            Array.from({ length: 5 }, (_, k) => ctx.lineTo(x - s * 1.1 + ((k + 1) * s * 2.2) / 5, y + (k % 2 ? 0.3 : -0.3) * s))
+            Array.from({ length: 5 }, (_, k) =>
+              ctx.lineTo(x - s * 1.1 + ((k + 1) * s * 2.2) / 5, y + (k % 2 ? 0.3 : -0.3) * s),
+            )
             ctx.stroke()
           },
           () => {
@@ -1033,7 +1050,10 @@ const ART: Definition[] = [
     label: "Two or three soft-edged colour fields floating on a stained ground",
     resolve: (random) => {
       const r = random("rothko")
-      const set = r() < 0.75 ? pick(r, ROTHKO) : [shade(hsl(r(), 0.5, 0.3), 1), hsl(r(), 0.6, 0.5), hsl(r(), 0.5, 0.25), hsl(r(), 0.7, 0.6)]
+      const set =
+        r() < 0.75
+          ? pick(r, ROTHKO)
+          : [shade(hsl(r(), 0.5, 0.3), 1), hsl(r(), 0.6, 0.5), hsl(r(), 0.5, 0.25), hsl(r(), 0.7, 0.6)]
       const count = r() < 0.6 ? 2 : 3
 
       return {
@@ -1052,7 +1072,8 @@ const ART: Definition[] = [
       const top = p.margin
       const bottom = 32 - p.margin
       const inner = bottom - top - gap * (p.count - 1)
-      const heights = p.count === 2 ? [inner * p.split, inner * (1 - p.split)] : [inner * 0.3, inner * 0.22, inner * 0.48]
+      const heights =
+        p.count === 2 ? [inner * p.split, inner * (1 - p.split)] : [inner * 0.3, inner * 0.22, inner * 0.48]
 
       const bands = heights.map((height, i) => {
         const y0 = top + heights.slice(0, i).reduce((sum, h) => sum + h, 0) + gap * i

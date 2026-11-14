@@ -14,15 +14,15 @@ import {
   UnknownProviderError,
   ToolFailure,
   HttpContext,
-} from "@opencode/ai/effect"
-import { RequestExecutor } from "@opencode/ai/route"
-import { Permission } from "@opencode/core/permission"
-import { ID } from "@opencode/core/model"
-import { ModelResolver } from "@opencode/core/model-resolver"
-import { Provider } from "@opencode/core/provider"
-import { Tool } from "@opencode/schema/tool"
-import { toSessionError } from "@opencode/core/session/to-session-error"
-import { SessionRunnerRetry } from "@opencode/core/session/runner/retry"
+} from "@ruth/ai/effect"
+import { RequestExecutor } from "@ruth/ai/route"
+import { Permission } from "@ruth/core/permission"
+import { ID } from "@ruth/core/model"
+import { ModelResolver } from "@ruth/core/model-resolver"
+import { Provider } from "@ruth/core/provider"
+import { Tool } from "@ruth/schema/tool"
+import { toSessionError } from "@ruth/core/session/to-session-error"
+import { SessionRunnerRetry } from "@ruth/core/session/runner/retry"
 
 const llm = (reason: AIError["reason"]) => new AIError({ reason })
 
@@ -85,7 +85,7 @@ describe("toSessionError", () => {
     expect(SessionRunnerRetry.isRetryable(free)).toBe(false)
     expect(toSessionError(free)).toEqual({
       type: "provider.free-limit",
-      message: "Free usage limit reached. Connect a provider or subscribe to OpenCode Go to keep going, or switch models.",
+      message: "Free usage limit reached. Connect a provider or subscribe to Zen Go to keep going, or switch models.",
       status: 429,
       response: { body: JSON.stringify(freeBody) },
       retryAfterMs: 3_600_000,
@@ -109,7 +109,7 @@ describe("toSessionError", () => {
     expect(toSessionError(go)).toEqual({
       type: "provider.go-limit",
       message:
-        "OpenCode Go 5 hour usage limit reached. Switch to a free model, or turn on Extra Usage on the Go page in OpenCode Console to keep going.",
+        "Zen Go 5 hour usage limit reached. Switch to a free model, or turn on Extra Usage on the Go page in Zen Console to keep going.",
       status: 429,
       response: { body: JSON.stringify(goBody) },
       retryAfterMs: 120_000,
@@ -300,7 +300,7 @@ describe("toSessionError", () => {
     const configuration = new ModelResolver.ModelConfigurationError({
       providerID: Provider.ID.make("azure"),
       modelID: ID.make("gpt-5.4-nano"),
-      package: "@opencode/ai/providers/azure/responses",
+      package: "@ruth/ai/providers/azure/responses",
       detail: "Azure requires resourceName or baseURL",
     })
     expect(toSessionError(configuration)).toEqual({
@@ -310,13 +310,13 @@ describe("toSessionError", () => {
     const initialization = new ModelResolver.ModelInitializationError({
       providerID: Provider.ID.make("custom"),
       modelID: ID.make("model"),
-      package: "@opencode/ai/providers/custom",
+      package: "@ruth/ai/providers/custom",
       phase: "load",
-      detail: "Provider package @opencode/ai/providers/custom is broken",
+      detail: "Provider package @ruth/ai/providers/custom is broken",
     })
     expect(toSessionError(initialization)).toEqual({
       type: "provider.no-route",
-      message: "Cannot initialize custom/model: Provider package @opencode/ai/providers/custom is broken",
+      message: "Cannot initialize custom/model: Provider package @ruth/ai/providers/custom is broken",
     })
   })
 

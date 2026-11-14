@@ -1,6 +1,6 @@
 import { confirm, intro, log, outro, spinner } from "@clack/prompts"
-import { Service } from "@opencode/client/effect/service"
-import { Global } from "@opencode/util/global"
+import { Service } from "@ruth/client/effect/service"
+import { Global } from "@ruth/util/global"
 import { Effect, FileSystem, Schedule } from "effect"
 import path from "node:path"
 import { Commands } from "../commands"
@@ -26,7 +26,7 @@ export default Runtime.handler(
     const services = (yield* fs.exists(global.state))
       ? (yield* fs.readDirectory(global.state)).filter((name) => /^service(?:-.*)?\.json$/.test(name))
       : []
-    const shell = method === "curl" ? yield* shellConfigs(global.home) : []
+    const shell = method === "github" ? yield* shellConfigs(global.home) : []
 
     log.info(`Installation method: ${method ?? "unknown"}`)
     log.message("The following global files will be removed (shared by Ruth versions and channels):")
@@ -36,7 +36,7 @@ export default Runtime.handler(
     )
     shell.forEach((file) => log.info(`  Shell PATH: ${file}`))
     if (removal) log.info(`  Package: ${removal.command.join(" ")}`)
-    if (method === "curl") log.info(`  Binary (manual removal): ${process.execPath}`)
+    if (method === "github") log.info(`  Binary (manual removal): ${process.execPath}`)
     if (!method) log.warn("Could not detect the installation method. Remove the installation manually after cleanup.")
 
     if (input.dryRun) {
@@ -70,7 +70,7 @@ export default Runtime.handler(
       )
     }
 
-    // Links that keep an older OpenCode replaceable may still run; move them so the cache can go.
+    // Links that keep an older Ruth replaceable may still run; move them so the cache can go.
     if (process.platform === "win32") yield* RetainedImage.relocate(global.cache, global.tmp)
     const errors: string[] = []
     progress.start("Removing Cache...")
@@ -108,7 +108,7 @@ export default Runtime.handler(
         ),
       )
     }
-    if (method === "curl") {
+    if (method === "github") {
       log.message("To finish removing the binary, run:")
       log.info(`  rm '${process.execPath.replaceAll("'", "'\\''")}'`)
     }
@@ -154,8 +154,8 @@ const shellConfigs = Effect.fnUntraced(function* (home: string) {
 function cleanShellConfig(content: string) {
   const lines = content.split("\n")
   const entry = (line: string) =>
-    /^(?:export PATH=|fish_add_path\s)/.test(line.trim()) && line.includes(".opencode/bin")
+    /^(?:export PATH=|fish_add_path\s)/.test(line.trim()) && line.includes(".ruth/bin")
   return lines
-    .filter((line, index) => !entry(line) && !(line.trim() === "# opencode" && entry(lines[index + 1] ?? "")))
+    .filter((line, index) => !entry(line) && !(line.trim() === "# ruth" && entry(lines[index + 1] ?? "")))
     .join("\n")
 }

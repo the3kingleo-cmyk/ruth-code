@@ -1,10 +1,10 @@
 /**
  * Ruth environment lookup.
  *
- * Canonical prefix is `RUTH_`. Earlier `JCODE_` (Jarvis Code) and `OPENCODE_`
- * prefixes are still accepted as fallbacks so existing shells and docs keep working.
+ * Canonical prefix is `RUTH_`. The earlier `JCODE_` (Jarvis Code) prefix is
+ * still accepted as a fallback so existing shells keep working.
  */
-const PREFIXES = ["RUTH_", "JCODE_", "OPENCODE_"] as const
+const PREFIXES = ["RUTH_", "JCODE_"] as const
 
 export function env(name: string): string | undefined {
   let suffix = name
@@ -23,7 +23,7 @@ export function env(name: string): string | undefined {
   return firstHit
 }
 
-/** Copy each set RUTH_* (then JCODE_*) variable onto unset older equivalents. */
+/** Copy each set RUTH_* variable onto its unset JCODE_* equivalent. */
 export function applyRuthEnvFallbacks(target: NodeJS.ProcessEnv = process.env): void {
   const copy = (fromPrefix: string, toPrefix: string) => {
     for (const [key, value] of Object.entries(target)) {
@@ -32,10 +32,7 @@ export function applyRuthEnvFallbacks(target: NodeJS.ProcessEnv = process.env): 
       if (target[dest] === undefined) target[dest] = value
     }
   }
-  // Newest prefix first so RUTH_* wins, then fill OPENCODE_* from both.
   copy("RUTH_", "JCODE_")
-  copy("RUTH_", "OPENCODE_")
-  copy("JCODE_", "OPENCODE_")
 }
 
 /** @deprecated Alias kept for the previous Jarvis Code name. */

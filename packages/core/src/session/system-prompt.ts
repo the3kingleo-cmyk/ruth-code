@@ -7,22 +7,16 @@ export function make(tools: string[]) {
 }
 
 export function render(prompt: string, tools: string[]) {
-  const instructions: string[] = []
-  if (tools.includes("shell")) {
-    instructions.push(
-      "- Prefer dedicated tools over shell commands; fall back to the shell when a tool cannot do what you need.",
-      "- Do not chain shell commands with separators like `echo \"====\";` or `printf '---'`; the output becomes noisy in a way that makes the user's side of the conversation worse.",
+  const guidance: string[] = []
+  if (tools.includes("shell"))
+    guidance.push(
+      "- Use a dedicated tool when one fits, and the shell when none does.",
+      "- Run one clear command at a time. Don't add separator output like `echo \"====\"` between commands.",
     )
-  }
-  if (tools.includes("write")) {
-    instructions.push(
-      "- Use the write tool to create files or completely replace their content. Prefer using the edit tool for targeted changes.",
+  if (tools.includes("edit"))
+    guidance.push(
+      "- Use edit for targeted changes. `oldString` must match the file exactly and appear once; add surrounding lines to make it unique, or set `replaceAll` to change every match. `newString` must differ from it.",
     )
-  }
-  if (tools.includes("edit")) {
-    instructions.push(
-      "- Use the edit tool for targeted changes to existing text files. It replaces the exact text in `oldString` with `newString`, and the values must differ. By default, `oldString` must occur exactly once. If it occurs multiple times, include more surrounding context to make it unique or set `replaceAll` to true to replace every occurrence.",
-    )
-  }
-  return prompt.replace("${OPENCODE_TOOL_GUIDANCE}", instructions.join("\n"))
+  if (tools.includes("write")) guidance.push("- Use write to create a new file or replace a whole file.")
+  return prompt.replace("${RUTH_TOOL_GUIDANCE}", guidance.join("\n"))
 }

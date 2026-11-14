@@ -2,8 +2,8 @@ import { spawnSync } from "child_process"
 import fs from "fs"
 import os from "os"
 import path from "path"
-import { env } from "@opencode/util/env"
-import { isLowMemory, readMemAvailableKiB } from "@opencode/util/meminfo"
+import { env } from "@ruth/util/env"
+import { isLowMemory, readMemAvailableKiB } from "@ruth/util/meminfo"
 import {
   configDir,
   DEFAULT_CHAT_MODEL,
@@ -155,7 +155,7 @@ export function runDoctor(options: { repair?: boolean } = {}): DoctorReport {
         ? `File watcher off until memory is above 768 MiB (MemAvailable ${readMemAvailableKiB() ?? "?"} KiB)`
         : watcher.enabled
           ? "File watcher is on"
-          : "File watcher is disabled by RUTH_FILEWATCHER_DISABLE / OPENCODE_FILEWATCHER_DISABLE",
+          : "File watcher is disabled by RUTH_FILEWATCHER_DISABLE",
   })
   checks.push({
     name: "memory",

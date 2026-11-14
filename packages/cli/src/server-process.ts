@@ -1,14 +1,14 @@
 export * as ServerProcess from "./server-process"
 
 import { NodeServices } from "@effect/platform-node"
-import { Service } from "@opencode/client/effect/service"
-import { LayerNode } from "@opencode/util/effect/layer-node"
-import { Global } from "@opencode/util/global"
-import { OPENCODE_ARTIFACT, OPENCODE_CHANNEL, OPENCODE_VERSION } from "./version"
-import { AppProcess } from "@opencode/util/process"
+import { Service } from "@ruth/client/effect/service"
+import { LayerNode } from "@ruth/util/effect/layer-node"
+import { Global } from "@ruth/util/global"
+import { RUTH_ARTIFACT, RUTH_CHANNEL, RUTH_VERSION } from "./version"
+import { AppProcess } from "@ruth/util/process"
 import { randomBytes, randomUUID } from "node:crypto"
 import { Effect, Option, Redacted, Schema } from "effect"
-import { PersistentPty } from "@opencode/schema/persistent-pty"
+import { PersistentPty } from "@ruth/schema/persistent-pty"
 import { HttpServer } from "effect/http"
 import { NetAddress } from "effect/net"
 import { Env } from "./env"
@@ -37,7 +37,7 @@ export const run = Effect.fnUntraced(function* (options: Options) {
       LayerNode.compile(LayerNode.group([Global.node, AppProcess.node]), {
         replacements: [
           Global.node.replace(
-            Global.layerWith(process.env.OPENCODE_CONFIG_DIR ? { config: process.env.OPENCODE_CONFIG_DIR } : {}),
+            Global.layerWith(process.env.RUTH_CONFIG_DIR ? { config: process.env.RUTH_CONFIG_DIR } : {}),
           ),
         ],
       }),
@@ -47,8 +47,8 @@ export const run = Effect.fnUntraced(function* (options: Options) {
 })
 
 const processEffect = Effect.fnUntraced(function* (options: Options) {
-  const inherited = process.env.OPENCODE_PTY_HANDOFF
-  delete process.env.OPENCODE_PTY_HANDOFF
+  const inherited = process.env.RUTH_PTY_HANDOFF
+  delete process.env.RUTH_PTY_HANDOFF
   const handoff =
     inherited === undefined
       ? undefined
@@ -82,12 +82,12 @@ const processEffect = Effect.fnUntraced(function* (options: Options) {
       // Keep a package-manager or curl install replaceable while the service runs; Desktop updates its own copy.
       if (options.mode === "service" && process.platform === "win32" && RetainedImage.installed(global.home))
         yield* RetainedImage.retain(global.cache, "service")
-      const { start } = yield* Effect.promise(() => import("@opencode/server/process"))
+      const { start } = yield* Effect.promise(() => import("@ruth/server/process"))
       const environmentPassword = yield* Env.password
       // Keep the lease credential out of the environment inherited by tools.
       if (options.mode === "stdio") {
-        delete process.env.OPENCODE_PASSWORD
-        delete process.env.OPENCODE_SERVER_PASSWORD
+        delete process.env.RUTH_PASSWORD
+        delete process.env.RUTH_SERVER_PASSWORD
       }
       const password =
         options.mode === "service"
@@ -102,46 +102,46 @@ const processEffect = Effect.fnUntraced(function* (options: Options) {
       const launch = (bindPort?: number) => start(
         {
           app: {
-            name: process.env.OPENCODE_CLIENT ?? OPENCODE_ARTIFACT,
-            version: OPENCODE_VERSION,
-            channel: OPENCODE_CHANNEL,
+            name: process.env.RUTH_CLIENT ?? RUTH_ARTIFACT,
+            version: RUTH_VERSION,
+            channel: RUTH_CHANNEL,
           },
           hostname,
           port: bindPort,
           cors: options.cors ?? config.cors,
           password,
           pty: { handoff },
-          simulation: truthy(process.env.OPENCODE_SIMULATE),
+          simulation: truthy(process.env.RUTH_SIMULATE),
           database: {
             path: databasePath(global.data),
           },
           models: {
-            url: process.env.OPENCODE_MODELS_URL,
-            file: process.env.OPENCODE_MODELS_PATH,
-            fetch: !truthy(process.env.OPENCODE_DISABLE_MODELS_FETCH),
+            url: process.env.RUTH_MODELS_URL,
+            file: process.env.RUTH_MODELS_PATH,
+            fetch: !truthy(process.env.RUTH_DISABLE_MODELS_FETCH),
           },
           config: {
-            directory: process.env.OPENCODE_CONFIG_DIR,
+            directory: process.env.RUTH_CONFIG_DIR,
             project: !truthy(
-              process.env.OPENCODE_CONFIG_PROJECT_DISABLE ?? process.env.OPENCODE_DISABLE_PROJECT_CONFIG,
+              process.env.RUTH_CONFIG_PROJECT_DISABLE ?? process.env.RUTH_DISABLE_PROJECT_CONFIG,
             ),
             // .claude is only read for skills, so both flags gate the same roots.
             claude: !(
-              truthy(process.env.OPENCODE_DISABLE_CLAUDE_CODE) ||
-              truthy(process.env.OPENCODE_DISABLE_CLAUDE_CODE_SKILLS)
+              truthy(process.env.RUTH_DISABLE_CLAUDE_CODE) ||
+              truthy(process.env.RUTH_DISABLE_CLAUDE_CODE_SKILLS)
             ),
-            file: process.env.OPENCODE_CONFIG,
-            content: process.env.OPENCODE_CONFIG_CONTENT,
+            file: process.env.RUTH_CONFIG,
+            content: process.env.RUTH_CONFIG_CONTENT,
           },
           windows: {
-            gitbash: process.env.OPENCODE_GIT_BASH_PATH,
+            gitbash: process.env.RUTH_GIT_BASH_PATH,
           },
           fs: {
             filewatcher: shouldEnableFilewatcher().enabled,
             fff:
-              process.env.OPENCODE_DISABLE_FFF === undefined
+              process.env.RUTH_DISABLE_FFF === undefined
                 ? process.platform !== "win32"
-                : !truthy(process.env.OPENCODE_DISABLE_FFF),
+                : !truthy(process.env.RUTH_DISABLE_FFF),
           },
         },
         serviceOptions === undefined
@@ -166,9 +166,23 @@ const processEffect = Effect.fnUntraced(function* (options: Options) {
 
       const takeOverOrRelocate = Effect.fnUntraced(function* (cause: unknown) {
         if (findIncumbent === undefined) return yield* Effect.fail(cause)
-        const found = yield* findIncumbent.pipe(Effect.timeoutOption("2 seconds"))
-        if (Option.isSome(found) && found.value !== undefined) return
         if (port !== undefined) {
+          // A sibling that is still starting holds the port before it registers; give it time to settle.
+          const holder = yield* PortOwner.inspect(port, hostname)
+          const unrelated =
+            holder !== undefined &&
+            !PortOwner.isManagedService(holder.command) &&
+            !PortOwner.isServiceProcess(holder.command)
+          const deadline = unrelated ? 0 : Date.now() + 8_000
+          while (Date.now() < deadline) {
+            const found = yield* findIncumbent.pipe(Effect.timeoutOption("2 seconds"))
+            if (Option.isSome(found) && found.value !== undefined) return
+            if ((yield* PortOwner.inspect(port, hostname)) === undefined) {
+              const freed = yield* bind(port)
+              if (freed !== undefined) return freed
+            }
+            yield* Effect.sleep("250 millis")
+          }
           const owner = yield* PortOwner.inspect(port, hostname)
           if (owner !== undefined && owner.pid !== process.pid && PortOwner.isManagedService(owner.command)) {
             yield* Effect.logInfo("Stopping stale managed service on the configured port", {

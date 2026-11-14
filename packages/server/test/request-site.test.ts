@@ -41,8 +41,8 @@ it.live("rejects API navigations and calls from other sites while other clients 
 
     // Calls from other sites need an allowed origin; media elements send none.
     const cors = (origin: string) => ({ "sec-fetch-site": "cross-site", "sec-fetch-mode": "cors", origin })
-    expect(yield* status(read, cors("https://app.opencode.ai"))).toBe(200)
-    expect(yield* status(read, cors("oc://renderer"))).toBe(200)
+    expect(yield* status(read, cors("https://app.example.org"))).toBe(403)
+    expect(yield* status(read, cors("oc://renderer"))).toBe(403)
     expect(yield* status(read, cors("http://localhost:3000"))).toBe(200)
     expect(yield* status(read, cors("https://example.com"))).toBe(403)
     expect(yield* status("/api/path", cors("null"), "POST")).toBe(403)

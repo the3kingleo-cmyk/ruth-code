@@ -1,13 +1,13 @@
 import { describe, expect } from "bun:test"
 import { InMemoryTransport, type JSONRPCMessage } from "@modelcontextprotocol/client"
-import { AppNodeBuilder } from "@opencode/core/effect/app-node-builder"
-import { Flag } from "@opencode/core/flag"
-import { Mcp } from "@opencode/core/mcp/index"
-import { McpClient } from "@opencode/core/mcp/client"
-import type { Permission } from "@opencode/core/permission"
-import { Session } from "@opencode/core/session"
-import { Tool } from "@opencode/core/tool"
-import { McpEventTools } from "@opencode/core/tool/plugin/mcp-events"
+import { AppNodeBuilder } from "@ruth/core/effect/app-node-builder"
+import { Flag } from "@ruth/core/flag"
+import { Mcp } from "@ruth/core/mcp/index"
+import { McpClient } from "@ruth/core/mcp/client"
+import type { Permission } from "@ruth/core/permission"
+import { Session } from "@ruth/core/session"
+import { Tool } from "@ruth/core/tool"
+import { McpEventTools } from "@ruth/core/tool/plugin/mcp-events"
 import { Effect, Layer, PubSub, Stream } from "effect"
 import { hostEnvironmentLayer } from "./fixture/environment"
 import { advance, drain } from "./lib/clock"
@@ -106,7 +106,7 @@ const setup = Effect.fnUntraced(function* (input: { flag?: string } = {}) {
         tools.execute({
           sessionID: session,
           ...toolIdentity,
-          call: { type: "tool-call", id: "call_watch", name: "opencode_watch_mcp_event", input },
+          call: { type: "tool-call", id: "call_watch", name: "ruth_watch_mcp_event", input },
         }),
       ),
       Effect.orDie,
@@ -134,7 +134,7 @@ describe("watch_mcp_event", () => {
   it.live("is absent while the mcp_events flag is off", () =>
     Effect.gen(function* () {
       const { registry } = yield* setup({ flag: "-mcp_events" })
-      expect((yield* toolDefinitions(registry)).map((tool) => tool.name)).not.toContain("opencode_watch_mcp_event")
+      expect((yield* toolDefinitions(registry)).map((tool) => tool.name)).not.toContain("ruth_watch_mcp_event")
     }),
   )
 
@@ -144,7 +144,7 @@ describe("watch_mcp_event", () => {
       expect((yield* watch({})).output).toEqual({
         events: [{ server: "jobs", name: "job.finished", description: "A job ended", inputSchema: {} }],
       })
-      expect(asserts).toMatchObject([{ action: "opencode_watch_mcp_event", resources: ["jobs"], save: ["jobs"] }])
+      expect(asserts).toMatchObject([{ action: "ruth_watch_mcp_event", resources: ["jobs"], save: ["jobs"] }])
     }),
   )
 

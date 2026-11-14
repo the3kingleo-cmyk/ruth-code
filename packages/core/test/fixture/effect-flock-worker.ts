@@ -1,9 +1,9 @@
 import fs from "fs/promises"
 import os from "os"
 import { Effect } from "effect"
-import { LayerNode } from "@opencode/util/effect/layer-node"
-import { EffectFlock } from "@opencode/util/effect-flock"
-import { Global } from "@opencode/util/global"
+import { LayerNode } from "@ruth/util/effect/layer-node"
+import { EffectFlock } from "@ruth/util/effect-flock"
+import { Global } from "@ruth/util/global"
 
 type Msg = {
   key: string

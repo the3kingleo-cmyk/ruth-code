@@ -1,7 +1,7 @@
 export * as ScreenshotTool from "./screenshot.js"
 
-import { ToolFailure } from "@opencode/ai/effect"
-import type { Context } from "@opencode/plugin/effect/plugin"
+import { ToolFailure } from "@ruth/ai/effect"
+import type { Context } from "@ruth/plugin/effect/plugin"
 import { Effect, Schema } from "effect"
 import { toolFailure } from "../runtime.js"
 import { Permission } from "../../permission.js"
@@ -74,7 +74,7 @@ async function capture(target: "screen" | "terminal") {
 }
 
 export const Plugin = {
-  id: "opencode.tool.screenshot",
+  id: "ruth.tool.screenshot",
   effect: Effect.fn("ScreenshotTool.Plugin")(function* (ctx: Context) {
     const permission = yield* Permission.Service
     yield* ctx.tool

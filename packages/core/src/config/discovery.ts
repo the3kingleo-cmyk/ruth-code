@@ -3,8 +3,8 @@ export * as ConfigDiscovery from "./discovery.js"
 import os from "os"
 import path from "path"
 import { Effect } from "effect"
-import { FSUtil } from "@opencode/util/fs-util"
-import { Global } from "@opencode/util/global"
+import { FSUtil } from "@ruth/util/fs-util"
+import { Global } from "@ruth/util/global"
 import { Location } from "../location.js"
 import { AbsolutePath } from "../schema.js"
 import type { Options } from "../config.js"
@@ -14,7 +14,7 @@ export const names = ["ruth.json", "ruth.jsonc"]
 /** Eligible sources in priority order, including paths that may appear later. */
 export interface Sources {
   readonly system?: { readonly path: AbsolutePath; readonly present: boolean }
-  /** macOS MDM managed preferences plist (`ai.opencode.managed`), when one is deployed. */
+  /** macOS MDM managed preferences plist (`ai.ruth.managed`), when one is deployed. */
   readonly preferences?: AbsolutePath
   readonly global?: AbsolutePath
   readonly explicit?: AbsolutePath
@@ -24,22 +24,22 @@ export interface Sources {
   readonly agents: readonly AbsolutePath[]
 }
 
-/** Platform system configuration directory (`/Library/Application Support/opencode`, `/etc/opencode`, `%ProgramData%\opencode`). */
+/** Platform system configuration directory (`/Library/Application Support/ruth`, `/etc/ruth`, `%ProgramData%\ruth`). */
 export function systemDirectory(platform: NodeJS.Platform = process.platform, env: NodeJS.ProcessEnv = process.env) {
-  if (platform === "darwin") return AbsolutePath.make("/Library/Application Support/opencode")
-  if (platform === "win32") return AbsolutePath.make(path.join(env.ProgramData || "C:\\ProgramData", "opencode"))
-  return AbsolutePath.make("/etc/opencode")
+  if (platform === "darwin") return AbsolutePath.make("/Library/Application Support/ruth")
+  if (platform === "win32") return AbsolutePath.make(path.join(env.ProgramData || "C:\\ProgramData", "ruth"))
+  return AbsolutePath.make("/etc/ruth")
 }
 
 /** macOS MDM managed preferences plists, most specific first; the first one present wins. */
 export function preferencePaths(user: string) {
   return [
-    AbsolutePath.make(path.join("/Library/Managed Preferences", user, "ai.opencode.managed.plist")),
-    AbsolutePath.make("/Library/Managed Preferences/ai.opencode.managed.plist"),
+    AbsolutePath.make(path.join("/Library/Managed Preferences", user, "ai.ruth.managed.plist")),
+    AbsolutePath.make("/Library/Managed Preferences/ai.ruth.managed.plist"),
   ]
 }
 
-// Keys macOS and MDM profiles inject into managed preferences that are not OpenCode config.
+// Keys macOS and MDM profiles inject into managed preferences that are not Ruth config.
 const preferenceMetadata = new Set([
   "PayloadDisplayName",
   "PayloadIdentifier",

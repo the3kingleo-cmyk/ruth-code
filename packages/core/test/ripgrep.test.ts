@@ -2,11 +2,11 @@ import { describe, expect, test } from "bun:test"
 import fs from "fs/promises"
 import path from "path"
 import { Effect } from "effect"
-import { AppNodeBuilder } from "@opencode/core/effect/app-node-builder"
-import { Location } from "@opencode/core/location"
-import { Ripgrep } from "@opencode/core/ripgrep"
-import { RipgrepBinary } from "@opencode/core/ripgrep/binary"
-import { RelativePath } from "@opencode/core/schema"
+import { AppNodeBuilder } from "@ruth/core/effect/app-node-builder"
+import { Location } from "@ruth/core/location"
+import { Ripgrep } from "@ruth/core/ripgrep"
+import { RipgrepBinary } from "@ruth/core/ripgrep/binary"
+import { RelativePath } from "@ruth/core/schema"
 import { tmpdirScoped, withTempDir } from "./fixture/tmpdir"
 import { testEffect } from "./lib/effect"
 import { tempLocationLayer } from "./fixture/location"
@@ -99,14 +99,14 @@ describe("Ripgrep", () => {
   it.live("never includes git metadata", () =>
     withTempDir((tmp) =>
       Effect.gen(function* () {
-        yield* Effect.promise(() => fs.mkdir(path.join(tmp.path, ".opencode")))
-        yield* Effect.promise(() => fs.writeFile(path.join(tmp.path, ".opencode", "config"), "needle\n"))
+        yield* Effect.promise(() => fs.mkdir(path.join(tmp.path, ".ruth")))
+        yield* Effect.promise(() => fs.writeFile(path.join(tmp.path, ".ruth", "config"), "needle\n"))
         yield* Effect.promise(() => fs.mkdir(path.join(tmp.path, ".git")))
         yield* Effect.promise(() => fs.writeFile(path.join(tmp.path, ".git", "config"), "needle\n"))
         const ripgrep = yield* Ripgrep.Service
 
         const files = yield* ripgrep.find({ cwd: tmp.path, pattern: "**/*", limit: 10 })
-        expect(files.map((item) => item.path)).toContain(RelativePath.make(".opencode/config"))
+        expect(files.map((item) => item.path)).toContain(RelativePath.make(".ruth/config"))
         expect(files.map((item) => item.path)).not.toContain(RelativePath.make(".git/config"))
 
         const observed: string[] = []
@@ -119,7 +119,7 @@ describe("Ripgrep", () => {
         expect(observed).toEqual(limited.map((item) => item.path))
 
         const matches = yield* ripgrep.grep({ cwd: tmp.path, pattern: "needle", include: "config", limit: 10 })
-        expect(matches.map((item) => item.entry.path)).toContain(RelativePath.make(".opencode/config"))
+        expect(matches.map((item) => item.entry.path)).toContain(RelativePath.make(".ruth/config"))
         expect(matches.map((item) => item.entry.path)).not.toContain(RelativePath.make(".git/config"))
       }),
     ),

@@ -1,23 +1,23 @@
-import { Config } from "@opencode/core/config"
-import { ConfigIntegration } from "@opencode/core/config/integration"
-import { ConfigPolicyPlugin } from "@opencode/core/config/plugin/policy"
-import { Integration } from "@opencode/core/integration"
-import { Mcp } from "@opencode/core/mcp/index"
-import { Skill } from "@opencode/core/skill"
-import { Info } from "@opencode/schema/config"
-import { ConfigPolicy } from "@opencode/schema/config/policy"
-import { ID } from "@opencode/schema/event"
-import { Credential } from "@opencode/core/credential"
-import { WebSearch } from "@opencode/core/websearch"
+import { Config } from "@ruth/core/config"
+import { ConfigIntegration } from "@ruth/core/config/integration"
+import { ConfigPolicyPlugin } from "@ruth/core/config/plugin/policy"
+import { Integration } from "@ruth/core/integration"
+import { Mcp } from "@ruth/core/mcp/index"
+import { Skill } from "@ruth/core/skill"
+import { Info } from "@ruth/schema/config"
+import { ConfigPolicy } from "@ruth/schema/config/policy"
+import { ID } from "@ruth/schema/event"
+import { Credential } from "@ruth/core/credential"
+import { WebSearch } from "@ruth/core/websearch"
 import { Effect, Schema, Stream } from "effect"
 import { host } from "../plugin/host"
 
-/** A connected organization's policy as the OpenCode Console delivers it: an integration config document. */
+/** A connected organization's policy as the Zen Console delivers it: an integration config document. */
 export function organizationPolicy(policies: ConfigPolicy.Info[], organization?: string) {
   return new ConfigIntegration.Document({
     type: "document",
     integrationID: Integration.ID.make("opencode"),
-    connection: { type: "env", name: "OPENCODE_API_KEY" },
+    connection: { type: "env", name: "RUTH_ZEN_API_KEY" },
     organization,
     info: Schema.decodeUnknownSync(Info)({ policies }),
   })

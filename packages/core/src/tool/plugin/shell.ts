@@ -1,11 +1,11 @@
 export * as ShellTool from "./shell.js"
 
-import { ToolFailure } from "@opencode/ai/effect"
-import type { Context } from "@opencode/plugin/effect/plugin"
-import type { SessionHooks } from "@opencode/plugin/effect/session"
-import type { ShellCreateBefore } from "@opencode/plugin/effect/shell"
-import type { Shell as ShellSchema } from "@opencode/schema/shell"
-import type { Tool } from "@opencode/schema/tool"
+import { ToolFailure } from "@ruth/ai/effect"
+import type { Context } from "@ruth/plugin/effect/plugin"
+import type { SessionHooks } from "@ruth/plugin/effect/session"
+import type { ShellCreateBefore } from "@ruth/plugin/effect/shell"
+import type { Shell as ShellSchema } from "@ruth/schema/shell"
+import type { Tool } from "@ruth/schema/tool"
 import { Clock, Deferred, Effect, Fiber, Option, Schema, Struct } from "effect"
 import { Environment } from "../../environment/index.js"
 import { Job } from "../../job.js"
@@ -46,7 +46,7 @@ const description = (shell?: string) =>
     "Rely on automatic truncation unless filtering the output is more useful.",
     "Commands still running after their timeout move to the background.",
     "Background commands return immediately, and you will be notified when they complete.",
-    "The current session ID is available in the OPENCODE_SESSION_ID environment variable.",
+    "The current session ID is available in the RUTH_SESSION_ID environment variable.",
   ].join(" ")
 
 export const Input = Schema.Struct({
@@ -270,7 +270,7 @@ export const reattach = Effect.fnUntraced(function* (input: {
 })
 
 export const Plugin = {
-  id: "opencode.tool.shell",
+  id: "ruth.tool.shell",
   effect: Effect.fn("ShellTool.Plugin")(function* (ctx: Context) {
     const sessions = yield* Session.Service
     const jobs = yield* Job.Service
@@ -386,9 +386,9 @@ export const Plugin = {
                     (invocation) =>
                       Effect.gen(function* () {
                         invocation.env.AGENT = "1"
-                        invocation.env.OPENCODE = "1"
-                        invocation.env.AI_AGENT ||= "opencode"
-                        invocation.env.OPENCODE_SESSION_ID = context.sessionID
+                        invocation.env.RUTH = "1"
+                        invocation.env.AI_AGENT ||= "ruth"
+                        invocation.env.RUTH_SESSION_ID = context.sessionID
                         // Asking for permission can take a while; a stop then ends the call before any command starts.
                         finalTimeout = yield* restore(
                           Effect.raceFirst(
@@ -473,7 +473,7 @@ export const Plugin = {
               // Shell spans, including the job that waits for a backgrounded command, name the call that started them.
               Effect.annotateSpans({
                 "gen_ai.tool.call.id": context.id,
-                ...(input.background === true ? { "opencode.shell.background": true } : {}),
+                ...(input.background === true ? { "ruth.shell.background": true } : {}),
               }),
               Effect.map((output) => toolResult(output, finalTimeout)),
               Effect.mapError(toolFailure(`Unable to execute command: ${input.command}`)),

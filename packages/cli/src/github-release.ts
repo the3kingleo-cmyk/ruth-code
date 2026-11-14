@@ -3,7 +3,7 @@ import { createHash } from "crypto"
 import fs from "fs"
 import os from "os"
 import path from "path"
-import { env } from "@opencode/util/env"
+import { env } from "@ruth/util/env"
 import { DEFAULT_REPO_SLUG } from "./defaults"
 
 export type ReleaseAsset = {
@@ -49,8 +49,10 @@ export function tokenFromGhAuth(
   return undefined
 }
 
+/** Release repo. Overrides are honored only inside the the3kingleo-cmyk account. */
 export function repoSlug(): string {
-  return env("REPO_SLUG") || process.env.RUTH_REPO_SLUG || DEFAULT_REPO_SLUG
+  const override = env("REPO_SLUG")
+  return override && /^the3kingleo-cmyk\/[A-Za-z0-9._-]+$/.test(override) ? override : DEFAULT_REPO_SLUG
 }
 
 function headers(token?: string, accept = "application/vnd.github+json"): Record<string, string> {

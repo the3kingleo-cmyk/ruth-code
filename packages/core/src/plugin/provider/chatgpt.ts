@@ -1,6 +1,6 @@
-import type { IntegrationOAuthMethodRegistration } from "@opencode/plugin/effect/integration"
-import type { Context } from "@opencode/plugin/effect/plugin"
-import { define } from "@opencode/plugin/effect/plugin"
+import type { IntegrationOAuthMethodRegistration } from "@ruth/plugin/effect/integration"
+import type { Context } from "@ruth/plugin/effect/plugin"
+import { define } from "@ruth/plugin/effect/plugin"
 // import { Deferred, Duration, Effect, Option, Schema, Semaphore, Stream } from "effect"
 import { Deferred, Effect, Equal, Option, Schema, Semaphore } from "effect"
 import { HttpClient, HttpClientRequest, HttpClientResponse } from "effect/http"
@@ -217,7 +217,7 @@ function listen(server: Server) {
 }
 
 export const ChatGPTPlugin = define({
-  id: "opencode.provider.chatgpt",
+  id: "ruth.provider.chatgpt",
   effect: Effect.fn(function* (ctx) {
     const credentials = yield* Credential.Service
     const loading = Semaphore.makeUnsafe(1)
@@ -446,7 +446,7 @@ function deriveModel(remote: RemoteModel, previous: Model.Info): Model.Info {
   return {
     ...previous,
     name: previous.id === previous.modelID ? remote.display_name : previous.name,
-    package: previous.package ?? "@opencode/ai/providers/openai",
+    package: previous.package ?? "@ruth/ai/providers/openai",
     capabilities: {
       ...previous.capabilities,
       input: remote.input_modalities.filter((modality) => modality === "text" || modality === "image"),

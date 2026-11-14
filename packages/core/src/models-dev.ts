@@ -1,16 +1,16 @@
 import { Cause, Context, Duration, Effect, Layer, Option, Result, Schedule, Schema, Semaphore } from "effect"
 import { HttpClient, HttpClientError, HttpClientRequest, HttpClientResponse } from "effect/http"
-import { ConfigProvider } from "@opencode/schema/config/provider"
-import { MaxTokensField, MediaInput } from "@opencode/schema/model-compatibility"
-import { ModelsDev } from "@opencode/schema/models-dev"
-import { Money } from "@opencode/schema/money"
-import { FreeformFormat } from "@opencode/schema/tool"
+import { ConfigProvider } from "@ruth/schema/config/provider"
+import { MaxTokensField, MediaInput } from "@ruth/schema/model-compatibility"
+import { ModelsDev } from "@ruth/schema/models-dev"
+import { Money } from "@ruth/schema/money"
+import { FreeformFormat } from "@ruth/schema/tool"
 import { App } from "./app.js"
-import { Hash } from "@opencode/util/hash"
-import { FSUtil } from "@opencode/util/fs-util"
+import { Hash } from "@ruth/util/hash"
+import { FSUtil } from "@ruth/util/fs-util"
 import { Bus } from "./bus.js"
-import { makeGlobalNode } from "@opencode/util/effect/app-node"
-import { httpClient } from "@opencode/util/effect/app-node-platform"
+import { makeGlobalNode } from "@ruth/util/effect/app-node"
+import { httpClient } from "@ruth/util/effect/app-node-platform"
 import { Model } from "./model.js"
 import { AISDKNative } from "./aisdk-native.js"
 import { Provider } from "./provider.js"
@@ -19,7 +19,7 @@ import { KV } from "./kv.js"
 import snapshotText from "./models-dev/snapshot.txt" with { type: "text" }
 import { isV1, toV2 } from "./models-dev/v1.js"
 
-// Only the fields opencode reads are decoded. Unknown keys are ignored, and a model that
+// Only the fields ruth reads are decoded. Unknown keys are ignored, and a model that
 // doesn't match is skipped rather than failing the whole catalog.
 const Price = Money.USDPerMillionTokens
 const CacheWrite = Schema.Union([Price, Schema.Record(Schema.String, Price)])
@@ -77,7 +77,7 @@ const SourceApi = Schema.Struct({
     }),
   ),
   sdk: Schema.optional(
-    Schema.Struct({ aisdk: Schema.optional(Schema.String), opencodeai: Schema.optional(Schema.String) }),
+    Schema.Struct({ aisdk: Schema.optional(Schema.String), ruthai: Schema.optional(Schema.String) }),
   ),
   compatibility: Schema.optional(
     Schema.Struct({
@@ -132,7 +132,7 @@ const SourceProvider = Schema.Struct({
   models: Schema.Record(Schema.String, Schema.Unknown),
 })
 
-// The model types opencode keeps. Only chat models are offered for sessions; the others are listed on request.
+// The model types ruth keeps. Only chat models are offered for sessions; the others are listed on request.
 const TYPES: readonly string[] = ["chat", "decision", "image"]
 
 const ContextCondition = Schema.Struct({ gt: Schema.optional(Schema.Finite), gte: Schema.optional(Schema.Finite) })
@@ -162,19 +162,19 @@ type Route = {
 // These packages build their URL from provider settings (region, resource, account, project…), which
 // only happens when no baseURL is set. The catalog's URL for them is a template or SDK default.
 const BUILDS_OWN_URL = new Set([
-  "@opencode/ai/providers/amazon-bedrock",
-  "@opencode/ai/providers/azure/chat",
-  "@opencode/ai/providers/azure/images",
-  "@opencode/ai/providers/azure/messages",
-  "@opencode/ai/providers/azure/responses",
-  "@opencode/ai/providers/cloudflare-ai-gateway",
-  "@opencode/ai/providers/cloudflare-ai-gateway/decisions",
-  "@opencode/ai/providers/cloudflare-workers-ai",
-  "@opencode/ai/providers/cloudflare-workers-ai/decisions",
-  "@opencode/ai/providers/cloudflare-workers-ai/images",
-  "@opencode/ai/providers/google-vertex/gemini",
-  "@opencode/ai/providers/google-vertex/images",
-  "@opencode/ai/providers/google-vertex/messages",
+  "@ruth/ai/providers/amazon-bedrock",
+  "@ruth/ai/providers/azure/chat",
+  "@ruth/ai/providers/azure/images",
+  "@ruth/ai/providers/azure/messages",
+  "@ruth/ai/providers/azure/responses",
+  "@ruth/ai/providers/cloudflare-ai-gateway",
+  "@ruth/ai/providers/cloudflare-ai-gateway/decisions",
+  "@ruth/ai/providers/cloudflare-workers-ai",
+  "@ruth/ai/providers/cloudflare-workers-ai/decisions",
+  "@ruth/ai/providers/cloudflare-workers-ai/images",
+  "@ruth/ai/providers/google-vertex/gemini",
+  "@ruth/ai/providers/google-vertex/images",
+  "@ruth/ai/providers/google-vertex/messages",
   "aisdk:@jerome-benoit/sap-ai-provider-v2",
   "aisdk:watsonx-ai-provider",
 ])
@@ -251,19 +251,19 @@ function entries<A>(record: Record<string, unknown> | undefined, decode: (input:
 
 function route(providerID: Provider.ID, model: SourceModel, unknown: Set<string>): Route | undefined {
   // A chat model uses its first API with a package. Other types (image, decision…) only run through the
-  // opencode entrypoint for their type (`providers/<P>/images`) that this build can load, and are skipped
+  // ruth entrypoint for their type (`providers/<P>/images`) that this build can load, and are skipped
   // without one: a chat entrypoint loads a chat model, which can't generate images or decisions.
   const apis = entries(model.api, decodeApi).map(
-    ([protocol, entry]) => [protocol, entry, loadable(entry.sdk?.opencodeai, unknown)] as const,
+    ([protocol, entry]) => [protocol, entry, loadable(entry.sdk?.ruthai, unknown)] as const,
   )
-  const [protocol, api, opencodeai] =
+  const [protocol, api, ruthai] =
     (model.type === "chat"
-      ? apis.find(([, entry, opencodeai]) => opencodeai || entry.sdk?.aisdk)
-      : apis.find(([, , opencodeai]) => opencodeai?.endsWith(`/${model.type}s`))) ?? []
+      ? apis.find(([, entry, ruthai]) => ruthai || entry.sdk?.aisdk)
+      : apis.find(([, , ruthai]) => ruthai?.endsWith(`/${model.type}s`))) ?? []
   if (!protocol || !api) return undefined
   const aisdk = api.sdk?.aisdk
   const packageName =
-    opencodeai ??
+    ruthai ??
     (aisdk &&
       (AISDKNative.native(aisdk, {
         providerID,
@@ -288,10 +288,10 @@ function route(providerID: Provider.ID, model: SourceModel, unknown: Set<string>
   }
 }
 
-// Newer catalogs may name @opencode/ai entrypoints that older builds don't ship, so those count as no package.
-function loadable(opencodeai: string | undefined, unknown: Set<string>) {
-  const name = Provider.packageName(opencodeai)
-  if (!name?.startsWith("@opencode/ai/") || Provider.builtinPackages.has(name)) return opencodeai
+// Newer catalogs may name @ruth/ai entrypoints that older builds don't ship, so those count as no package.
+function loadable(ruthai: string | undefined, unknown: Set<string>) {
+  const name = Provider.packageName(ruthai)
+  if (!name?.startsWith("@ruth/ai/") || Provider.builtinPackages.has(name)) return ruthai
   unknown.add(name)
   return undefined
 }
@@ -310,12 +310,12 @@ function released(date: string) {
   return Number.isFinite(time) ? time : 0
 }
 
-const COMPATIBLE = new Set(["@opencode/ai/providers/openai-compatible", "@opencode/ai/providers/anthropic-compatible"])
+const COMPATIBLE = new Set(["@ruth/ai/providers/openai-compatible", "@ruth/ai/providers/anthropic-compatible"])
 
 const zero = Money.USDPerMillionTokens.zero
 
 // Only per-token text prices are kept: per-image, per-second and similar prices have
-// no place in opencode's cost yet. Context overrides become tiers; other conditions
+// no place in ruth's cost yet. Context overrides become tiers; other conditions
 // (service tier, time of day…) are left out.
 function cost(input: SourceCost | undefined): Model.Info["cost"] {
   const text = input?.text
@@ -358,7 +358,7 @@ function cost(input: SourceCost | undefined): Model.Info["cost"] {
   return [base, ...tiers.values()]
 }
 
-// opencode has one cache write price: the first TTL listed, else the explicit cache's.
+// ruth has one cache write price: the first TTL listed, else the explicit cache's.
 function cacheWrite(cache: typeof CachePrices.Type | undefined) {
   const first = (write: typeof CacheWrite.Type | undefined) =>
     typeof write === "object" ? Object.values(write)[0] : write
@@ -402,12 +402,12 @@ function factorAt(factor: Factor, path: readonly string[]): number {
   )
   if (node === undefined) return 1
   if (typeof node === "number") return node
-  // A cache write factor is keyed by TTL; opencode keeps the first one.
+  // A cache write factor is keyed by TTL; ruth keeps the first one.
   const first = Object.values(node)[0]
   return typeof first === "number" ? first : 1
 }
 
-// v2 lists exact MIME types; opencode's capabilities use the broad kind.
+// v2 lists exact MIME types; ruth's capabilities use the broad kind.
 function modality(value: string) {
   if (value === "application/pdf") return "pdf"
   const kind = value.split("/")[0]
@@ -471,7 +471,7 @@ function modelInfo(
   }
 }
 
-export { Event } from "@opencode/schema/models-dev"
+export { Event } from "@ruth/schema/models-dev"
 
 export interface Interface {
   readonly get: () => Effect.Effect<readonly Snapshot[]>
@@ -486,7 +486,7 @@ export const Options = Schema.Struct({
 })
 export type Options = typeof Options.Type
 
-export class Service extends Context.Service<Service, Interface>()("@opencode/ModelsDev") {}
+export class Service extends Context.Service<Service, Interface>()("@ruth/ModelsDev") {}
 
 const CatalogJson = Schema.fromJsonString(Schema.Record(Schema.String, Schema.Unknown))
 const decodeCatalog = (text: string) => Schema.decodeUnknownEffect(CatalogJson)(text)
@@ -504,7 +504,7 @@ const CacheMeta = Schema.Struct({
 })
 const defaultSource = "https://models.opencode.ai"
 
-// The experimental v2 API, limited to the model types opencode keeps.
+// The experimental v2 API, limited to the model types ruth keeps.
 export const catalogPath = `/experimental/v2.0/api.json?type=${TYPES.join(",")}`
 
 export const decodeSnapshot = (text: string) => decodeCatalog(text).pipe(Effect.flatMap(normalize))

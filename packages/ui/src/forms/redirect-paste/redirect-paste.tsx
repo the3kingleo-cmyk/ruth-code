@@ -1,6 +1,6 @@
 import { createUniqueId, onMount, Show } from "solid-js"
-import { Button } from "@opencode/ui/button"
-import { TextInput } from "@opencode/ui/text-input"
+import { Button } from "@ruth/ui/button"
+import { TextInput } from "@ruth/ui/text-input"
 import { useI18n } from "../../context/i18n"
 
 /** Why the last paste was not taken: the field was empty, or the server rejected the URL with `message`. */

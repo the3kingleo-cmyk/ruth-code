@@ -1,6 +1,6 @@
-import { AIError, ToolFailure, type FinishReasonDetails } from "@opencode/ai/effect"
-import { Tool } from "@opencode/schema/tool"
-import { SessionError } from "@opencode/schema/session-error"
+import { AIError, ToolFailure, type FinishReasonDetails } from "@ruth/ai/effect"
+import { Tool } from "@ruth/schema/tool"
+import { SessionError } from "@ruth/schema/session-error"
 import { Permission } from "../permission.js"
 import { Integration } from "../integration.js"
 import { AgentNotFoundError, StepFailedError } from "./error.js"
@@ -108,14 +108,14 @@ export function contentFilterError(summary: string, reason: FinishReasonDetails)
   }
 }
 
-// OpenCode Console names what a refusing budget covers, in its envelope's metadata or, for Google clients, ErrorInfo.
+// Zen Console names what a refusing budget covers, in its envelope's metadata or, for Google clients, ErrorInfo.
 function budgetLimit(reason: AIError["reason"]): SessionError.Error {
   if (/"coverage"\s*:\s*"models"/.test(reason.body ?? ""))
     return { ...providerError("provider.model-budget-limit", reason), message: MODEL_BUDGET_LIMIT_MESSAGE }
   return { ...providerError("provider.budget-limit", reason), message: BUDGET_LIMIT_MESSAGE }
 }
 
-// OpenCode Console names the Go limit that refused the request (5 hour, weekly or monthly) in its envelope's metadata.
+// Zen Console names the Go limit that refused the request (5 hour, weekly or monthly) in its envelope's metadata.
 function goLimit(reason: AIError["reason"]): SessionError.Error {
   const name = /"limitName"\s*:\s*"([^"]+)"/.exec(reason.body ?? "")?.[1]
   return {

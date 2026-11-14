@@ -3,7 +3,7 @@ import { Effect, Option } from "effect"
 import { Commands } from "../commands"
 import { Runtime } from "../../framework/runtime"
 import { runningBinary, selfUpdate } from "../../self-update"
-import { OPENCODE_VERSION } from "../../version"
+import { RUTH_VERSION } from "../../version"
 
 export default Runtime.handler(
   Commands.commands["self-update"],
@@ -13,7 +13,7 @@ export default Runtime.handler(
     progress.start("Checking the3kingleo-cmyk/ruth-code releases...")
     const result = yield* Effect.promise(() =>
       selfUpdate({
-        currentVersion: OPENCODE_VERSION,
+        currentVersion: RUTH_VERSION,
         currentBinary: runningBinary(),
         target: Option.getOrUndefined(input.target),
         chatCheck: !input.skipChat,

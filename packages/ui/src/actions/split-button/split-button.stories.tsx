@@ -1,7 +1,7 @@
 import { createEffect, createSignal, Show } from "solid-js"
-import { AppIcon } from "@opencode/ui/app-icon"
-import { Icon } from "@opencode/ui/icon"
-import { Menu } from "@opencode/ui/menu"
+import { AppIcon } from "@ruth/ui/app-icon"
+import { Icon } from "@ruth/ui/icon"
+import { Menu } from "@ruth/ui/menu"
 import { SplitButton, SplitButtonAction, SplitButtonMenuTrigger } from "./split-button"
 
 const defaults = { label: "Open", finder: false, actionDisabled: false, menuDisabled: false, open: false }

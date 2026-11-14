@@ -16,68 +16,68 @@ import {
   RateLimitError,
   UnknownProviderError,
   type UserMessage,
-} from "@opencode/ai/effect"
-import { OpenAIChat } from "@opencode/ai/protocols/openai-chat"
-import { AnthropicMessages, OpenAIResponses } from "@opencode/ai/protocols"
-import { TestLLM, compileRequest } from "@opencode/ai/testing"
-import { RequestExecutor } from "@opencode/ai/route"
-import type { SessionHooks } from "@opencode/plugin/effect/session"
-import { Database } from "@opencode/core/database/database"
-import { makeLocationNode } from "@opencode/util/effect/app-node"
-import { AppNodeBuilder } from "@opencode/core/effect/app-node-builder"
-import { LayerNodePlatform } from "@opencode/core/effect/app-node-platform"
-import { LayerNode } from "@opencode/util/effect/layer-node"
-import { Bus } from "@opencode/core/bus"
-import { Event } from "@opencode/schema/event"
-import { App } from "@opencode/core/app"
-import { Permission } from "@opencode/core/permission"
-import { EventTable } from "@opencode/core/event/sql"
-import { Project } from "@opencode/core/project"
-import { ProjectTable } from "@opencode/core/project/sql"
-import { Form } from "@opencode/core/form"
-import { Job } from "@opencode/core/job"
-import { AbsolutePath } from "@opencode/core/schema"
-import { Session } from "@opencode/core/session"
-import { Snapshot } from "@opencode/core/snapshot"
-import { SessionEvent } from "@opencode/core/session/event"
-import { SessionCompaction } from "@opencode/core/session/compaction"
-import { SessionInbox } from "@opencode/core/session/inbox"
-import { SessionMessage } from "@opencode/core/session/message"
-import { SessionModelTransport } from "@opencode/core/session/model-transport"
-import { Money } from "@opencode/schema/money"
-import { SessionProjector } from "@opencode/core/session/projector"
-import { SessionExecution } from "@opencode/core/session/execution"
-import { SessionRunCoordinator } from "@opencode/core/session/run-coordinator"
-import { SessionRunner } from "@opencode/core/session/runner/index"
-import { SessionRunnerLLM } from "@opencode/core/session/runner/llm"
-import { SessionRunnerModel } from "@opencode/core/session/runner/model"
-import { SessionUsage } from "@opencode/core/session/usage"
-import { PluginSupervisor } from "@opencode/core/plugin/supervisor"
-import { Plugin } from "@opencode/core/plugin"
-import { PluginHooks } from "@opencode/core/plugin/hooks"
-import { PluginPromise } from "@opencode/core/plugin/promise"
-import { OptimizePlugin } from "@opencode/core/plugin/optimize"
-import { IdentityPlugin } from "@opencode/core/plugin/identity"
-import { QuestionTool } from "@opencode/core/tool/plugin/question"
-import { Agent } from "@opencode/core/agent"
-import { Config } from "@opencode/core/config"
-import { Document, Info } from "@opencode/schema/config"
-import { ConfigCompaction } from "@opencode/schema/config/compaction"
-import { Tool } from "@opencode/core/tool"
-import type { Info as ToolInfo } from "@opencode/schema/tool"
-import { InstructionStateTable, SessionInboxTable, SessionMessageTable, SessionTable } from "@opencode/core/session/sql"
-import { InstructionEntry } from "@opencode/core/session/instruction-entry"
-import { SessionStore } from "@opencode/core/session/store"
-import { Instructions } from "@opencode/core/instructions/index"
-import { InstructionBuiltIns } from "@opencode/core/instructions/builtins"
-import { InstructionDiscovery } from "@opencode/core/instruction-discovery"
-import { SkillInstructions } from "@opencode/core/skill/instructions"
-import { ReferenceInstructions } from "@opencode/core/reference/instructions"
-import { McpInstructions } from "@opencode/core/mcp/instructions"
-import { SessionSystemPrompt } from "@opencode/core/session/system-prompt"
-import { ID, Model } from "@opencode/core/model"
-import { Location } from "@opencode/core/location"
-import { Provider } from "@opencode/core/provider"
+} from "@ruth/ai/effect"
+import { OpenAIChat } from "@ruth/ai/protocols/openai-chat"
+import { AnthropicMessages, OpenAIResponses } from "@ruth/ai/protocols"
+import { TestLLM, compileRequest } from "@ruth/ai/testing"
+import { RequestExecutor } from "@ruth/ai/route"
+import type { SessionHooks } from "@ruth/plugin/effect/session"
+import { Database } from "@ruth/core/database/database"
+import { makeLocationNode } from "@ruth/util/effect/app-node"
+import { AppNodeBuilder } from "@ruth/core/effect/app-node-builder"
+import { LayerNodePlatform } from "@ruth/core/effect/app-node-platform"
+import { LayerNode } from "@ruth/util/effect/layer-node"
+import { Bus } from "@ruth/core/bus"
+import { Event } from "@ruth/schema/event"
+import { App } from "@ruth/core/app"
+import { Permission } from "@ruth/core/permission"
+import { EventTable } from "@ruth/core/event/sql"
+import { Project } from "@ruth/core/project"
+import { ProjectTable } from "@ruth/core/project/sql"
+import { Form } from "@ruth/core/form"
+import { Job } from "@ruth/core/job"
+import { AbsolutePath } from "@ruth/core/schema"
+import { Session } from "@ruth/core/session"
+import { Snapshot } from "@ruth/core/snapshot"
+import { SessionEvent } from "@ruth/core/session/event"
+import { SessionCompaction } from "@ruth/core/session/compaction"
+import { SessionInbox } from "@ruth/core/session/inbox"
+import { SessionMessage } from "@ruth/core/session/message"
+import { SessionModelTransport } from "@ruth/core/session/model-transport"
+import { Money } from "@ruth/schema/money"
+import { SessionProjector } from "@ruth/core/session/projector"
+import { SessionExecution } from "@ruth/core/session/execution"
+import { SessionRunCoordinator } from "@ruth/core/session/run-coordinator"
+import { SessionRunner } from "@ruth/core/session/runner/index"
+import { SessionRunnerLLM } from "@ruth/core/session/runner/llm"
+import { SessionRunnerModel } from "@ruth/core/session/runner/model"
+import { SessionUsage } from "@ruth/core/session/usage"
+import { PluginSupervisor } from "@ruth/core/plugin/supervisor"
+import { Plugin } from "@ruth/core/plugin"
+import { PluginHooks } from "@ruth/core/plugin/hooks"
+import { PluginPromise } from "@ruth/core/plugin/promise"
+import { OptimizePlugin } from "@ruth/core/plugin/optimize"
+import { IdentityPlugin } from "@ruth/core/plugin/identity"
+import { QuestionTool } from "@ruth/core/tool/plugin/question"
+import { Agent } from "@ruth/core/agent"
+import { Config } from "@ruth/core/config"
+import { Document, Info } from "@ruth/schema/config"
+import { ConfigCompaction } from "@ruth/schema/config/compaction"
+import { Tool } from "@ruth/core/tool"
+import type { Info as ToolInfo } from "@ruth/schema/tool"
+import { InstructionStateTable, SessionInboxTable, SessionMessageTable, SessionTable } from "@ruth/core/session/sql"
+import { InstructionEntry } from "@ruth/core/session/instruction-entry"
+import { SessionStore } from "@ruth/core/session/store"
+import { Instructions } from "@ruth/core/instructions/index"
+import { InstructionBuiltIns } from "@ruth/core/instructions/builtins"
+import { InstructionDiscovery } from "@ruth/core/instruction-discovery"
+import { SkillInstructions } from "@ruth/core/skill/instructions"
+import { ReferenceInstructions } from "@ruth/core/reference/instructions"
+import { McpInstructions } from "@ruth/core/mcp/instructions"
+import { SessionSystemPrompt } from "@ruth/core/session/system-prompt"
+import { ID, Model } from "@ruth/core/model"
+import { Location } from "@ruth/core/location"
+import { Provider } from "@ruth/core/provider"
 import {
   Cause,
   Context,
@@ -97,11 +97,11 @@ import { TestClock } from "effect/testing"
 import { and, asc, desc, eq, sql } from "drizzle-orm"
 import { testEffect } from "./lib/effect"
 import { promptLocationNode } from "./fixture/prompt-location"
-import { LocationServiceMap } from "@opencode/core/location-service-map"
+import { LocationServiceMap } from "@ruth/core/location-service-map"
 import { Expected } from "./lib/session-message"
 import { permissionLayer } from "./lib/permission"
 import { agentHost, modelHost, host, noProviders } from "./plugin/host"
-import { CodeModeInstructions } from "@opencode/core/codemode/instructions"
+import { CodeModeInstructions } from "@ruth/core/codemode/instructions"
 
 const emptyCodeMode = `${CodeModeInstructions.render({ total: 0, namespaces: [] })}\n\n`
 type ToolBarrier = {
@@ -5375,7 +5375,7 @@ describe("SessionRunnerLLM", () => {
       "User-Agent": App.useragent(App.make()),
       "x-opencode-project": Project.ID.global,
       "x-opencode-session": sessionID,
-      "x-opencode-client": "opencode",
+      "x-opencode-client": "ruth",
     })
   })
 
@@ -6323,7 +6323,7 @@ describe("SessionRunnerLLM", () => {
           .filter((span) => span.name === "SessionStep.attempt")
           .map((span) => ({
             error: span.attributes.get("error.type"),
-            attempt: span.attributes.get("opencode.retry.attempt"),
+            attempt: span.attributes.get("ruth.retry.attempt"),
           })),
       ).toEqual([
         { error: "Transport", attempt: undefined },
@@ -6916,7 +6916,7 @@ describe("SessionRunnerLLM", () => {
     expect(yield* recordedEventTypes(sessionID)).not.toContain("session.retry.scheduled.1")
   })
 
-  scenario("records OpenCode Console's Go usage limit 429 as a typed step failure without retrying", function* (s) {
+  scenario("records Zen Console's Go usage limit 429 as a typed step failure without retrying", function* (s) {
     // The exact refusal Console sends a Go subscriber at a limit.
     const body = JSON.stringify({
       type: "error",
@@ -6944,7 +6944,7 @@ describe("SessionRunnerLLM", () => {
           error: {
             type: "provider.go-limit",
             message:
-              "OpenCode Go 5 hour usage limit reached. Switch to a free model, or turn on Extra Usage on the Go page in OpenCode Console to keep going.",
+              "Zen Go 5 hour usage limit reached. Switch to a free model, or turn on Extra Usage on the Go page in Zen Console to keep going.",
             status: 429,
             response: { body },
             retryAfterMs: 3_600_000,

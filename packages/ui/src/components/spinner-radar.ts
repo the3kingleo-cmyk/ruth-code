@@ -73,11 +73,15 @@ function layout() {
     const others = placed.filter((other) => other !== dot && !other.steady && ringOf(other.cell) === ringOf(dot.cell))
     const behind = Math.min(...others.map((other) => frac(dot.at - other.at)))
     const ahead = Math.min(...others.map((other) => frac(other.at - dot.at)))
+
     return `${round(behind)} ${round(ahead)}`
   })
+
   const unique = [...new Set(keys.filter((key) => key !== ""))]
+
   const shapes = unique.map((key) => {
     const [behind, ahead] = key.split(" ").map(Number)
+
     return headStops(behind! * 100, ahead! * 100)
   })
 

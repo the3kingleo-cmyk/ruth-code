@@ -1,22 +1,22 @@
 import path from "path"
 import { describe, expect } from "bun:test"
 import { Effect, Exit, Fiber, Layer, Scope, Stream } from "effect"
-import { Agent } from "@opencode/core/agent"
-import { Bus } from "@opencode/core/bus"
-import { AppNodeBuilder } from "@opencode/core/effect/app-node-builder"
-import { LayerNode } from "@opencode/util/effect/layer-node"
-import { Location } from "@opencode/core/location"
-import { Permission } from "@opencode/core/permission"
-import { AgentPlugin } from "@opencode/core/plugin/agent"
-import { AbsolutePath } from "@opencode/core/schema"
-import { Global } from "@opencode/util/global"
+import { Agent } from "@ruth/core/agent"
+import { Bus } from "@ruth/core/bus"
+import { AppNodeBuilder } from "@ruth/core/effect/app-node-builder"
+import { LayerNode } from "@ruth/util/effect/layer-node"
+import { Location } from "@ruth/core/location"
+import { Permission } from "@ruth/core/permission"
+import { AgentPlugin } from "@ruth/core/plugin/agent"
+import { AbsolutePath } from "@ruth/core/schema"
+import { Global } from "@ruth/util/global"
 import { location } from "./fixture/location"
 import { testEffect } from "./lib/effect"
 import { agentHost, host } from "./plugin/host"
 
 const testLocation = location({ directory: AbsolutePath.make("/project") })
 const locationLayer = Layer.succeed(Location.Service, Location.Service.of(testLocation))
-const global = Global.make({ data: "/data", config: "/config", tmp: "/tmp/opencode" })
+const global = Global.make({ data: "/data", config: "/config", tmp: "/tmp/ruth" })
 const globalLayer = Layer.succeed(Global.Service, Global.Service.of(global))
 
 const it = testEffect(
@@ -207,8 +207,8 @@ describe("Agent", () => {
       const explore = yield* agent.get(Agent.ID.make("explore"))
       expect(Permission.evaluate("shell", "git log -5", explore?.permissions ?? []).effect).toBe("allow")
       expect(Permission.evaluate("edit", "src/index.ts", explore?.permissions ?? []).effect).toBe("deny")
-      expect(Permission.evaluate("read", ".env", explore?.permissions ?? []).effect).toBe("ask")
-      expect(Permission.evaluate("read", ".env.local", explore?.permissions ?? []).effect).toBe("ask")
+      expect(Permission.evaluate("read", ".env", explore?.permissions ?? []).effect).toBe("deny")
+      expect(Permission.evaluate("read", ".env.local", explore?.permissions ?? []).effect).toBe("deny")
       expect(Permission.evaluate("read", ".env.example", explore?.permissions ?? []).effect).toBe("allow")
       expect(Permission.evaluate("read", "src/index.ts", explore?.permissions ?? []).effect).toBe("allow")
       expect(Permission.evaluate("external_directory", "/outside/*", explore?.permissions ?? []).effect).toBe("allow")

@@ -1,26 +1,26 @@
 import { describe, expect } from "bun:test"
 import { and, asc, eq } from "drizzle-orm"
 import { Effect, Schema } from "effect"
-import { Database } from "@opencode/core/database/database"
-import { AppNodeBuilder } from "@opencode/core/effect/app-node-builder"
-import { LayerNode } from "@opencode/util/effect/layer-node"
-import { Bus } from "@opencode/core/bus"
-import { Event } from "@opencode/schema/event"
-import { EventTable } from "@opencode/core/event/sql"
-import { InstructionDiscovery } from "@opencode/core/instruction-discovery"
-import { Instructions } from "@opencode/core/instructions/index"
-import { Project } from "@opencode/core/project"
-import { ProjectTable } from "@opencode/core/project/sql"
-import { AbsolutePath } from "@opencode/core/schema"
-import { InstructionState } from "@opencode/core/session/instruction-state"
-import { SessionProjector } from "@opencode/core/session/projector"
-import { SessionSchema } from "@opencode/core/session/schema"
+import { Database } from "@ruth/core/database/database"
+import { AppNodeBuilder } from "@ruth/core/effect/app-node-builder"
+import { LayerNode } from "@ruth/util/effect/layer-node"
+import { Bus } from "@ruth/core/bus"
+import { Event } from "@ruth/schema/event"
+import { EventTable } from "@ruth/core/event/sql"
+import { InstructionDiscovery } from "@ruth/core/instruction-discovery"
+import { Instructions } from "@ruth/core/instructions/index"
+import { Project } from "@ruth/core/project"
+import { ProjectTable } from "@ruth/core/project/sql"
+import { AbsolutePath } from "@ruth/core/schema"
+import { InstructionState } from "@ruth/core/session/instruction-state"
+import { SessionProjector } from "@ruth/core/session/projector"
+import { SessionSchema } from "@ruth/core/session/schema"
 import {
   InstructionBlobTable,
   InstructionStateTable,
   SessionMessageTable,
   SessionTable,
-} from "@opencode/core/session/sql"
+} from "@ruth/core/session/sql"
 import { testEffect } from "./lib/effect"
 
 const it = testEffect(

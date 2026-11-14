@@ -1,5 +1,5 @@
 import { NodeFileSystem } from "@effect/platform-node"
-import { Global } from "@opencode/util/global"
+import { Global } from "@ruth/util/global"
 import { afterEach, beforeEach, expect, test } from "bun:test"
 import { Effect, FileSystem } from "effect"
 import fs from "node:fs/promises"
@@ -11,7 +11,7 @@ import { isolatedEnv } from "./fixture/environment"
 
 let root = ""
 beforeEach(async () => {
-  root = await fs.mkdtemp(path.join(os.tmpdir(), "opencode-pair-remote-consent-"))
+  root = await fs.mkdtemp(path.join(os.tmpdir(), "ruth-pair-remote-consent-"))
 })
 afterEach(async () => {
   await fs.rm(root, { recursive: true, force: true })
@@ -112,7 +112,7 @@ test("pair --remote without a terminal fails before enabling anything, and help 
     [
       "This will expose your Ruth server to the internet.",
       "Traffic is end-to-end encrypted, and access requires your server password.",
-      "To pair locally instead, run `opencode pair` without the --remote flag.",
+      "To pair locally instead, run `ruth pair` without the --remote flag.",
       "Run interactively or pass --yes to continue.",
       "",
     ].join(os.EOL),

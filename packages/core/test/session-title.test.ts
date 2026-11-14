@@ -9,32 +9,32 @@ import {
   SystemPart,
   TransportError,
   type LLMRequest,
-} from "@opencode/ai/effect"
-import { OpenAIChat, OpenAIResponses } from "@opencode/ai/protocols"
-import { Agent } from "@opencode/core/agent"
-import { Database } from "@opencode/core/database/database"
-import { AppNodeBuilder } from "@opencode/core/effect/app-node-builder"
-import { llmClient } from "@opencode/core/effect/app-node-platform"
-import { LayerNode } from "@opencode/util/effect/layer-node"
-import { Bus } from "@opencode/core/bus"
-import { SessionEvent } from "@opencode/core/session/event"
-import { SessionMessage } from "@opencode/core/session/message"
-import { SessionProjector } from "@opencode/core/session/projector"
-import { SessionRunnerModel } from "@opencode/core/session/runner/model"
-import { SessionTable } from "@opencode/core/session/sql"
-import { SessionStore } from "@opencode/core/session/store"
-import { SessionTitle } from "@opencode/core/session/title"
-import { PluginHooks } from "@opencode/core/plugin/hooks"
-import { PluginSupervisor } from "@opencode/core/plugin/supervisor"
-import { Location } from "@opencode/core/location"
-import { Session } from "@opencode/core/session"
-import { Project } from "@opencode/core/project"
-import { ProjectTable } from "@opencode/core/project/sql"
-import { App } from "@opencode/core/app"
-import { Model } from "@opencode/core/model"
-import { Provider } from "@opencode/core/provider"
-import { AbsolutePath } from "@opencode/core/schema"
-import { Money } from "@opencode/schema/money"
+} from "@ruth/ai/effect"
+import { OpenAIChat, OpenAIResponses } from "@ruth/ai/protocols"
+import { Agent } from "@ruth/core/agent"
+import { Database } from "@ruth/core/database/database"
+import { AppNodeBuilder } from "@ruth/core/effect/app-node-builder"
+import { llmClient } from "@ruth/core/effect/app-node-platform"
+import { LayerNode } from "@ruth/util/effect/layer-node"
+import { Bus } from "@ruth/core/bus"
+import { SessionEvent } from "@ruth/core/session/event"
+import { SessionMessage } from "@ruth/core/session/message"
+import { SessionProjector } from "@ruth/core/session/projector"
+import { SessionRunnerModel } from "@ruth/core/session/runner/model"
+import { SessionTable } from "@ruth/core/session/sql"
+import { SessionStore } from "@ruth/core/session/store"
+import { SessionTitle } from "@ruth/core/session/title"
+import { PluginHooks } from "@ruth/core/plugin/hooks"
+import { PluginSupervisor } from "@ruth/core/plugin/supervisor"
+import { Location } from "@ruth/core/location"
+import { Session } from "@ruth/core/session"
+import { Project } from "@ruth/core/project"
+import { ProjectTable } from "@ruth/core/project/sql"
+import { App } from "@ruth/core/app"
+import { Model } from "@ruth/core/model"
+import { Provider } from "@ruth/core/provider"
+import { AbsolutePath } from "@ruth/core/schema"
+import { Money } from "@ruth/schema/money"
 import { Deferred, Effect, Fiber, Layer, Schema, Stream } from "effect"
 import { testEffect } from "./lib/effect"
 
@@ -224,7 +224,7 @@ it.effect("generates a title from the sole user message and renames the session"
       "User-Agent": App.useragent(App.make()),
       "x-opencode-project": Project.ID.global,
       "x-opencode-session": sessionID,
-      "x-opencode-client": "opencode",
+      "x-opencode-client": "ruth",
     })
     expect(requests[0]?.promptCacheKey).toBe(sessionID)
     expect(requests[0]?.tools).toEqual([])

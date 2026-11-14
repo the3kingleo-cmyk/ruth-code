@@ -1,9 +1,9 @@
 import { describe, expect } from "bun:test"
 import { Effect } from "effect"
-import type { Job } from "@opencode/core/job"
-import { SessionBackground } from "@opencode/core/session/background"
-import { SessionMessage } from "@opencode/core/session/message"
-import { SessionSchema } from "@opencode/core/session/schema"
+import type { Job } from "@ruth/core/job"
+import { SessionBackground } from "@ruth/core/session/background"
+import { SessionMessage } from "@ruth/core/session/message"
+import { SessionSchema } from "@ruth/core/session/schema"
 import { it } from "./lib/effect"
 
 const root = SessionSchema.ID.make("ses_root")

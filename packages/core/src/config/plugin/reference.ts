@@ -1,19 +1,19 @@
 export * as ConfigReferencePlugin from "./reference.js"
 
-import { define } from "@opencode/plugin/effect/plugin"
-import { Document } from "@opencode/schema/config"
-import { ConfigReference } from "@opencode/schema/config/reference"
+import { define } from "@ruth/plugin/effect/plugin"
+import { Document } from "@ruth/schema/config"
+import { ConfigReference } from "@ruth/schema/config/reference"
 import path from "path"
 import { Effect } from "effect"
 import { Config } from "../../config.js"
 import { Reference } from "../../reference.js"
 import { AbsolutePath } from "../../schema.js"
-import { Global } from "@opencode/util/global"
+import { Global } from "@ruth/util/global"
 import { Location } from "../../location.js"
 import { ConfigEntryObserver } from "./entry-observer.js"
 
 export const Plugin = define({
-  id: "opencode.config.reference",
+  id: "ruth.config.reference",
   effect: Effect.fn(function* (ctx) {
     const config = yield* Config.Service
     const location = yield* Location.Service

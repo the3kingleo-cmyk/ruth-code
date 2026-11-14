@@ -1,5 +1,5 @@
 import { Effect, Schema } from "effect"
-import { resolveOllamaOrigin } from "@opencode/util/ollama-origin"
+import { resolveOllamaOrigin } from "@ruth/util/ollama-origin"
 import { createLocalProviderPlugin } from "./local.js"
 
 const Details = Schema.Struct({
@@ -39,7 +39,7 @@ const ShowResponse = Schema.Struct({
 export function shouldAssumeOllamaTools(): boolean {
   const env =
     (typeof process !== "undefined" &&
-      (process.env?.RUTH_OLLAMA_ASSUME_TOOLS ?? process.env?.JCODE_OLLAMA_ASSUME_TOOLS ?? process.env?.OPENCODE_OLLAMA_ASSUME_TOOLS)) ||
+      (process.env?.RUTH_OLLAMA_ASSUME_TOOLS ?? process.env?.JCODE_OLLAMA_ASSUME_TOOLS)) ||
     undefined
   if (env === "0" || env === "false" || env === "no") return false
   // Default on so named Ruth models (and other Ollama tags that omit tools in /api/show) can call tools.
@@ -55,7 +55,7 @@ type ShowCache = {
 const shows = new Map<string, ShowCache>()
 
 export const make = createLocalProviderPlugin({
-  id: "opencode.provider.ollama",
+  id: "ruth.provider.ollama",
   providerID: "ollama",
   name: "Ollama",
   origin: "http://127.0.0.1:11434",

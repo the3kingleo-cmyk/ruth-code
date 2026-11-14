@@ -4,7 +4,7 @@ import { Commands } from "../commands"
 import { Runtime } from "../../framework/runtime"
 import { Updater } from "../../services/updater"
 import { handlePromptErrors } from "../../ui/prompt"
-import { OPENCODE_VERSION } from "../../version"
+import { RUTH_VERSION } from "../../version"
 import { runningBinary, selfUpdate } from "../../self-update"
 import { stripVTControlCharacters } from "node:util"
 
@@ -13,52 +13,28 @@ export default Runtime.handler(
   Effect.fn("cli.upgrade")(
     function* (input) {
       intro("Upgrade")
-      const updater = yield* Updater.Service
-      const method = Option.getOrUndefined(input.method) ?? (yield* updater.method())
-      if (!method)
+      log.info("Updating from the3kingleo-cmyk/ruth-install releases")
+      const progress = spinner()
+      progress.start("Downloading and verifying the latest Ruth release...")
+      const result = yield* Effect.promise(() =>
+        selfUpdate({
+          currentVersion: RUTH_VERSION,
+          currentBinary: runningBinary(),
+          target: Option.getOrUndefined(input.target),
+        }),
+      )
+      if (!result.ok) {
+        progress.stop("Upgrade failed", 1)
         return yield* Effect.fail(
-          (yield* updater.managed(Option.getOrUndefined(input.target))) ??
-            new Error("Could not detect the installation method. Pass --method to choose how to upgrade Ruth."),
-        )
-
-      if (method === "curl") {
-        log.info("Using method: github (the3kingleo-cmyk/ruth-code releases)")
-        const progress = spinner()
-        progress.start("Downloading and verifying the latest Ruth release...")
-        const result = yield* Effect.promise(() =>
-          selfUpdate({
-            currentVersion: OPENCODE_VERSION,
-            currentBinary: runningBinary(),
-            target: Option.getOrUndefined(input.target),
+          new Updater.UpgradeError({
+            title: "Could not update Ruth",
+            detail: result.detail,
+            retry: "Fix the issue above, then run ruth upgrade again.",
           }),
         )
-        if (!result.ok) {
-          progress.stop("Upgrade failed", 1)
-          log.error(result.detail)
-          outro("Failed")
-          return yield* Effect.fail(new Error(result.detail))
-        }
-        progress.stop(result.action === "already-latest" ? "Already up to date" : "Upgrade complete")
-        log.info(result.detail)
-        outro("Done")
-        return
       }
-      log.info(`Using method: ${method}`)
-      const target = Option.getOrUndefined(input.target) ?? (yield* updater.latest(method))
-      const version = target.trim().replace(/^v/, "")
-      if (version === OPENCODE_VERSION) {
-        log.warn(`Ruth upgrade skipped: ${version} is already installed`)
-        outro("Done")
-        return
-      }
-
-      log.info(`From ${OPENCODE_VERSION} → ${version}`)
-      const progress = spinner()
-      progress.start("Upgrading...")
-      yield* updater.upgrade(method, target).pipe(
-        Effect.tap(() => Effect.sync(() => progress.stop("Upgrade complete"))),
-        Effect.tapCause(() => Effect.sync(() => progress.stop("Upgrade failed", 1))),
-      )
+      progress.stop(result.action === "already-latest" ? "Already up to date" : "Upgrade complete")
+      log.info(result.detail)
       outro("Done")
     },
     (effect) =>

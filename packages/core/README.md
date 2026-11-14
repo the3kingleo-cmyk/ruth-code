@@ -1,3 +1,3 @@
-# @opencode/core
+# @ruth/core
 
-Core runtime services for OpenCode.
+Core runtime services for Ruth.

@@ -48,7 +48,7 @@ case "$name" in
   *) cp "$tmpdir/$name" "$tmpdir/ruth" ;;
 esac
 
-bin="$(find "$tmpdir" -type f \( -name ruth -o -name jcode -o -name opencode \) | head -n 1)"
+bin="$(find "$tmpdir" -type f \( -name ruth -o -name jcode -o -name ruth \) | head -n 1)"
 [ -n "$bin" ] || die "Downloaded asset $name did not contain a ruth binary"
 
 mkdir -p "$RUTH_BIN_DIR"
@@ -152,11 +152,11 @@ install_plugin() {
     git clone --branch "$OMO_REPO_BRANCH" --single-branch "https://x-access-token:${TOKEN}@github.com/${OMO_REPO_SLUG}.git" "$OMO_INSTALL_DIR"
     git -C "$OMO_INSTALL_DIR" remote set-url origin "https://github.com/${OMO_REPO_SLUG}.git"
   fi
-  log "Building the Oh My OpenCode chromebook-lite plugin ..."
+  log "Building the Oh My Ruth chromebook-lite plugin ..."
   (
     cd "$OMO_INSTALL_DIR"
     bun install
-    bun run build || bun build packages/omo-opencode/src/index.ts --outdir dist --target bun --format esm --external zod
+    bun run build || bun build packages/omo-ruth/src/index.ts --outdir dist --target bun --format esm --external zod
   )
   [ -f "$OMO_INSTALL_DIR/dist/index.js" ] || log "warning: dist/index.js not found; the plugin may not load until the build succeeds"
 
@@ -182,7 +182,7 @@ if [ "$INSTALL_PLUGIN" = "1" ] || [ "$INSTALL_PLUGIN" = "true" ] || [ "$INSTALL_
   command -v jq >/dev/null 2>&1 || die "jq is required to register the plugin in ruth.json"
   install_plugin
 else
-  log "Skipping Oh My OpenCode plugin (INSTALL_PLUGIN=0). Set INSTALL_PLUGIN=1 to install it."
+  log "Skipping Oh My Ruth plugin (INSTALL_PLUGIN=0). Set INSTALL_PLUGIN=1 to install it."
 fi
 
 # Local chat model — first-run talks to the named Ruth Ollama model.
@@ -200,7 +200,7 @@ else
   log "Ollama is not on PATH. Install it from https://ollama.com, then: ruth doctor --repair"
 fi
 
-log "Cloud providers (OpenCode Zen and others) are not pre-keyed. After local chat works, you can run: ruth auth login"
+log "Cloud providers (Zen and others) are not pre-keyed. After local chat works, you can run: ruth auth login"
 log ""
 log "Next steps:"
 log "  1. source ~/.bashrc    (or open a new terminal so PATH includes ~/.local/bin)"

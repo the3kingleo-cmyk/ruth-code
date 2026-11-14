@@ -1,4 +1,4 @@
-import type { Plugin } from "@opencode/plugin/tui"
+import type { Plugin } from "@ruth/plugin/tui"
 import { useTerminalDimensions } from "@opentui/solid"
 import { onMount } from "solid-js"
 import { DialogHighlights } from "../../../component/dialog-highlights"
@@ -13,7 +13,7 @@ const items = [
   },
   {
     title: "Safer Remote Pairing",
-    body: "The first `opencode pair --remote` now warns that it will expose your server and asks for confirmation. For non-interactive use, pass `opencode pair --remote --yes`.",
+    body: "The first `ruth pair --remote` now warns that it will expose your server and asks for confirmation. For non-interactive use, pass `ruth pair --remote --yes`.",
   },
   {
     title: "Installable Web App",

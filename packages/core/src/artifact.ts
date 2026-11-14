@@ -14,10 +14,10 @@ import {
   Provider,
   ProviderID,
   UpdateInput,
-} from "@opencode/schema/artifact"
-import type { SessionID } from "@opencode/schema/session-id"
-import { Global } from "@opencode/util/global"
-import { makeLocationNode } from "@opencode/util/effect/app-node"
+} from "@ruth/schema/artifact"
+import type { SessionID } from "@ruth/schema/session-id"
+import { Global } from "@ruth/util/global"
+import { makeLocationNode } from "@ruth/util/effect/app-node"
 import { Clock, Context, Effect, Layer, Option, Schema } from "effect"
 import { Bus } from "./bus.js"
 import { Flag } from "./flag.js"
@@ -177,7 +177,7 @@ export interface Interface extends State.Transformable<Editor> {
   ) => Effect.Effect<LocalFile, DisabledError | NotFoundError | FileMissingError | InvalidError>
 }
 
-export class Service extends Context.Service<Service, Interface>()("@opencode/Artifact") {}
+export class Service extends Context.Service<Service, Interface>()("@ruth/Artifact") {}
 
 const StoredRecord = Schema.Struct({
   info: Info,

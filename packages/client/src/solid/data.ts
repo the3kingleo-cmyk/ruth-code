@@ -37,13 +37,13 @@ import type {
   ToolContent,
   UsageLimitsInfo,
   VcsInfo,
-  OpenCodeEvent,
-  OpenCodeClient,
+  RuthEvent,
+  RuthClient,
   WebSearchProvider,
 } from "../promise"
-import { Worktree } from "@opencode/schema/worktree"
-import { SessionID } from "@opencode/schema/session-id"
-import { SessionMessage } from "@opencode/schema/session-message"
+import { Worktree } from "@ruth/schema/worktree"
+import { SessionID } from "@ruth/schema/session-id"
+import { SessionMessage } from "@ruth/schema/session-message"
 import {
   isFormAlreadySettledError,
   isFormNotFoundError,
@@ -53,7 +53,7 @@ import {
   type SessionPromptInput,
 } from "../promise"
 import { createStore, produce, reconcile } from "solid-js/store"
-import type { SessionInbox } from "@opencode/schema/session-inbox"
+import type { SessionInbox } from "@ruth/schema/session-inbox"
 import { batch, createEffect, createMemo, createSignal, onCleanup } from "solid-js"
 
 export type DataSessionStatus = "idle" | "running"
@@ -63,19 +63,19 @@ export type DataSessionStatus = "idle" | "running"
  * execution that ended without delivering it, and `queued` waits for every steer to drain.
  */
 export type DataPendingStatus = "starting" | "steering" | "stranded" | "queued"
-type OpenCodeEventMap = { [Type in OpenCodeEvent["type"]]: Extract<OpenCodeEvent, { type: Type }> }
+type RuthEventMap = { [Type in RuthEvent["type"]]: Extract<RuthEvent, { type: Type }> }
 
 export type CreateDataInput = {
-  readonly api: () => OpenCodeClient
+  readonly api: () => RuthClient
   readonly directory: string
   /** Raw-message window used for an initial transcript read. Older pages retain their normal size. */
   readonly initialMessageLimit?: () => number
   readonly event: {
-    readonly on: <Type extends OpenCodeEvent["type"]>(
+    readonly on: <Type extends RuthEvent["type"]>(
       type: Type,
-      handler: (event: OpenCodeEventMap[Type]) => void,
+      handler: (event: RuthEventMap[Type]) => void,
     ) => () => void
-    readonly listen: (handler: (event: { name: OpenCodeEvent["type"]; details: OpenCodeEvent }) => void) => () => void
+    readonly listen: (handler: (event: { name: RuthEvent["type"]; details: RuthEvent }) => void) => () => void
   }
   readonly connection?: {
     readonly status: () => "connected" | "connecting" | "reconnecting"
@@ -113,7 +113,7 @@ type LocationData = {
   provider?: ProviderInfo[]
   reference?: ReferenceInfo[]
   websearch?: WebSearchProvider[]
-  // The Go allowance and Console budgets of the OpenCode Console workspace the location is signed in to; null when it
+  // The Go allowance and Console budgets of the Zen Console workspace the location is signed in to; null when it
   // isn't signed in.
   usageLimits?: UsageLimitsInfo | null
   // Currently running shell commands for this location, keyed by shell id. Entries are removed
@@ -214,7 +214,7 @@ function formRequestOptions(sessionID: string, ref?: LocationRef) {
   if (sessionID !== "global" || !ref) return undefined
   return {
     headers: {
-      "x-opencode-directory": encodeURIComponent(ref.directory),
+      "x-ruth-directory": encodeURIComponent(ref.directory),
     },
   }
 }
@@ -738,7 +738,7 @@ export function createData(config: CreateDataInput) {
     )
   }
 
-  function handleEvent(event: OpenCodeEvent) {
+  function handleEvent(event: RuthEvent) {
     switch (event.type) {
       case "server.connected": {
         const updates = new Map<string, DataSessionStatus | undefined>()
@@ -1494,7 +1494,7 @@ export function createData(config: CreateDataInput) {
   // A cached per-location catalog. `sync` loads once per invalidation, keyed by the
   // effective location, and publishes under the server's canonical location; `alias`
   // also publishes under the requested key when the two differ.
-  // Reloads usage limits only where something has read them, since each load asks OpenCode Console.
+  // Reloads usage limits only where something has read them, since each load asks Zen Console.
   function refreshUsageLimits(location: LocationRef) {
     const loaded =
       store.location[locationKey(location)]?.usageLimits !== undefined ||

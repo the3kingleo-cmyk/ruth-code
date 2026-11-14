@@ -1,24 +1,19 @@
 #!/usr/bin/env bun
-// The GUI plugin SDK is learned from editor hovers and the guide, so both are checked. Fails, naming each file and
+// The GUI plugin SDK is learned from editor hovers, so its doc comments are checked. Fails, naming each file and
 // line, when in `packages/plugin/src/gui`:
 // - an exported declaration, an interface member, a field of an object type (an option, a result, a union member), or
 //   a member of an exported object such as `Store.global` has no doc comment;
 // - a documented function or method leaves a parameter without `@param`, or names one it does not have.
-// It also fails when a code block of the guide (`packages/gui-plugins/README.md`) marked `<!-- source: path -->` (a
-// whole file of a built-in plugin) or `<!-- source: path#name -->` (a top-level declaration or call named `name`,
-// else the first nested match, with the comments directly above it) differs from that source, or when the
-// guide or the package's AGENTS.md names a `ctx.<member>` no context declares.
 // Usage: bun script/sdk-docs.ts
 import path from "node:path"
 import { Glob } from "bun"
 import ts from "typescript"
 
 const root = path.resolve(import.meta.dir, "..")
-const pkg = path.join(root, "packages/gui-plugins")
 const sdk = path.join(root, "packages/plugin/src/gui")
 
 const problems: string[] = []
-const counts = { declarations: 0, members: 0, parameters: 0, blocks: 0 }
+const counts = { declarations: 0, members: 0, parameters: 0 }
 
 const files = [...new Glob("**/*.{ts,tsx}").scanSync(sdk)]
   .filter((file) => !/\.(test|typecheck)\.tsx?$/.test(file))
@@ -28,12 +23,11 @@ const files = [...new Glob("**/*.{ts,tsx}").scanSync(sdk)]
 const sources = await Promise.all(files.map(async (file) => parse(file, await Bun.file(file).text())))
 
 sources.forEach((source) => source.statements.forEach((statement) => checkStatement(source, statement)))
-await checkGuide()
 
 problems.forEach((problem) => console.log(problem))
 console.log(
   `sdk-docs: ${counts.declarations} declarations, ${counts.members} members and ${counts.parameters} parameters ` +
-    `documented in ${files.length} files; ${counts.blocks} guide blocks match their source; ${problems.length} problem(s)`,
+    `documented in ${files.length} files; ${problems.length} problem(s)`,
 )
 process.exit(problems.length > 0 ? 1 : 0)
 
@@ -191,132 +185,6 @@ function relative(file: string) {
   return path.relative(root, file).replaceAll(path.sep, "/")
 }
 
-/** The guide's marked code blocks match their source, and every `ctx.*` the guide and AGENTS.md name exists. */
-async function checkGuide() {
-  const guide = path.join(pkg, "README.md")
-  const lines = (await read(guide)).split("\n")
-
-  const blocks = lines.flatMap((line, index) => {
-    const marker = /^<!-- source: ([^#\s]+)(?:#([\w$]+))? -->$/.exec(line.trim())
-
-    if (!marker?.[1]) return []
-
-    const fence = lines.findIndex((candidate, next) => next > index && candidate.startsWith("```"))
-    const close = lines.findIndex((candidate, next) => next > fence && candidate.trim() === "```")
-    const at = `${relative(guide)}:${index + 1}`
-
-    if (fence === -1 || close === -1 || lines.slice(index + 1, fence).some((between) => between.trim() !== "")) {
-      problems.push(`${at}  the source marker is not followed by a code block`)
-
-      return []
-    }
-
-    return [{ at, file: path.join(pkg, marker[1]), name: marker[2], code: lines.slice(fence + 1, close) }]
-  })
-
-  await Promise.all(
-    blocks.map(async (block) => {
-      const label = `${relative(block.file)}${block.name ? `#${block.name}` : ""}`
-      const text = await Bun.file(block.file)
-        .text()
-        .catch(() => undefined)
-
-      if (text === undefined) return void problems.push(`${block.at}  ${label}: no such file`)
-
-      const expected = excerpt(block.file, text.replaceAll("\r\n", "\n"), block.name)
-
-      if (!expected) return void problems.push(`${block.at}  ${label}: nothing by that name`)
-
-      const row = Array.from({ length: Math.max(expected.length, block.code.length) }, (_, row) => row).find(
-        (row) => expected[row] !== block.code[row],
-      )
-
-      if (row === undefined) return void counts.blocks++
-
-      problems.push(`${block.at}  the code block differs from ${label} at its line ${row + 1}`)
-    }),
-  )
-
-  const members = contextMembers()
-
-  await Promise.all(
-    [guide, path.join(pkg, "AGENTS.md")].map(async (doc) =>
-      (await read(doc)).split("\n").forEach((line, index) =>
-        [...line.matchAll(/\bctx\.([A-Za-z]+)/g)].forEach((match) => {
-          if (match[1] && !members.has(match[1]))
-            problems.push(`${relative(doc)}:${index + 1}  \`ctx.${match[1]}\` is not a context member`)
-        }),
-      ),
-    ),
-  )
-}
-
-async function read(file: string) {
-  return (await Bun.file(file).text()).replaceAll("\r\n", "\n")
-}
-
-/**
- * The file's lines, or, for a name, the lines of its top-level match (else the first nested match), with the comment
- * lines directly above it, dedented.
- */
-function excerpt(file: string, text: string, name: string | undefined) {
-  const lines = text.replace(/\n$/, "").split("\n")
-
-  if (!name) return lines
-
-  const source = parse(file, text)
-  const node = named(source, name)
-
-  if (!node) return undefined
-
-  const first = source.getLineAndCharacterOfPosition(node.getStart(source)).line
-  const last = source.getLineAndCharacterOfPosition(node.getEnd()).line
-  const above = lines.slice(0, first).findLastIndex((line) => !/^\s*(\/\/|\/\*|\*)/.test(line)) + 1
-  const picked = lines.slice(above, last + 1)
-  const indent = Math.min(...picked.filter((line) => line.trim()).map((line) => /^\s*/.exec(line)?.[0].length ?? 0))
-
-  return picked.map((line) => line.slice(indent))
-}
-
-/** Top-level matches win; otherwise find the first nested declaration, property or call in source order. */
-function named(node: ts.Node, name: string): ts.Node | undefined {
-  if (ts.isSourceFile(node)) {
-    const top = node.statements.find((statement) => matches(statement, name))
-
-    if (top) return top
-  }
-
-  if (matches(node, name)) return node
-
-  return ts.forEachChild(node, (child) => named(child, name))
-}
-
-function matches(node: ts.Node, name: string) {
-  if (ts.isVariableStatement(node)) {
-    return node.declarationList.declarations.some((declaration) => declaration.name.getText() === name)
-  }
-
-  if (
-    (ts.isFunctionDeclaration(node) ||
-      ts.isClassDeclaration(node) ||
-      ts.isInterfaceDeclaration(node) ||
-      ts.isTypeAliasDeclaration(node) ||
-      ts.isPropertyAssignment(node) ||
-      ts.isMethodDeclaration(node)) &&
-    node.name?.getText() === name
-  )
-    return true
-
-  if (
-    ts.isExpressionStatement(node) &&
-    ts.isCallExpression(node.expression) &&
-    node.expression.expression.getText() === name
-  )
-    return true
-
-  return false
-}
-
 function parse(file: string, text: string) {
   return ts.createSourceFile(
     file,
@@ -324,20 +192,5 @@ function parse(file: string, text: string) {
     ts.ScriptTarget.Latest,
     true,
     file.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
-  )
-}
-
-/** Every member a window or main context exposes: `BaseContext`, `Context`, `SetupContext` and `MainContext`. */
-function contextMembers() {
-  const names = new Set(["BaseContext", "Context", "SetupContext", "MainContext"])
-
-  return new Set(
-    sources.flatMap((source) =>
-      source.statements.flatMap((statement) =>
-        ts.isInterfaceDeclaration(statement) && names.has(statement.name.text)
-          ? statement.members.flatMap((member) => (member.name ? [member.name.getText(source)] : []))
-          : [],
-      ),
-    ),
   )
 }

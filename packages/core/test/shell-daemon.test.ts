@@ -4,23 +4,23 @@ import { mkdir, rm, utimes, writeFile } from "node:fs/promises"
 import path from "node:path"
 import { Context, Effect, Fiber, Layer } from "effect"
 import { TestClock } from "effect/testing"
-import { AppNodeBuilder } from "@opencode/core/effect/app-node-builder"
-import { PersistentPty } from "@opencode/core/persistent-pty"
-import { Config } from "@opencode/core/config"
-import { Environment } from "@opencode/core/environment/index"
-import { Location } from "@opencode/core/location"
-import { AbsolutePath } from "@opencode/core/schema"
-import { Shell } from "@opencode/core/shell"
-import { Bus } from "@opencode/core/bus"
-import { Global } from "@opencode/util/global"
-import { FSUtil } from "@opencode/util/fs-util"
-import { LayerNode } from "@opencode/util/effect/layer-node"
-import { AppProcess } from "@opencode/util/process"
+import { AppNodeBuilder } from "@ruth/core/effect/app-node-builder"
+import { PersistentPty } from "@ruth/core/persistent-pty"
+import { Config } from "@ruth/core/config"
+import { Environment } from "@ruth/core/environment/index"
+import { Location } from "@ruth/core/location"
+import { AbsolutePath } from "@ruth/core/schema"
+import { Shell } from "@ruth/core/shell"
+import { Bus } from "@ruth/core/bus"
+import { Global } from "@ruth/util/global"
+import { FSUtil } from "@ruth/util/fs-util"
+import { LayerNode } from "@ruth/util/effect/layer-node"
+import { AppProcess } from "@ruth/util/process"
 import { hostEnvironmentLayer } from "./fixture/environment"
 import { location } from "./fixture/location"
 import { daemonShells, until } from "./fixture/shell-daemon"
 import { tmpdirScoped } from "./fixture/tmpdir"
-import { binaryPath } from "@opencode/pty"
+import { binaryPath } from "@ruth/pty"
 import { it } from "./lib/effect"
 
 const windows = process.platform === "win32"
@@ -32,8 +32,8 @@ describe("Shell on the process daemon", () => {
     Effect.gen(function* () {
       const env = yield* daemonShells()
       yield* Effect.promise(() => mkdir(path.join(env.directory, "sub")))
-      process.env.OPENCODE_TEST_REMOVED = "1"
-      yield* Effect.addFinalizer(() => Effect.sync(() => delete process.env.OPENCODE_TEST_REMOVED))
+      process.env.RUTH_TEST_REMOVED = "1"
+      yield* Effect.addFinalizer(() => Effect.sync(() => delete process.env.RUTH_TEST_REMOVED))
       yield* env.withShell(env.directory, (shell) =>
         Effect.gen(function* () {
           const info = yield* shell.create(
@@ -46,8 +46,8 @@ describe("Shell on the process daemon", () => {
             },
             (invocation) =>
               Effect.sync(() => {
-                delete invocation.env.OPENCODE_TEST_REMOVED
-                invocation.env.OPENCODE_TEST_UNSET = undefined
+                delete invocation.env.RUTH_TEST_REMOVED
+                invocation.env.RUTH_TEST_UNSET = undefined
               }),
           )
           const [request] = env.created()
@@ -65,9 +65,9 @@ describe("Shell on the process daemon", () => {
               timeoutDeadline: expect.any(Number),
             },
           })
-          expect(request?.env).toMatchObject({ TERM: "xterm-256color", OPENCODE_TERMINAL: "1" })
-          expect(request?.env).not.toHaveProperty("OPENCODE_TEST_REMOVED")
-          expect(request?.env).not.toHaveProperty("OPENCODE_TEST_UNSET")
+          expect(request?.env).toMatchObject({ TERM: "xterm-256color", RUTH_TERMINAL: "1" })
+          expect(request?.env).not.toHaveProperty("RUTH_TEST_REMOVED")
+          expect(request?.env).not.toHaveProperty("RUTH_TEST_UNSET")
           expect(info).toMatchObject({ status: "running", pid: 1001, cwd: path.join(env.directory, "sub") })
           expect(env.spawned()).toBe(0)
 
@@ -491,8 +491,8 @@ describe("Shell on the process daemon", () => {
   )
 })
 
-// Against the real opencode-pty, like server/test/persistent-pty.test.ts.
-const binary = process.env.OPENCODE_PTY_BIN ?? binaryPath
+// Against the real ruth-pty, like server/test/persistent-pty.test.ts.
+const binary = process.env.RUTH_PTY_BIN ?? binaryPath
 const real = binary !== undefined && existsSync(binary) ? it.live : it.live.skip
 
 describe("Shell on a real process daemon", () => {
@@ -505,8 +505,8 @@ describe("Shell on a real process daemon", () => {
         const state = path.join(data, "state")
         const global = Global.layerWith({ data, state })
         const started = () => existsSync(path.join(state, "pty")) && readdirSync(path.join(state, "pty")).length > 0
-        process.env.OPENCODE_TEST_REMOVED = "1"
-        yield* Effect.addFinalizer(() => Effect.sync(() => delete process.env.OPENCODE_TEST_REMOVED))
+        process.env.RUTH_TEST_REMOVED = "1"
+        yield* Effect.addFinalizer(() => Effect.sync(() => delete process.env.RUTH_TEST_REMOVED))
         yield* Effect.gen(function* () {
           const shell = yield* Shell.Service
           const pty = yield* PersistentPty.Service
@@ -516,12 +516,12 @@ describe("Shell on a real process daemon", () => {
             {
               shell: windows ? (Bun.which("pwsh") ?? "powershell.exe") : "/bin/sh",
               command: windows
-                ? "if ($env:OPENCODE_TEST_REMOVED) { exit 1 }; [Console]::Out.Write('unset|' + $env:TERM + '|' + $PWD.Path + [char]10 + 'tail')"
-                : 'printf "%s|%s|%s\\n" "${OPENCODE_TEST_REMOVED:-unset}" "$TERM" "$(pwd)"; printf tail',
+                ? "if ($env:RUTH_TEST_REMOVED) { exit 1 }; [Console]::Out.Write('unset|' + $env:TERM + '|' + $PWD.Path + [char]10 + 'tail')"
+                : 'printf "%s|%s|%s\\n" "${RUTH_TEST_REMOVED:-unset}" "$TERM" "$(pwd)"; printf tail',
             },
             (invocation) =>
               Effect.sync(() => {
-                delete invocation.env.OPENCODE_TEST_REMOVED
+                delete invocation.env.RUTH_TEST_REMOVED
               }),
           )
           expect(started()).toBe(true)

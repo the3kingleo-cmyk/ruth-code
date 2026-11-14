@@ -2,32 +2,32 @@
   "build": { "command": "bun run build", "cwd": "packages/app", "output": "packages/app/dist" },
   "serve": { "command": "bun e2e/utils/serve.ts --host 127.0.0.1 --port {port}", "cwd": "packages/app" },
   "apps": {
-    "opencode": {
+    "ruth": {
       "exe": {
-        "windows": "%LOCALAPPDATA%/Programs/ai.opencode.desktop/OpenCode.exe",
-        "macos": "/Applications/OpenCode.app/Contents/MacOS/OpenCode"
+        "windows": "%LOCALAPPDATA%/Programs/ai.ruth.desktop/Ruth.exe",
+        "macos": "/Applications/Ruth.app/Contents/MacOS/Ruth"
       },
-      "unset": ["OPENCODE_*", "OTEL_*", "SENTRY_*"],
+      "unset": ["RUTH_*", "OTEL_*", "SENTRY_*"],
       "env": {
-        "OPENCODE_DB": "{home}/.local/share/opencode/opencode.db",
-        "OPENCODE_CONFIG_DIR": "{home}/.config/opencode",
+        "RUTH_DB": "{home}/.local/share/ruth/ruth.db",
+        "RUTH_CONFIG_DIR": "{home}/.config/ruth",
         "HTTP_PROXY": "http://127.0.0.1:9",
         "HTTPS_PROXY": "http://127.0.0.1:9",
         "NO_PROXY": "localhost,127.0.0.1,::1"
       },
-      "dirs": [".local/share/opencode"],
+      "dirs": [".local/share/ruth"],
       "files": {
-        ".config/opencode/service.json": { "port": "{port}" },
-        "AppData/Local/@opencodedesktop-updater": "a file, not a folder: the updater cannot stage a download while strobe measures"
+        ".config/ruth/service.json": { "port": "{port}" },
+        "AppData/Local/@ruthdesktop-updater": "a file, not a folder: the updater cannot stage a download while strobe measures"
       },
-      "guard": [{ "file": "~/.local/state/opencode/service.json", "pid": "pid", "url": "url" }],
-      "protocols": ["opencode"]
+      "guard": [{ "file": "~/.local/state/ruth/service.json", "pid": "pid", "url": "url" }],
+      "protocols": ["ruth"]
     },
-    "opencode-beta": {
-      "extends": "opencode",
+    "ruth-beta": {
+      "extends": "ruth",
       "exe": {
-        "windows": "%LOCALAPPDATA%/Programs/ai.opencode.desktop.beta/OpenCode Beta.exe",
-        "macos": "/Applications/OpenCode Beta.app/Contents/MacOS/OpenCode Beta"
+        "windows": "%LOCALAPPDATA%/Programs/ai.ruth.desktop.beta/Ruth Beta.exe",
+        "macos": "/Applications/Ruth Beta.app/Contents/MacOS/Ruth Beta"
       }
     }
   }

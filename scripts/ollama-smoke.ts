@@ -8,7 +8,7 @@
 import { extractToolCallFromText } from "../packages/ai/src/tool-call-extract.ts"
 
 const host = process.env.OLLAMA_HOST ?? "http://127.0.0.1:11434"
-const model = process.env.RUTH_SMOKE_MODEL ?? process.env.JCODE_SMOKE_MODEL ?? process.env.OPENCODE_SMOKE_MODEL ?? "huihui_ai/qwen3-abliterated:1.7b"
+const model = process.env.RUTH_SMOKE_MODEL ?? process.env.JCODE_SMOKE_MODEL ?? process.env.RUTH_SMOKE_MODEL ?? "huihui_ai/qwen3-abliterated:1.7b"
 const tools = [
   {
     type: "function",

@@ -1,6 +1,6 @@
 import { batch, onCleanup } from "solid-js"
 import { createStore } from "solid-js/store"
-import type { OpenCodeClient, OpenCodeEvent } from "../promise"
+import type { RuthClient, RuthEvent } from "../promise"
 
 export type ClientConnectionStatus = "connected" | "connecting" | "reconnecting"
 export type ClientConnectionEvent = {
@@ -14,8 +14,8 @@ export type ClientConnectionEvent = {
 }
 
 export type ClientConnectionOptions = {
-  readonly reconnect?: (signal: AbortSignal) => Promise<OpenCodeClient>
-  readonly onEvent: (event: OpenCodeEvent) => void
+  readonly reconnect?: (signal: AbortSignal) => Promise<RuthClient>
+  readonly onEvent: (event: RuthEvent) => void
   readonly flushInterval?: number
   readonly pageLifecycle?: boolean
   /**
@@ -37,14 +37,14 @@ export const defaultIdleTimeout = 600_000
 
 /**
  * Resolve the event-stream idle timeout in milliseconds.
- * `RUTH_SSE_IDLE_TIMEOUT` (then `JCODE_SSE_IDLE_TIMEOUT`, then `OPENCODE_SSE_IDLE_TIMEOUT`) overrides the default.
+ * `RUTH_SSE_IDLE_TIMEOUT` (then `JCODE_SSE_IDLE_TIMEOUT`) overrides the default.
  * Use `0`, `false`, or `off` to disable the watchdog.
  */
 export function resolveIdleTimeoutMs(override?: number): number {
   if (override !== undefined) return override
   const env =
     (typeof process !== "undefined" &&
-      (process.env?.RUTH_SSE_IDLE_TIMEOUT ?? process.env?.JCODE_SSE_IDLE_TIMEOUT ?? process.env?.OPENCODE_SSE_IDLE_TIMEOUT)) ||
+      (process.env?.RUTH_SSE_IDLE_TIMEOUT ?? process.env?.JCODE_SSE_IDLE_TIMEOUT)) ||
     undefined
   if (env === "0" || env === "false" || env === "off") return 0
   if (env !== undefined && env !== "") {
@@ -57,7 +57,7 @@ export function resolveIdleTimeoutMs(override?: number): number {
 // returns to the foreground is probably half-open after the device slept.
 export const foregroundIdleThreshold = 20_000
 
-export function createClientConnection(initialApi: OpenCodeClient, options: ClientConnectionOptions) {
+export function createClientConnection(initialApi: RuthClient, options: ClientConnectionOptions) {
   const abort = new AbortController()
   const history: ClientConnectionEvent[] = []
   const idleTimeout = resolveIdleTimeoutMs(options.idleTimeout)
@@ -67,7 +67,7 @@ export function createClientConnection(initialApi: OpenCodeClient, options: Clie
     error?: string
   }>({ status: "connecting", attempt: 0 })
   let api = initialApi
-  let pending: OpenCodeEvent[] = []
+  let pending: RuthEvent[] = []
   let flushTimer: ReturnType<typeof setTimeout> | undefined
   let stream: AbortController | undefined
   let current: AbortController | undefined
@@ -82,7 +82,7 @@ export function createClientConnection(initialApi: OpenCodeClient, options: Clie
     if (history.length > connectionHistoryLimit) history.shift()
   }
 
-  function publish(event: OpenCodeEvent) {
+  function publish(event: RuthEvent) {
     pending.push(event)
     if (flushTimer) return
     flushTimer = setTimeout(() => {

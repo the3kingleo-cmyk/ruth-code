@@ -1,6 +1,6 @@
 # Chromebook lite setup for Ruth
 
-This is a personal fork of OpenCode, rebranded as Ruth (`ruth`). See `LICENSE` and `NOTICE`.
+This is a personal fork of Ruth, rebranded as Ruth (`ruth`). See `LICENSE` and `NOTICE`.
 
 It is meant for an HP Chromebook (or similar) running ChromeOS + Linux (Crostini), with about 6–8 GB of RAM, local Ollama, and no dedicated GPU.
 
@@ -13,7 +13,7 @@ It is meant for an HP Chromebook (or similar) running ChromeOS + Linux (Crostini
 
 The installer and `ruth doctor --repair` build these from `huihui_ai/qwen3-abliterated` (Qwen3 is Apache 2.0). The 1.7B model is small; prefer `ruth-pro` when tool use is unreliable.
 
-A short local-model prompt for Qwen-family and named Ruth models ships in this core (plugin id `opencode.prompt.qwen`).
+A short local-model prompt for Qwen-family and named Ruth models ships in this core (plugin id `ruth.prompt.qwen`).
 
 ## What this fork changes
 
@@ -23,11 +23,11 @@ A short local-model prompt for Qwen-family and named Ruth models ships in this c
 - Title generation is capped at 128 output tokens.
 - Conservative extraction of a single `{name, arguments}` tool call from assistant text.
 - `RUTH_OLLAMA_ASSUME_TOOLS=1` treats configured Ollama models as tool-capable.
-- The Oh My OpenCode chromebook-lite plugin is installed by default. It keeps todo-continuation on, but caps and loop-guards it, and adds a memory guard. The file watcher stays on unless memory is low.
+- The Oh My Ruth chromebook-lite plugin is installed by default. It keeps todo-continuation on, but caps and loop-guards it, and adds a memory guard. The file watcher stays on unless memory is low.
 
 ## Recommended config
 
-See `presets/ruth.json`. Important environment variables (`RUTH_*` preferred; `JCODE_*` and `OPENCODE_*` also work):
+See `presets/ruth.json`. Important environment variables (`RUTH_*` preferred; `JCODE_*` and `RUTH_*` also work):
 
 ```bash
 export RUTH_DISABLE_FILEWATCHER=1
@@ -36,7 +36,7 @@ export RUTH_SSE_IDLE_TIMEOUT=600000
 export RUTH_OLLAMA_ASSUME_TOOLS=1
 ```
 
-The OpenCode provider id (`opencode`) is unchanged so OpenCode Zen cloud models and `ruth auth login` keep working.
+The Ruth provider id (`opencode`) is unchanged so Zen cloud models and `ruth auth login` keep working.
 
 ## Install
 
@@ -53,7 +53,7 @@ Do not use `https://the3kingleo-cmyk.github.io/ruth-install`.
 
 ## Cloud providers
 
-This repository does not ship API keys. To use OpenCode Zen or other hosted providers:
+This repository does not ship API keys. To use Zen or other hosted providers:
 
 ```bash
 ruth auth login

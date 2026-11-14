@@ -1,8 +1,8 @@
-import { Database } from "@opencode/core/database/database"
-import { ModelsDev } from "@opencode/core/models-dev"
-import { PersistentPty } from "@opencode/core/persistent-pty"
+import { Database } from "@ruth/core/database/database"
+import { ModelsDev } from "@ruth/core/models-dev"
+import { PersistentPty } from "@ruth/core/persistent-pty"
 import { Schema } from "effect"
-import type { LayerNodePlatform } from "@opencode/util/effect/app-node-platform"
+import type { LayerNodePlatform } from "@ruth/util/effect/app-node-platform"
 
 export const ServerOptions = Schema.Struct({
   app: Schema.optional(
@@ -26,7 +26,7 @@ export const ServerOptions = Schema.Struct({
   ),
   models: Schema.optional(ModelsDev.Options),
   /**
-   * Replaces `globalThis.fetch` for OpenCode's own HTTP requests: OpenCode Console config, model requests, web fetch
+   * Replaces `globalThis.fetch` for Ruth's own HTTP requests: Zen Console config, model requests, web fetch
    * and search, well-known config, and remote MCP servers. Agent code in Code Mode keeps `globalThis.fetch`. For
    * example, a Cloudflare Worker can route requests through a Service Binding.
    */

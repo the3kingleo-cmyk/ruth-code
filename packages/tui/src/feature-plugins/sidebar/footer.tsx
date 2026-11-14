@@ -1,4 +1,4 @@
-import { Plugin } from "@opencode/plugin/tui"
+import { Plugin } from "@ruth/plugin/tui"
 import { createMemo, Show } from "solid-js"
 import { useTerminalDimensions } from "@opentui/solid"
 import { FilePath } from "../../ui/file-path"
@@ -115,7 +115,7 @@ function SidebarFooter(props: { context: Plugin.Context; sessionID: string }) {
 }
 
 export default Plugin.define({
-  id: "opencode.sidebar.footer",
+  id: "ruth.sidebar.footer",
   setup(context) {
     // Append keeps the path open to additive plugin claims; an external
     // replace still takes the boundary over.

@@ -11,8 +11,8 @@ import {
 } from "@opentui/core"
 import { useRenderer } from "@opentui/solid"
 import { createEffect, createSignal, untrack } from "solid-js"
-import { parseSessionMention, sessionMentions } from "@opencode/util/session-mention"
-import { displayLabel } from "@opencode/util/session-title-fallback"
+import { parseSessionMention, sessionMentions } from "@ruth/util/session-mention"
+import { displayLabel } from "@ruth/util/session-title-fallback"
 import { useData } from "../context/data"
 import { useRoute } from "../context/route"
 import { stringWidth } from "../util/string-width"
@@ -55,7 +55,7 @@ export function useSessionLinks() {
   function linkChunks(this: CodeRenderable, chunks: TextChunk[], context: ChunkRenderContext) {
     const style = context.syntaxStyle.mergeStyles("markup.link.url")
     // Like the web app, a code span links only when it is exactly a session ID, so a command such
-    // as `opencode --session ses_…` stays copyable. Marked by displayed offset, since detectLinks
+    // as `ruth --session ses_…` stays copyable. Marked by displayed offset, since detectLinks
     // can split chunks.
     const raw = context.highlights.filter(([, , group]) => group === "markup.raw" || group.startsWith("markup.raw."))
     let position = 0

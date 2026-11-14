@@ -1,7 +1,7 @@
 export * as CameraTool from "./camera.js"
 
-import { ToolFailure } from "@opencode/ai/effect"
-import type { Context } from "@opencode/plugin/effect/plugin"
+import { ToolFailure } from "@ruth/ai/effect"
+import type { Context } from "@ruth/plugin/effect/plugin"
 import { Effect, Schema } from "effect"
 import { promises as fs } from "node:fs"
 import { toolFailure } from "../runtime.js"
@@ -56,7 +56,7 @@ async function snap(device: string) {
 }
 
 export const Plugin = {
-  id: "opencode.tool.camera",
+  id: "ruth.tool.camera",
   effect: Effect.fn("CameraTool.Plugin")(function* (ctx: Context) {
     const permission = yield* Permission.Service
     yield* ctx.tool

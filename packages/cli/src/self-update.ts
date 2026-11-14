@@ -22,9 +22,9 @@ export type RunSync = (
 export function runningBinary(): string {
   const exec = process.execPath
   const base = path.basename(exec).replace(/\.exe$/i, "")
-  if (base === "ruth" || base === "jcode" || base === "opencode") return exec
+  if (base === "ruth" || base === "jcode" || base === "ruth") return exec
   const argv1 = process.argv[1]
-  if (argv1 && fs.existsSync(argv1) && /(?:^|\/)(ruth|jcode|opencode)$/.test(argv1.replace(/\.exe$/i, ""))) return argv1
+  if (argv1 && fs.existsSync(argv1) && /(?:^|\/)(ruth|jcode|ruth)$/.test(argv1.replace(/\.exe$/i, ""))) return argv1
   return exec
 }
 
@@ -76,7 +76,7 @@ function walkForBinary(directory: string): string | undefined {
     if (entry.isDirectory()) {
       const nested = walkForBinary(full)
       if (nested) return nested
-    } else if (entry.name === "ruth" || entry.name === "jcode" || entry.name === "opencode") {
+    } else if (entry.name === "ruth" || entry.name === "jcode" || entry.name === "ruth") {
       return full
     }
   }

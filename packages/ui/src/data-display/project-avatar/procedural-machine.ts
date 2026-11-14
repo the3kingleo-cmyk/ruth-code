@@ -312,6 +312,7 @@ const RETRO: Definition[] = [
 
       const digit = (x0: number, n: number) => {
         const bits = SEGMENTS[n]
+
         const put = (segment: number, x: number, y: number) => {
           const lean = p.slant ? Math.floor((12 - y) / 4) : 0
           pixels.set(x0 + x + lean, 3 + y, (bits >> (6 - segment)) & 1 ? p.lit : off)
@@ -377,7 +378,9 @@ const RETRO: Definition[] = [
           pixels.rect(p.propX, ground - 5, 1, 5, light)
         },
         () =>
-          pixels.each((x, y) => (y < ground && Math.hypot(x + 0.5 - (p.propX + 1.5), y + 0.5 - ground) < 3.5 ? light : undefined)),
+          pixels.each((x, y) =>
+            y < ground && Math.hypot(x + 0.5 - (p.propX + 1.5), y + 0.5 - ground) < 3.5 ? light : undefined,
+          ),
         () => undefined,
       ]
 
@@ -435,7 +438,8 @@ const RETRO: Definition[] = [
       const inner = 16 - p.border * 2
 
       pixels.each((x, y) => {
-        if (x < p.border || y < p.border || x >= 16 - p.border || y >= 16 - p.border) return rows[(y + roll) % 32] ? p.stripeA : p.stripeB
+        if (x < p.border || y < p.border || x >= 16 - p.border || y >= 16 - p.border)
+          return rows[(y + roll) % 32] ? p.stripeA : p.stripeB
         const lx = p.corner & 1 ? inner - 1 - (x - p.border) : x - p.border
         const ly = p.corner & 2 ? inner - 1 - (y - p.border) : y - p.border
         const d = lx + ly - (inner - 1)
@@ -534,12 +538,14 @@ const RETRO: Definition[] = [
       ].forEach(([x, amount]) => {
         if (amount > 0.45) pixels.rect(x - 1, 6, 3, 3, tape)
         pixels.set(x, 7, 0xf6f3ec)
+
         const [dx, dy] = [
           [0, -1],
           [1, 0],
           [0, 1],
           [-1, 0],
         ][(spin + x) % 4]
+
         pixels.set(x + dx, 7 + dy, t > 0 ? 0xf6f3ec : amount > 0.45 ? tape : window)
       })
       pixels.rect(4, 10, 8, 2, shade(p.body, 0.82))
@@ -770,7 +776,8 @@ const CURVES: Definition[] = [
       pixels.each((x, y) => {
         const wx = x + (fbm(x * 0.08 + p.seedX, y * 0.08 + p.seedY) - 0.5) * p.warp * 2
         const wy = y + (fbm(x * 0.08 + p.seedY, y * 0.08 + p.seedX) - 0.5) * p.warp * 2
-        const wave = (angle: number, phase: number) => Math.cos(p.frequency * (wx * Math.cos(angle) + wy * Math.sin(angle)) + phase)
+        const wave = (angle: number, phase: number) =>
+          Math.cos(p.frequency * (wx * Math.cos(angle) + wy * Math.sin(angle)) + phase)
         const v = (wave(p.a1, p.p1) + wave(p.a2, p.p2) + wave(p.a3, p.p3)) / 3
 
         if (p.kind === 0) return v > 0.25 ? p.mark : p.ground
@@ -850,7 +857,8 @@ const CURVES: Definition[] = [
     id: "hilbert",
     name: "Hilbert",
     family: "Tiling and curves",
-    label: "A Hilbert curve of order two or three, in any of eight orientations, graded along its length; colour flows on hover",
+    label:
+      "A Hilbert curve of order two or three, in any of eight orientations, graded along its length; colour flows on hover",
     animated: true,
     resolve: (random) => {
       const r = random("hilbert")

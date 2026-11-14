@@ -1,7 +1,7 @@
 import fs from "fs"
 import os from "os"
 import path from "path"
-import { env } from "@opencode/util/env"
+import { env } from "@ruth/util/env"
 
 export const DEFAULT_CHAT_MODEL = "ruth"
 export const DEFAULT_TOOLS_MODEL = "ruth-pro"

@@ -126,14 +126,7 @@ const WALLS = [0xf4efe6, 0xe9c46a, 0xe07a5f, 0x81b29a, 0x9ec1e0, 0xc9ada7, 0xfff
 const ROOFS = [0xb23a48, 0x3d405b, 0x6b4423, 0x264653, 0x2f2f2f, 0x8a3324, 0x2a9d8f]
 
 // Pips on a 3 × 3 lattice for faces one to six.
-const PIPS = [
-  [4],
-  [0, 8],
-  [0, 4, 8],
-  [0, 2, 6, 8],
-  [0, 2, 4, 6, 8],
-  [0, 2, 3, 5, 6, 8],
-]
+const PIPS = [[4], [0, 8], [0, 4, 8], [0, 2, 6, 8], [0, 2, 4, 6, 8], [0, 2, 3, 5, 6, 8]]
 
 // Body, pip.
 const DICE = [
@@ -214,8 +207,12 @@ const NATURE: Definition[] = [
 
       const ridge = (prefix: string, count: number, x: number) =>
         Math.max(
-          ...Array.from({ length: count }, (_, i) => p[`${prefix}h${i}`] - Math.abs(x + 0.5 - p[`${prefix}x${i}`]) * p[`${prefix}s${i}`]),
-        ) - (16 - base)
+          ...Array.from(
+            { length: count },
+            (_, i) => p[`${prefix}h${i}`] - Math.abs(x + 0.5 - p[`${prefix}x${i}`]) * p[`${prefix}s${i}`],
+          ),
+        ) -
+        (16 - base)
 
       const scene = (x: number, y: number) => {
         const height = base - y
@@ -271,10 +268,12 @@ const NATURE: Definition[] = [
         const crests = Array.from({ length: p.bands }, (_, k) => {
           const spacing = (16 - p.horizon) / p.bands
           const swell = p.amplitude * (0.6 + k * 0.25)
-          const curve = p.horizon + k * spacing + swell * Math.sin(x * p.frequency + p.phase + k * 1.9 + t * (1.5 + k * 0.4))
+          const curve =
+            p.horizon + k * spacing + swell * Math.sin(x * p.frequency + p.phase + k * 1.9 + t * (1.5 + k * 0.4))
 
           return curve
         })
+
         const band = crests.findLastIndex((curve) => y + 0.5 >= curve)
 
         if (band < 0) {
@@ -325,8 +324,8 @@ const NATURE: Definition[] = [
       const glow = (x: number, y: number) =>
         Math.max(
           ...Array.from({ length: p.ribbons }, (_, k) => {
-            const edge =
-              p.base - k * 3 + p.amplitude * Math.sin(x * p.frequency + p.phase + k * 2.1 + t * 1.3)
+            const edge = p.base - k * 3 + p.amplitude * Math.sin(x * p.frequency + p.phase + k * 2.1 + t * 1.3)
+
             const above = edge - (y + 0.5)
 
             if (above < -0.5 || above > p.length) return 0
@@ -439,7 +438,8 @@ const NATURE: Definition[] = [
     id: "lava",
     name: "Lava lamp",
     family: "Nature and materials",
-    label: "A tapered lamp of metaball wax in a dithered liquid, on a chrome, brass or black base; the wax rises on hover",
+    label:
+      "A tapered lamp of metaball wax in a dithered liquid, on a chrome, brass or black base; the wax rises on hover",
     animated: true,
     resolve: (random) => {
       const r = random("lava")
@@ -458,7 +458,8 @@ const NATURE: Definition[] = [
     paint: (pixels, p, t) => {
       const [top, bottom, wax] = colors(p, "l", 3)
       const rand = mulberry32(p.seed)
-      const half = (y: number) => (y < 2 || y > 11 ? 0 : 1.2 + (p.belly - 1.2) * Math.sin((Math.PI * (y - 1.5)) / 11) ** 0.8)
+      const half = (y: number) =>
+        y < 2 || y > 11 ? 0 : 1.2 + (p.belly - 1.2) * Math.sin((Math.PI * (y - 1.5)) / 11) ** 0.8
       const glass = (x: number, y: number) => Math.abs(x + 0.5 - 8) < half(y)
       const dark = luma(p.ground) < 0.3
 
@@ -471,7 +472,10 @@ const NATURE: Definition[] = [
 
       pixels.each((x, y) => {
         if (glass(x, y)) {
-          const field = blobs.reduce((sum, blob) => sum + (blob.r * blob.r) / ((x + 0.5 - blob.x) ** 2 + (y + 0.5 - blob.y) ** 2 + 0.01), 0)
+          const field = blobs.reduce(
+            (sum, blob) => sum + (blob.r * blob.r) / ((x + 0.5 - blob.x) ** 2 + (y + 0.5 - blob.y) ** 2 + 0.01),
+            0,
+          )
 
           if (field > 1) return field > 3 ? tint(wax, 0.3) : wax
 
@@ -480,7 +484,8 @@ const NATURE: Definition[] = [
 
         if (y <= 1 && y >= 0 && Math.abs(x + 0.5 - 8) < 1.6 + y * 0.4) return y === 0 ? shade(p.metal, 0.8) : p.metal
 
-        if (y >= 12 && y <= 14 && Math.abs(x + 0.5 - 8) < 1.6 + (y - 12) * 0.9) return y === 12 ? tint(p.metal, 0.25) : y === 14 ? shade(p.metal, 0.7) : p.metal
+        if (y >= 12 && y <= 14 && Math.abs(x + 0.5 - 8) < 1.6 + (y - 12) * 0.9)
+          return y === 12 ? tint(p.metal, 0.25) : y === 14 ? shade(p.metal, 0.7) : p.metal
 
         const near = [-1, 1].some((d) => glass(x + d, y) || glass(x + d * 2, y))
 
@@ -546,6 +551,7 @@ const CREATURES: Definition[] = [
 
       const eye = blink ? dark : p.glow
       const eyeY = y0 + 2
+
       const eyes = [
         () => {
           pixels.rect(x0 + 1, eyeY, 2, 2, eye)
@@ -572,6 +578,7 @@ const CREATURES: Definition[] = [
 
       eyes[p.eyes]()
       const mouthY = y0 + p.height - 2
+
       const mouths = [
         () => Array.from({ length: p.width - 4 }, (_, i) => i % 2 === 0 && pixels.set(x0 + 2 + i, mouthY, dark)),
         () => pixels.rect(x0 + 3, mouthY, p.width - 6, 1, dark),
@@ -584,6 +591,7 @@ const CREATURES: Definition[] = [
 
       mouths[p.mouth]()
       const tip = beep ? tint(p.glow, 0.5) : p.glow
+
       const antennas = [
         () => pixels.rect(x0 + 1, y0 - 1, p.width - 2, 1, dark),
         () => {
@@ -647,6 +655,7 @@ const CREATURES: Definition[] = [
       pixels.set(Math.round(8 - w * 0.55) + 1, top + 1, tint(p.body, 0.6))
       const eyeY = Math.round(base - h * 0.45)
       const ink = 0x1a1a24
+
       const faces = [
         () => {
           pixels.rect(5, eyeY, 1, 2, ink)
@@ -668,6 +677,7 @@ const CREATURES: Definition[] = [
       ]
 
       faces[p.eyes]()
+
       const mouths = [
         () => {
           pixels.set(7, eyeY + 2, ink)
@@ -686,6 +696,7 @@ const CREATURES: Definition[] = [
       ]
 
       mouths[p.mouth]()
+
       const hats = [
         () => undefined,
         () => {
@@ -739,7 +750,7 @@ const CREATURES: Definition[] = [
       const inside = (x: number, y: number) => {
         const X = x + 0.5 - 8 - (y - 8) * p.lean
         const Y = y + 0.5
-        const wave = Math.abs((((x + Math.floor(t * 6)) % p.period) + p.period) % p.period - p.period / 2) * 0.8
+        const wave = Math.abs(((((x + Math.floor(t * 6)) % p.period) + p.period) % p.period) - p.period / 2) * 0.8
 
         if (Y < cy) return Math.hypot(X, Y - cy) < p.width
 
@@ -762,6 +773,7 @@ const CREATURES: Definition[] = [
 
       const ink = 0x1a1626
       const ey = 5 + bob
+
       const eyes = [
         () => {
           pixels.rect(5, ey, 2, 3, ink)
@@ -785,6 +797,7 @@ const CREATURES: Definition[] = [
       ]
 
       eyes[p.eyes]()
+
       const mouths = [
         () => undefined,
         () => pixels.rect(7, ey + 4, 2, 2, ink),
@@ -832,13 +845,18 @@ const CREATURES: Definition[] = [
       const inHead = (x: number, y: number) => ((x + 0.5 - 8) / p.width) ** 2 + ((y + 0.5 - 10) / 5) ** 2 < 1
 
       const inEar = (x: number, y: number) =>
-        [3.5, 12.5].some((ex) => y >= 6 - p.ears && y <= 6 && Math.abs(x + 0.5 - ex) <= ((y - (6 - p.ears)) / p.ears) * 2.2)
+        [3.5, 12.5].some(
+          (ex) => y >= 6 - p.ears && y <= 6 && Math.abs(x + 0.5 - ex) <= ((y - (6 - p.ears)) / p.ears) * 2.2,
+        )
 
       const coat = (x: number, y: number) => {
         const coats = [
           () => p.fur,
-          () => ((y === 6 || y === 8) && x >= 6 && x <= 9 && x % 2 === 0) || ((x <= 3 || x >= 12) && y % 2 === 1) ? dark : p.fur,
-          () => (y >= 11 && x >= 5 && x <= 10) || (y >= 9 && x >= 7 && x <= 8) ? white : p.fur,
+          () =>
+            ((y === 6 || y === 8) && x >= 6 && x <= 9 && x % 2 === 0) || ((x <= 3 || x >= 12) && y % 2 === 1)
+              ? dark
+              : p.fur,
+          () => ((y >= 11 && x >= 5 && x <= 10) || (y >= 9 && x >= 7 && x <= 8) ? white : p.fur),
           () => (x < 7 && y < 9 ? 0xe8964a : x > 9 && y > 9 ? 0x2b2b30 : white),
           () => (Math.hypot(x + 0.5 - 8, y + 0.5 - 11) < 3 ? shade(0x5a4030, 1) : 0xf0e2c4),
         ]
@@ -858,6 +876,7 @@ const CREATURES: Definition[] = [
       })
 
       const eyeY = 9
+
       ;[5, 9].forEach((x) => {
         if (blink) return pixels.rect(x, eyeY + 1, 2, 1, shade(p.fur, 0.4))
         pixels.rect(x, eyeY, 2, 2, p.iris)
@@ -866,7 +885,9 @@ const CREATURES: Definition[] = [
       pixels.rect(7, 12, 2, 1, 0xf28fa3)
       pixels.set(7, 13, shade(coat(7, 13), 0.6))
       pixels.set(8, 13, shade(coat(8, 13), 0.6))
+
       const whisker = luma(p.ground) > 0.5 ? shade(p.ground, 0.55) : tint(p.ground, 0.55)
+
       ;[0, 1, 14, 15].forEach((x) => {
         if (!inHead(x, 12)) pixels.set(x, 12, whisker)
 
@@ -899,14 +920,19 @@ const OBJECTS: Definition[] = [
     paint: (pixels, p, t) => {
       const flasks = [
         (x: number, y: number) => Math.hypot(x + 0.5 - 8, y + 0.5 - 10) < 4.6 || (y >= 2 && y <= 6 && x >= 7 && x <= 8),
-        (x: number, y: number) => (y >= 2 && y <= 6 && x >= 7 && x <= 8) || (y > 6 && y <= 13 && Math.abs(x + 0.5 - 8) < 1 + (y - 6) * 0.75),
+        (x: number, y: number) =>
+          (y >= 2 && y <= 6 && x >= 7 && x <= 8) || (y > 6 && y <= 13 && Math.abs(x + 0.5 - 8) < 1 + (y - 6) * 0.75),
         (x: number, y: number) => y >= 2 && y <= 13 && x >= 6 && x <= 9 && !(y === 13 && (x === 6 || x === 9)),
         (x: number, y: number) =>
-          (y >= 2 && y <= 4 && x >= 7 && x <= 8) || (y === 5 && x >= 5 && x <= 10) || (y >= 6 && y <= 13 && x >= 4 && x <= 11),
+          (y >= 2 && y <= 4 && x >= 7 && x <= 8) ||
+          (y === 5 && x >= 5 && x <= 10) ||
+          (y >= 6 && y <= 13 && x >= 4 && x <= 11),
       ]
 
       const inside = flasks[p.flask]
-      const rows = Array.from({ length: 16 }, (_, y) => y).filter((y) => Array.from({ length: 16 }, (_, x) => x).some((x) => inside(x, y)))
+      const rows = Array.from({ length: 16 }, (_, y) => y).filter((y) =>
+        Array.from({ length: 16 }, (_, x) => x).some((x) => inside(x, y)),
+      )
       const top = rows[0]
       const bottom = rows[rows.length - 1]
       const surface = Math.round(bottom - (bottom - top - 2) * p.level)
@@ -936,7 +962,7 @@ const OBJECTS: Definition[] = [
       Array.from({ length: 3 }, () => {
         const x = 6 + Math.floor(rand() * 4)
         const span = bottom - surface - 1
-        const y = bottom - 1 - Math.floor(((rand() * span + t * 6) % Math.max(1, span)))
+        const y = bottom - 1 - Math.floor((rand() * span + t * 6) % Math.max(1, span))
 
         if (inside(x, y) && y > surface) pixels.set(x, y, tint(p.liquid, 0.6))
       })
@@ -966,7 +992,8 @@ const OBJECTS: Definition[] = [
         (dx: number, dy: number) => Math.abs(dx) < 6.2 && Math.abs(dy) < 4.6 && Math.abs(dx) + Math.abs(dy) < 9,
         (dx: number, dy: number) => (dx / 6) ** 4 + (dy / 6) ** 4 < 1,
         (dx: number, dy: number) => dy > -4.5 && dy < 6 - Math.abs(dx) * 1.7 - 0.5 && Math.abs(dx) < 6.5,
-        (dx: number, dy: number) => Math.hypot(dx - 4.5, dy) < 7.8 && Math.hypot(dx + 4.5, dy) < 7.8 && Math.abs(dy) < 6.4,
+        (dx: number, dy: number) =>
+          Math.hypot(dx - 4.5, dy) < 7.8 && Math.hypot(dx + 4.5, dy) < 7.8 && Math.abs(dy) < 6.4,
       ]
 
       const cut = cuts[p.cut]
@@ -977,7 +1004,13 @@ const OBJECTS: Definition[] = [
       pixels.each((x, y) => {
         const dx = x + 0.5 - 8
         const dy = (y + 0.5 - 8) * flip
-        const rotated = p.cut === 4 ? [dx * Math.cos(p.turn * 0.3) - dy * Math.sin(p.turn * 0.3), dx * Math.sin(p.turn * 0.3) + dy * Math.cos(p.turn * 0.3)] : [dx, dy]
+        const rotated =
+          p.cut === 4
+            ? [
+                dx * Math.cos(p.turn * 0.3) - dy * Math.sin(p.turn * 0.3),
+                dx * Math.sin(p.turn * 0.3) + dy * Math.cos(p.turn * 0.3),
+              ]
+            : [dx, dy]
 
         if (!cut(rotated[0], rotated[1])) {
           const halo = dark && cut(rotated[0] * 0.8, rotated[1] * 0.8)
@@ -996,11 +1029,13 @@ const OBJECTS: Definition[] = [
       })
 
       const glint = Math.floor(t * 2.5) % 3
+
       const spots = [
         [5, 5],
         [10, 6],
         [6, 10],
       ]
+
       const [sx, sy] = spots[t > 0 ? glint : 0]
       pixels.set(sx, sy, 0xffffff)
       pixels.set(sx - 1, sy, tint(p.stone, 0.7))
@@ -1060,12 +1095,20 @@ const OBJECTS: Definition[] = [
       const roofs = [
         () => {
           const peak = Math.ceil(p.width / 2)
-          Array.from({ length: peak }, (_, k) => pixels.rect(x0 - 1 + k, y0 - 1 - k, p.width + 2 - k * 2, 1, k % 2 ? roofShade : p.roofColor))
+          Array.from({ length: peak }, (_, k) =>
+            pixels.rect(x0 - 1 + k, y0 - 1 - k, p.width + 2 - k * 2, 1, k % 2 ? roofShade : p.roofColor),
+          )
 
           return y0 - peak
         },
         () => {
-          pixels.each((x, y) => (y < base && y >= base - p.height - 5 && Math.abs(x + 0.5 - (center + 0.5)) < (y - (base - p.height - 6)) * 0.62 ? p.roofColor : undefined))
+          pixels.each((x, y) =>
+            y < base &&
+            y >= base - p.height - 5 &&
+            Math.abs(x + 0.5 - (center + 0.5)) < (y - (base - p.height - 6)) * 0.62
+              ? p.roofColor
+              : undefined,
+          )
 
           return base - p.height - 5
         },
@@ -1109,8 +1152,16 @@ const OBJECTS: Definition[] = [
       if (!p.chimney || p.roof === 1 || p.roof === 4) return
       const cx = x1 - 2
       pixels.rect(cx, roofTop, 1, Math.max(1, y0 - roofTop), shade(p.roofColor, 0.55))
+
       const puff = Math.floor(t * 3)
-      ;[0, 1, 2].forEach((k) => pixels.set(cx + ((k + puff) % 2), roofTop - 1 - k - (t > 0 ? puff % 2 : 0), mix(sky[0], 0xffffff, 0.6 - k * 0.15)))
+
+      ;[0, 1, 2].forEach((k) =>
+        pixels.set(
+          cx + ((k + puff) % 2),
+          roofTop - 1 - k - (t > 0 ? puff % 2 : 0),
+          mix(sky[0], 0xffffff, 0.6 - k * 0.15),
+        ),
+      )
     },
   },
   {
@@ -1155,11 +1206,17 @@ const OBJECTS: Definition[] = [
           if (dx < 1 || y >= 12) return undefined
           const spread = Math.abs(y + 0.5 - (lamp + 0.5)) / dx
 
-          return spread < 0.28 ? mix(pixels.get(x, y), sun, 0.55 * (1 - dx / 16) * Math.min(1, Math.abs(reach))) : undefined
+          return spread < 0.28
+            ? mix(pixels.get(x, y), sun, 0.55 * (1 - dx / 16) * Math.min(1, Math.abs(reach)))
+            : undefined
         })
       }
 
-      pixels.each((x, y) => (y >= 11 && y <= 13 && Math.abs(x + 0.5 - (p.x + 0.5)) < 4 - (y - 11) * -0.6 - (y === 11 ? 1.4 : 0) ? p.rock : undefined))
+      pixels.each((x, y) =>
+        y >= 11 && y <= 13 && Math.abs(x + 0.5 - (p.x + 0.5)) < 4 - (y - 11) * -0.6 - (y === 11 ? 1.4 : 0)
+          ? p.rock
+          : undefined,
+      )
 
       for (let y = 4; y <= 10; y++) {
         const half = 1 + (y >= 8 ? 1 : 0)
@@ -1226,7 +1283,13 @@ const OBJECTS: Definition[] = [
         const step = (size - pipSize) / 2
         PIPS[value - 1].forEach((spot) => {
           const color = value === 1 && p.pip === 0x1a1a1a ? 0xc8102e : p.pip
-          pixels.rect(Math.round(x0 + (spot % 3) * step * 0.78 + step * 0.22), Math.round(y0 + Math.floor(spot / 3) * step * 0.78 + step * 0.22), pipSize, pipSize, color)
+          pixels.rect(
+            Math.round(x0 + (spot % 3) * step * 0.78 + step * 0.22),
+            Math.round(y0 + Math.floor(spot / 3) * step * 0.78 + step * 0.22),
+            pipSize,
+            pipSize,
+            color,
+          )
         })
       }
 
@@ -1310,7 +1373,8 @@ const EMBLEMS: Definition[] = [
     id: "constellation",
     name: "Constellation",
     family: "Emblems",
-    label: "Four to seven stars joined by their shortest links, on a night sky or a parchment chart; they twinkle on hover",
+    label:
+      "Four to seven stars joined by their shortest links, on a night sky or a parchment chart; they twinkle on hover",
     animated: true,
     resolve: (random) => {
       const r = random("constellation")
@@ -1361,7 +1425,10 @@ const EMBLEMS: Definition[] = [
         const [a, b] = linked
           .flatMap((i) => xs.map((_, j) => [i, j]))
           .filter(([, j]) => !linked.includes(j))
-          .toSorted(([i, j], [k, l]) => Math.hypot(xs[i] - xs[j], ys[i] - ys[j]) - Math.hypot(xs[k] - xs[l], ys[k] - ys[l]))[0]
+          .toSorted(
+            ([i, j], [k, l]) => Math.hypot(xs[i] - xs[j], ys[i] - ys[j]) - Math.hypot(xs[k] - xs[l], ys[k] - ys[l]),
+          )[0]
+
         ctx.beginPath()
         ctx.moveTo(xs[a] * px, ys[a] * px)
         ctx.lineTo(xs[b] * px, ys[b] * px)
@@ -1428,14 +1495,18 @@ const EMBLEMS: Definition[] = [
         ctx.stroke()
       })
 
-      const order = Array.from({ length: p.points }, (_, k) => k).toSorted((a, b) => (b % 2) - (a % 2) || (b % 4) - (a % 4))
+      const order = Array.from({ length: p.points }, (_, k) => k).toSorted(
+        (a, b) => (b % 2) - (a % 2) || (b % 4) - (a % 4),
+      )
       order.forEach((k) => {
         const angle = (k / p.points) * Math.PI * 2 - Math.PI / 2
         const level = k % 4 === 0 ? 1 : k % 2 === 0 ? 0.68 : 0.46
         const length = px * 0.46 * (p.points === 4 ? 1 : level)
         const width = px * (p.points === 4 ? 0.14 : 0.1) * (level < 1 ? 0.8 : 1)
         const tip = [Math.cos(angle) * length, Math.sin(angle) * length]
+
         const side = [Math.cos(angle + Math.PI / 2) * width, Math.sin(angle + Math.PI / 2) * width]
+
         ;[1, -1].forEach((s) => {
           ctx.beginPath()
           ctx.moveTo(0, 0)
@@ -1460,7 +1531,8 @@ const EMBLEMS: Definition[] = [
     id: "sigil",
     name: "Sigil",
     family: "Emblems",
-    label: "A bind-rune of staves and branches cut into slate, sandstone, wood or vellum, or glowing; the glow pulses on hover",
+    label:
+      "A bind-rune of staves and branches cut into slate, sandstone, wood or vellum, or glowing; the glow pulses on hover",
     animated: true,
     resolve: (random) => {
       const r = random("sigil")
@@ -1470,6 +1542,7 @@ const EMBLEMS: Definition[] = [
 
       const segments = Array.from({ length: branches }, () => {
         const a = pick(r, lattice)
+
         const options = lattice.filter((b) => {
           const dx = Math.abs((b % 3) - (a % 3))
           const dy = Math.abs(Math.floor(b / 3) - Math.floor(a / 3))

@@ -4,7 +4,15 @@
 // grid of pixels that is scaled up nearest-neighbour, with limited palettes and ordered dithering. Only the components
 // lab imports this module.
 
-import { cyrb53, drawProjectIcon, generateProjectIcon, mulberry32, tileMask, valueNoise, type GeneratedProjectIcon } from "./generated"
+import {
+  cyrb53,
+  drawProjectIcon,
+  generateProjectIcon,
+  mulberry32,
+  tileMask,
+  valueNoise,
+  type GeneratedProjectIcon,
+} from "./generated"
 import { CRAFT } from "./procedural-craft"
 import {
   clamp01,
@@ -1491,10 +1499,8 @@ export function projectIconStyle(id: string) {
 
 // A tetromino's cells after `turns` quarter turns, moved back to the origin.
 function turned(cells: number[][], turns: number) {
-  const rotated = Array.from({ length: turns }).reduce<number[][]>(
-    (list) => list.map(([x, y]) => [-y, x]),
-    cells,
-  )
+  const rotated = Array.from({ length: turns }).reduce<number[][]>((list) => list.map(([x, y]) => [-y, x]), cells)
+
   const minX = Math.min(...rotated.map(([x]) => x))
   const minY = Math.min(...rotated.map(([, y]) => y))
 

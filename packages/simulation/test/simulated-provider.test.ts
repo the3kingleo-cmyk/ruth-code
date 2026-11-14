@@ -2,21 +2,21 @@ import { expect, test } from "bun:test"
 import { mkdir, mkdtemp, rm } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
-import { Agent } from "@opencode/core/agent"
-import { Config } from "@opencode/core/config"
-import { Database } from "@opencode/core/database/database"
-import { makeGlobalNode } from "@opencode/util/effect/app-node"
-import { AppNodeBuilder } from "@opencode/core/effect/app-node-builder"
-import { LayerNode } from "@opencode/util/effect/layer-node"
-import { Bus } from "@opencode/core/bus"
-import { Location } from "@opencode/core/location"
-import { LocationServiceMap } from "@opencode/core/location-services"
-import { Plugin } from "@opencode/core/plugin"
-import { SdkPlugins } from "@opencode/core/plugin/sdk"
-import { AbsolutePath } from "@opencode/core/schema"
-import { Session } from "@opencode/core/session"
-import { SessionMessage } from "@opencode/core/session/message"
-import { Tool } from "@opencode/core/tool"
+import { Agent } from "@ruth/core/agent"
+import { Config } from "@ruth/core/config"
+import { Database } from "@ruth/core/database/database"
+import { makeGlobalNode } from "@ruth/util/effect/app-node"
+import { AppNodeBuilder } from "@ruth/core/effect/app-node-builder"
+import { LayerNode } from "@ruth/util/effect/layer-node"
+import { Bus } from "@ruth/core/bus"
+import { Location } from "@ruth/core/location"
+import { LocationServiceMap } from "@ruth/core/location-services"
+import { Plugin } from "@ruth/core/plugin"
+import { SdkPlugins } from "@ruth/core/plugin/sdk"
+import { AbsolutePath } from "@ruth/core/schema"
+import { Session } from "@ruth/core/session"
+import { SessionMessage } from "@ruth/core/session/message"
+import { Tool } from "@ruth/core/tool"
 import { Deferred, Effect, Fiber, Layer, Queue, Stream } from "effect"
 import type { Scope } from "effect/Scope"
 import { SimulatedProvider } from "../src/backend/simulated-provider"
@@ -44,7 +44,7 @@ test("streams a Drive-controlled provider response and removes the finished invo
         result: {
           protocolVersion: 1,
           role: "backend",
-          server: { name: "opencode", version: expect.any(String) },
+          server: { name: "ruth", version: expect.any(String) },
           capabilities: expect.arrayContaining(["llm.attach", "llm.request"]),
         },
       })
@@ -214,7 +214,7 @@ test("fails the provider stream when Drive disconnects the invocation", async ()
 
 test("controls arbitrary tools through scoped SDK overlays", async () => {
   const endpoint = availableEndpoint()
-  const directory = await mkdtemp(join(tmpdir(), "opencode-simulated-tools-"))
+  const directory = await mkdtemp(join(tmpdir(), "ruth-simulated-tools-"))
   const secondDirectory = join(directory, "second")
   await mkdir(secondDirectory)
   try {

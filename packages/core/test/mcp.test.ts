@@ -16,38 +16,38 @@ import {
   Server,
   WebStandardStreamableHTTPServerTransport,
 } from "@modelcontextprotocol/server"
-import { Document, Event, Info } from "@opencode/schema/config"
-import { ConfigMCP } from "@opencode/schema/config/mcp"
-import { McpEvent } from "@opencode/schema/mcp-event"
-import { ConfigPolicy } from "@opencode/schema/config/policy"
-import { Config } from "@opencode/core/config"
-import { ConfigMcpPlugin } from "@opencode/core/config/plugin/mcp"
-import { Credential } from "@opencode/core/credential"
-import { AppNodeBuilder } from "@opencode/core/effect/app-node-builder"
-import { LayerNode } from "@opencode/util/effect/layer-node"
-import { Bus } from "@opencode/core/bus"
-import { ID, type Payload } from "@opencode/schema/event"
-import { Form } from "@opencode/core/form"
-import { Integration } from "@opencode/core/integration"
-import { Environment } from "@opencode/core/environment/index"
-import { App } from "@opencode/core/app"
-import { Flag } from "@opencode/core/flag"
-import { EnvironmentUnavailable } from "@opencode/core/environment/unavailable"
-import { Location } from "@opencode/core/location"
-import { Mcp } from "@opencode/core/mcp/index"
-import { McpClient } from "@opencode/core/mcp/client"
-import { McpPool } from "@opencode/core/mcp/pool"
-import { McpStdio } from "@opencode/core/mcp/stdio"
-import { Permission } from "@opencode/core/permission"
-import { AbsolutePath } from "@opencode/core/schema"
-import { Session } from "@opencode/core/session"
-import { State } from "@opencode/core/state"
-import { McpTool } from "@opencode/core/tool/mcp"
-import { Command } from "@opencode/core/command"
-import { CommandPlugin } from "@opencode/core/plugin/command"
-import { McpResourceTools } from "@opencode/core/tool/plugin/mcp-resource"
-import { Tool } from "@opencode/core/tool"
-import { ToolOutput } from "@opencode/core/tool-output"
+import { Document, Event, Info } from "@ruth/schema/config"
+import { ConfigMCP } from "@ruth/schema/config/mcp"
+import { McpEvent } from "@ruth/schema/mcp-event"
+import { ConfigPolicy } from "@ruth/schema/config/policy"
+import { Config } from "@ruth/core/config"
+import { ConfigMcpPlugin } from "@ruth/core/config/plugin/mcp"
+import { Credential } from "@ruth/core/credential"
+import { AppNodeBuilder } from "@ruth/core/effect/app-node-builder"
+import { LayerNode } from "@ruth/util/effect/layer-node"
+import { Bus } from "@ruth/core/bus"
+import { ID, type Payload } from "@ruth/schema/event"
+import { Form } from "@ruth/core/form"
+import { Integration } from "@ruth/core/integration"
+import { Environment } from "@ruth/core/environment/index"
+import { App } from "@ruth/core/app"
+import { Flag } from "@ruth/core/flag"
+import { EnvironmentUnavailable } from "@ruth/core/environment/unavailable"
+import { Location } from "@ruth/core/location"
+import { Mcp } from "@ruth/core/mcp/index"
+import { McpClient } from "@ruth/core/mcp/client"
+import { McpPool } from "@ruth/core/mcp/pool"
+import { McpStdio } from "@ruth/core/mcp/stdio"
+import { Permission } from "@ruth/core/permission"
+import { AbsolutePath } from "@ruth/core/schema"
+import { Session } from "@ruth/core/session"
+import { State } from "@ruth/core/state"
+import { McpTool } from "@ruth/core/tool/mcp"
+import { Command } from "@ruth/core/command"
+import { CommandPlugin } from "@ruth/core/plugin/command"
+import { McpResourceTools } from "@ruth/core/tool/plugin/mcp-resource"
+import { Tool } from "@ruth/core/tool"
+import { ToolOutput } from "@ruth/core/tool-output"
 import {
   Clock,
   Context,
@@ -72,9 +72,9 @@ import {
 import { TestClock } from "effect/testing"
 import { ChildProcess, ChildProcessSpawner } from "effect/process"
 import { ExitCode, makeHandle, ProcessId } from "effect/process/ChildProcessSpawner"
-import { Global } from "@opencode/util/global"
-import { isRecord } from "@opencode/util/record"
-import { CrossSpawnSpawner } from "@opencode/util/cross-spawn-spawner"
+import { Global } from "@ruth/util/global"
+import { isRecord } from "@ruth/util/record"
+import { CrossSpawnSpawner } from "@ruth/util/cross-spawn-spawner"
 import { advance, drain } from "./lib/clock"
 import { testEffect } from "./lib/effect"
 import { registerIntegrationPolicy, setOrganizationPolicy } from "./fixture/policy"
@@ -274,7 +274,7 @@ function resourceServer(
             state.toolCalls.push({
               name: request.params.name,
               arguments: request.params.arguments,
-              sessionID: request.params._meta?.["ai.opencode/sessionID"],
+              sessionID: request.params._meta?.["ai.ruth/sessionID"],
               progressToken: request.params._meta?.progressToken,
             })
             const structured = request.params.arguments?.structured
@@ -375,7 +375,7 @@ function resourceMcpLayer(
     name?: string
     credentials?: Partial<Credential.Interface>
     bus?: Layer.Layer<Bus.Service>
-    /** `OPENCODE_FLAGS`, such as `-mcp_events`. */
+    /** `RUTH_FLAGS`, such as `-mcp_events`. */
     flags?: string
   },
 ) {
@@ -628,7 +628,7 @@ const permissions = Layer.mock(Permission.Service, {
     }),
 })
 const events = Layer.mock(Bus.Service, { subscribe: () => Stream.never })
-const outputData = await fs.mkdtemp(path.join(os.tmpdir(), "opencode-mcp-output-"))
+const outputData = await fs.mkdtemp(path.join(os.tmpdir(), "ruth-mcp-output-"))
 const it = testEffect(
   AppNodeBuilder.build(LayerNode.group([Tool.node, McpTool.node]), [
     ...toolNodeReplacements(permissions),
@@ -1720,7 +1720,7 @@ it.live("discovers and reads MCP resources through Code Mode", () =>
         })
 
       // The SDK walks every page, so one call returns the full catalog.
-      const listed = yield* run('return await tools.opencode.list_mcp_resources({ server: "resources" })')
+      const listed = yield* run('return await tools.ruth.list_mcp_resources({ server: "resources" })')
       expect(JSON.parse(listed.output.output)).toEqual({
         resources: [
           { server: "resources", name: "Guide", uri: "docs://guide" },
@@ -1735,9 +1735,9 @@ it.live("discovers and reads MCP resources through Code Mode", () =>
 
       // Omitting the server lists every server, so the model can find which one owns a URI.
       assertion = yield* Deferred.make<Permission.AssertInput>()
-      const everywhere = yield* run("return await tools.opencode.list_mcp_resources({})")
+      const everywhere = yield* run("return await tools.ruth.list_mcp_resources({})")
       expect(yield* Deferred.await(assertion)).toMatchObject({
-        action: "opencode_list_mcp_resources",
+        action: "ruth_list_mcp_resources",
         resources: ["resources"],
         save: ["resources"],
       })
@@ -1754,7 +1754,7 @@ it.live("discovers and reads MCP resources through Code Mode", () =>
 
       // A server may declare resources without implementing template listing.
       server.state.templatesUnsupported = true
-      const untemplated = yield* run('return await tools.opencode.list_mcp_resources({ server: "resources" })')
+      const untemplated = yield* run('return await tools.ruth.list_mcp_resources({ server: "resources" })')
       expect(JSON.parse(untemplated.output.output)).toEqual({
         resources: [
           { server: "resources", name: "Guide", uri: "docs://guide" },
@@ -1766,7 +1766,7 @@ it.live("discovers and reads MCP resources through Code Mode", () =>
 
       assertion = yield* Deferred.make<Permission.AssertInput>()
       const read = yield* run(
-        'const resource = await tools.opencode.read_mcp_resource({ server: "resources", uri: "docs://readme" }); return resource.contents.filter(part => part.type === "text").map(part => part.text).join("\\n")',
+        'const resource = await tools.ruth.read_mcp_resource({ server: "resources", uri: "docs://readme" }); return resource.contents.filter(part => part.type === "text").map(part => part.text).join("\\n")',
       )
       expect(read.content).toEqual([
         { type: "text", text: "hello" },
@@ -1774,14 +1774,14 @@ it.live("discovers and reads MCP resources through Code Mode", () =>
       ])
       expect(read.metadata?.toolCalls).toMatchObject([
         {
-          tool: "opencode.read_mcp_resource",
+          tool: "ruth.read_mcp_resource",
           status: "completed",
           input: { server: "resources", uri: "docs://readme" },
         },
       ])
       expect(server.state.resourceReads).toEqual(["docs://readme"])
       expect(yield* Deferred.await(assertion)).toEqual({
-        action: "opencode_read_mcp_resource",
+        action: "ruth_read_mcp_resource",
         resources: ["resources:docs://readme"],
         save: ["resources:*"],
         metadata: { server: "resources", uri: "docs://readme" },
@@ -1792,7 +1792,7 @@ it.live("discovers and reads MCP resources through Code Mode", () =>
 
       server.state.contents = [{ uri: "docs://readme", text: "line\n".repeat(20_000), mimeType: "text/plain" }]
       const large = yield* run(
-        'const resource = await tools.opencode.read_mcp_resource({ server: "resources", uri: "docs://readme" }); return resource.contents[0].text',
+        'const resource = await tools.ruth.read_mcp_resource({ server: "resources", uri: "docs://readme" }); return resource.contents[0].text',
       )
       const bounded = yield* ToolOutput.Service.use((output) => output.truncate(large)).pipe(
         Effect.provide(AppNodeBuilder.build(ToolOutput.node)),
@@ -1807,28 +1807,28 @@ it.live("discovers and reads MCP resources through Code Mode", () =>
       // An empty contents array means the resource exists without content, not that it is missing.
       server.state.contents = []
       const empty = yield* run(
-        'return await tools.opencode.read_mcp_resource({ server: "resources", uri: "docs://empty" })',
+        'return await tools.ruth.read_mcp_resource({ server: "resources", uri: "docs://empty" })',
       )
       expect(empty.metadata?.error).toBeUndefined()
       expect(JSON.parse(empty.output.output)).toEqual({ server: "resources", uri: "docs://empty", contents: [] })
       server.state.missing = ["docs://gone"]
       const gone = yield* run(
-        'return await tools.opencode.read_mcp_resource({ server: "resources", uri: "docs://gone" })',
+        'return await tools.ruth.read_mcp_resource({ server: "resources", uri: "docs://gone" })',
       )
       expect(gone.metadata?.error).toBe(true)
       expect(gone.output.output).toContain("Resource not found")
       const missing = yield* run(
-        'return await tools.opencode.read_mcp_resource({ server: "missing", uri: "docs://readme" })',
+        'return await tools.ruth.read_mcp_resource({ server: "missing", uri: "docs://readme" })',
       )
       expect(missing.metadata?.error).toBe(true)
       expect(missing.output.output).toContain("MCP server not found: missing")
 
       const reads = server.state.resourceReads.length
       decision = Effect.fail(
-        new Permission.BlockedError({ rules: [], permission: "opencode_read_mcp_resource", resources: ["*"] }),
+        new Permission.BlockedError({ rules: [], permission: "ruth_read_mcp_resource", resources: ["*"] }),
       )
       const denied = yield* run(
-        'return await tools.opencode.read_mcp_resource({ server: "resources", uri: "docs://denied" })',
+        'return await tools.ruth.read_mcp_resource({ server: "resources", uri: "docs://denied" })',
       )
       expect(denied.metadata?.error).toBe(true)
       expect(server.state.resourceReads).toHaveLength(reads)
@@ -3530,7 +3530,7 @@ describe("MCP pool", () => {
       const probes: Array<ChildProcess.Command> = []
       const spawns: Array<ChildProcess.Command> = []
       const pool = yield* recordingPool(probes)
-      const config = new ConfigMCP.Local({ type: "local", command: ["opencode-missing-mcp-server"], pool: true })
+      const config = new ConfigMCP.Local({ type: "local", command: ["ruth-missing-mcp-server"], pool: true })
       const a = yield* open(config, pool, directories[0], { environment: recordingEnvironmentLayer(spawns) })
       expect((yield* status(a.mcp))?.status).toBe("failed")
       expect(probes).toHaveLength(1)

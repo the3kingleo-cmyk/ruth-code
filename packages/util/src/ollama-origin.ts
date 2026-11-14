@@ -2,7 +2,7 @@ import { spawnSync } from "child_process"
 import fs from "fs"
 import os from "os"
 import path from "path"
-import { env } from "./env"
+import { env } from "./env.js"
 
 /** Default local Ollama bind used when no healthy cloud tunnel is available. */
 export const LOCAL_OLLAMA_ORIGIN = "http://127.0.0.1:11434"
@@ -88,7 +88,7 @@ export function probeOllama(origin: string, timeoutMs = 800): boolean {
  * Prefer a healthy Codespace tunnel (typically localhost:11435). Fall back to
  * local Ollama on localhost:11434 when the tunnel is down or has no state.
  *
- * An explicit `RUTH_OLLAMA_ORIGIN` (with `JCODE_` / `OPENCODE_` fallbacks) wins
+ * An explicit `RUTH_OLLAMA_ORIGIN` (with `JCODE_` / `RUTH_` fallbacks) wins
  * over both, so a user can pin a host. `OLLAMA_HOST` is not read here because
  * that variable is the server bind address.
  */

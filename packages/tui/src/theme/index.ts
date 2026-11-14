@@ -4,11 +4,11 @@ import {
   parseThemeDocument,
   type ThemeDocument,
   type ModeDefinition,
-} from "@opencode/theme/tui"
+} from "@ruth/theme/tui"
 import { resolveThemeColors } from "./resolve"
 import { DEFAULT_THEMES, type Theme, type ThemeV1Json } from "./v1"
-import opencode from "./assets/v2/opencode.json" with { type: "json" }
-import opencode2 from "./assets/v2/opencode2.json" with { type: "json" }
+import ruth from "./assets/v2/ruth.json" with { type: "json" }
+import ruth2 from "./assets/v2/ruth2.json" with { type: "json" }
 
 export { DEFAULT_THEMES, type Theme, type ThemeV1Json } from "./v1"
 
@@ -18,32 +18,32 @@ let customThemes: Record<string, ThemeDocumentSource> = {}
 let systemTheme: ThemeDocumentSource | undefined
 const listeners = new Set<(themes: Record<string, ThemeDocumentSource>) => void>()
 const parsed = { current: new WeakMap<object, ThemeDocument>(), newDesigns: new WeakMap<object, ThemeDocument>() }
-let opencodeTheme: (ThemeDocument & {
+let ruthTheme: (ThemeDocument & {
   readonly light: ModeDefinition
   readonly dark: ModeDefinition
 }) | undefined
 
-export function getOpenCodeTheme() {
-  if (opencodeTheme) return opencodeTheme
-  const document = parseThemeDocument(opencode, "opencode") as NonNullable<typeof opencodeTheme>
-  opencodeTheme = document
+export function getRuthTheme() {
+  if (ruthTheme) return ruthTheme
+  const document = parseThemeDocument(ruth, "ruth") as NonNullable<typeof ruthTheme>
+  ruthTheme = document
   return document
 }
 
-let opencode2Theme: ThemeDocument | undefined
+let ruth2Theme: ThemeDocument | undefined
 
 // Temporary theme for the "new-designs" experiment. It is not part of allThemes(), so only the
 // TUI theme context offers it, and only while the experiment is enabled.
-export function getOpenCode2Theme() {
-  opencode2Theme ??= parseThemeDocument(opencode2, "opencode2")
-  return opencode2Theme
+export function getRuth2Theme() {
+  ruth2Theme ??= parseThemeDocument(ruth2, "ruth2")
+  return ruth2Theme
 }
 
 function listThemes(): Record<string, ThemeDocumentSource> {
   // Priority: defaults < custom files < generated system.
   const themes: Record<string, ThemeDocumentSource> = {
     ...DEFAULT_THEMES,
-    ruth: getOpenCodeTheme(),
+    ruth: getRuthTheme(),
     ...customThemes,
   }
   return {

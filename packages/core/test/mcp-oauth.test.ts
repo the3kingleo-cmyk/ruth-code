@@ -1,13 +1,13 @@
 import { afterAll, describe, expect, test } from "bun:test"
 import { OAuthError, UnauthorizedError, type AuthProvider } from "@modelcontextprotocol/client"
 import path from "path"
-import { ConfigMCP } from "@opencode/schema/config/mcp"
-import { Credential } from "@opencode/core/credential"
-import { Database } from "@opencode/core/database/database"
-import { AppNodeBuilder } from "@opencode/core/effect/app-node-builder"
-import { Integration } from "@opencode/core/integration"
-import { McpClient } from "@opencode/core/mcp/client"
-import { McpOAuth } from "@opencode/core/mcp/oauth"
+import { ConfigMCP } from "@ruth/schema/config/mcp"
+import { Credential } from "@ruth/core/credential"
+import { Database } from "@ruth/core/database/database"
+import { AppNodeBuilder } from "@ruth/core/effect/app-node-builder"
+import { Integration } from "@ruth/core/integration"
+import { McpClient } from "@ruth/core/mcp/client"
+import { McpOAuth } from "@ruth/core/mcp/oauth"
 import { Cause, Effect, Exit, ManagedRuntime } from "effect"
 import { TestClock } from "effect/testing"
 import { hostEnvironmentLayer } from "./fixture/environment"
@@ -401,9 +401,8 @@ describe("MCP OAuth", () => {
       expect(url.searchParams.get("client_id")).toBe("registered")
       expect(registrations).toHaveLength(1)
       expect(registrations[0]).toMatchObject({
-        client_name: "opencode",
-        client_uri: "https://opencode.ai",
-        logo_uri: "https://opencode.ai/web-app-manifest-512x512.png",
+        client_name: "Ruth",
+        client_uri: "https://github.com/the3kingleo-cmyk/ruth-code",
       })
     })
 
@@ -460,7 +459,7 @@ describe("MCP OAuth connections", () => {
   const id = Credential.ID.make("cred_test")
 
   // Each instance has its own database connection, in-process lock table and file lock client over one file,
-  // like two OpenCode processes sharing a database.
+  // like two Ruth processes sharing a database.
   const instance = (file: string) =>
     ManagedRuntime.make(
       AppNodeBuilder.build(Credential.node, [Database.node.replace(Database.configured({ path: file }))]),
@@ -471,7 +470,7 @@ describe("MCP OAuth connections", () => {
     input: { expires?: number; metadata?: Record<string, unknown>; config?: typeof ConfigMCP.Remote.Type } = {},
   ) => {
     const tmp = await tmpdir()
-    const file = path.join(tmp.path, "opencode.db")
+    const file = path.join(tmp.path, "ruth.db")
     const first = instance(file)
     const second = instance(file)
     const row = credential({ access: "a1", refresh: "r1", url, expires: input.expires ?? Date.now() + 3_600_000 })

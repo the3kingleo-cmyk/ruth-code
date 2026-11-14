@@ -6,10 +6,10 @@ import {
   themeModes,
   type ResolvedTheme,
   type SurfaceName,
-} from "@opencode/theme/tui"
+} from "@ruth/theme/tui"
 import {
   allThemes,
-  getOpenCode2Theme,
+  getRuth2Theme,
   hasTheme,
   parseTheme,
   setCustomThemes,
@@ -136,7 +136,7 @@ const themeContext = createSimpleContext({
         const mode = lock ?? renderer.themeMode ?? props.mode
         draft.mode = mode
         draft.lock = lock
-        draft.active = config.theme?.name === "opencode" ? "ruth" : (config.theme?.name ?? "ruth")
+        draft.active = config.theme?.name === "ruth" ? "ruth" : (config.theme?.name ?? "ruth")
         draft.ready = false
       }),
     )
@@ -290,14 +290,14 @@ const themeContext = createSimpleContext({
 
     const available = createMemo(
       (): Record<string, ThemeDocumentSource> =>
-        newDesigns() ? { opencode2: getOpenCode2Theme(), ...themeSources() } : themeSources(),
+        newDesigns() ? { ruth2: getRuth2Theme(), ...themeSources() } : themeSources(),
     )
     const has = (name: string) => Boolean(name) && available()[name] !== undefined
 
     const initStarted = performance.now()
     const selected = createMemo(() => {
       const sources = available()
-      const name = sources[store.active === "opencode" ? "ruth" : store.active] ? (store.active === "opencode" ? "ruth" : store.active) : "ruth"
+      const name = sources[store.active === "ruth" ? "ruth" : store.active] ? (store.active === "ruth" ? "ruth" : store.active) : "ruth"
       try {
         return loadTheme(sources[name], name, store.mode, newDesigns())
       } catch (error) {

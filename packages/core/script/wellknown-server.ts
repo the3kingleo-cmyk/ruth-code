@@ -1,7 +1,7 @@
 const token = "dummy-wellknown-token"
 const port = Number(process.env.PORT ?? 8787)
 const config = {
-  $schema: "https://opencode.ai/config.json",
+  $schema: "https://the3kingleo-cmyk.github.io/ruth-install/config.json",
   share: "manual",
   model: "example-primary/example-chat",
   enabled_providers: ["example-primary", "example-secondary"],
@@ -86,19 +86,19 @@ const server = Bun.serve({
   port,
   async fetch(request) {
     const url = new URL(request.url)
-    if (url.pathname === "/.well-known/opencode") {
+    if (url.pathname === "/.well-known/ruth") {
       return Response.json({
         auth: {
           command: ["bun", "-e", `await Bun.sleep(5000); process.stdout.write(${JSON.stringify(token)})`],
           env: "TOKEN",
         },
         remote_config: {
-          url: `${url.origin}/config/opencode.json`,
+          url: `${url.origin}/config/ruth.json`,
           headers: { authorization: "Bearer {env:TOKEN}" },
         },
       })
     }
-    if (url.pathname === "/config/opencode.json") {
+    if (url.pathname === "/config/ruth.json") {
       if (request.headers.get("authorization") !== `Bearer ${token}`) {
         return new Response("Unauthorized", { status: 401 })
       }

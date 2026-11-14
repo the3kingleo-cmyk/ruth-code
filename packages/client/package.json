@@ -1,12 +1,12 @@
 {
   "$schema": "https://json.schemastore.org/package.json",
-  "name": "@opencode/client",
+  "name": "@ruth/client",
   "version": "2.3.0",
   "type": "module",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/anomalyco/opencode.git",
+    "url": "git+https://github.com/the3kingleo-cmyk/ruth-code.git",
     "directory": "packages/client"
   },
   "publishConfig": {
@@ -36,8 +36,8 @@
     "typecheck:tsc": "tsc --noEmit"
   },
   "dependencies": {
-    "@opencode/schema": "workspace:*",
-    "@opencode/protocol": "workspace:*"
+    "@ruth/schema": "workspace:*",
+    "@ruth/protocol": "workspace:*"
   },
   "peerDependencies": {
     "effect": "catalog:",
@@ -54,7 +54,7 @@
   "devDependencies": {
     "@effect/platform-node": "catalog:",
     "@modelcontextprotocol/client": "2.4.0",
-    "@opencode/httpapi-codegen": "workspace:*",
+    "@ruth/httpapi-codegen": "workspace:*",
     "@tsconfig/bun": "catalog:",
     "@types/bun": "catalog:",
     "@typescript/native": "catalog:",

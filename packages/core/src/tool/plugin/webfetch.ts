@@ -1,7 +1,7 @@
 export * as WebFetchTool from "./webfetch.js"
 
-import type { Context } from "@opencode/plugin/effect/plugin"
-import { ToolFailure } from "@opencode/ai/effect"
+import type { Context } from "@ruth/plugin/effect/plugin"
+import { ToolFailure } from "@ruth/ai/effect"
 import { Duration, Effect, Schema } from "effect"
 import { FetchHttpClient, HttpClient, HttpClientError, HttpClientRequest, HttpClientResponse } from "effect/http"
 import { Parser } from "htmlparser2"
@@ -56,7 +56,7 @@ const headers = (format: Format, userAgent: string) => ({
   "Accept-Language": "en-US,en;q=0.9",
 })
 
-const openCodeUserAgent =
+const ruthUserAgent =
   "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko); compatible; Ruth-User/1.0; +https://github.com/the3kingleo-cmyk/ruth-code"
 
 const isCloudflareChallenge = (error: unknown) => {
@@ -65,7 +65,7 @@ const isCloudflareChallenge = (error: unknown) => {
   return response.status === 403 && response.headers["cf-mitigated"] === "challenge"
 }
 
-const request = (url: string, format: Format, userAgent = openCodeUserAgent) =>
+const request = (url: string, format: Format, userAgent = ruthUserAgent) =>
   HttpClientRequest.get(url).pipe(HttpClientRequest.setHeaders(headers(format, userAgent)))
 
 const assertHttpUrl = (url: URL) => {
@@ -83,7 +83,7 @@ const execute = (
   check: (url: string) => Effect.Effect<void, Error>,
   url: string,
   format: Format,
-  userAgent = openCodeUserAgent,
+  userAgent = ruthUserAgent,
   redirects = 0,
 ): Effect.Effect<HttpClientResponse.HttpClientResponse, Error> =>
   http.execute(request(url, format, userAgent)).pipe(
@@ -126,7 +126,7 @@ const convert = (content: string, contentType: string, format: Format) => {
 }
 
 export const Plugin = {
-  id: "opencode.tool.webfetch",
+  id: "ruth.tool.webfetch",
   effect: Effect.fn("WebFetchTool.Plugin")(function* (ctx: Context) {
     const http = yield* HttpClient.HttpClient
     const permission = yield* Permission.Service
@@ -166,7 +166,7 @@ export const Plugin = {
                     ...Permission.invocation(context),
                   })
                 const response = yield* execute(http, check, url, input.format).pipe(
-                  Effect.catchIf(isCloudflareChallenge, () => execute(http, check, url, input.format, "opencode")),
+                  Effect.catchIf(isCloudflareChallenge, () => execute(http, check, url, input.format, "ruth")),
                 )
                 const contentType = response.headers["content-type"] || ""
                 const mime = mimeFrom(contentType)

@@ -122,7 +122,7 @@ describe("Config.Entry", () => {
     const entries = [
       new Config.Document({
         type: "document",
-        path: AbsolutePath.make("/project/opencode.json"),
+        path: AbsolutePath.make("/project/ruth.json"),
         info: new Config.Info({
           permissions: [
             { action: "shell", resource: "*", effect: "ask" },
@@ -131,7 +131,7 @@ describe("Config.Entry", () => {
         }),
       }),
       new Config.Document({ type: "document", info: new Config.Info({ shell: "/bin/zsh" }) }),
-      new Config.Directory({ type: "directory", path: AbsolutePath.make("/project/.opencode") }),
+      new Config.Directory({ type: "directory", path: AbsolutePath.make("/project/.ruth") }),
     ]
 
     const encoded = Schema.encodeSync(Schema.Array(Config.Entry))(entries)

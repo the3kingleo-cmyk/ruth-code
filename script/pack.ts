@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 
-import { Script } from "@opencode/script"
+import { Script } from "@ruth/script"
 import { $ } from "bun"
 import { rm } from "node:fs/promises"
 import path from "node:path"

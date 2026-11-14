@@ -1,4 +1,4 @@
-import { AppProcess } from "@opencode/util/process"
+import { AppProcess } from "@ruth/util/process"
 import { Effect } from "effect"
 import { ChildProcess } from "effect/process"
 import net from "node:net"
@@ -10,13 +10,24 @@ export type Info = {
   readonly command: string
 }
 
-const MANAGED_BIN = /^(ruth|opencode|jcode)$/i
+const MANAGED_BIN = /^(ruth|jcode)(\.exe)?$/i
+const RUTH_ENTRY = /^ruth(\.[cm]?[jt]s)?$/i
 
-/** True when the listening process is a Ruth, OpenCode, or JCode binary — including a stale service. */
+const basename = (token: string) => token.replace(/['"]/g, "").replace(/\\/g, "/").split("/").pop() ?? ""
+
+/**
+ * True when the listening process is a Ruth (or earlier JCode) server, including a stale service:
+ * either the binary itself, or a runtime launching a Ruth entry script with `serve --service`.
+ */
 export function isManagedService(command: string) {
-  const first = command.trim().split(/\s+/)[0] ?? ""
-  const base = first.replace(/\\/g, "/").split("/").pop() ?? ""
-  return MANAGED_BIN.test(base.replace(/['"]/g, ""))
+  const tokens = command.trim().split(/\s+/)
+  if (MANAGED_BIN.test(basename(tokens[0] ?? ""))) return true
+  return /\sserve\s+--service\b/.test(command) && tokens.slice(1).some((token) => RUTH_ENTRY.test(basename(token)))
+}
+
+/** True when the listener was started as a background service, so it may still be registering. */
+export function isServiceProcess(command: string) {
+  return /\sserve\s+--service\b/.test(command)
 }
 
 export const inspect = Effect.fnUntraced(function* (port: number, hostname?: string) {

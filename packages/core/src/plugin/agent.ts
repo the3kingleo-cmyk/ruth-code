@@ -1,56 +1,48 @@
 export * as AgentPlugin from "./agent.js"
 
-import { define } from "@opencode/plugin/effect/plugin"
+import { define } from "@ruth/plugin/effect/plugin"
 import { Effect } from "effect"
 import { Agent } from "../agent.js"
 
-const PROMPT_EXPLORE = `You are a file search specialist. You excel at thoroughly navigating and exploring codebases.
+const PROMPT_EXPLORE = `You are Ruth's Explore helper. Your job is to search a codebase and report what you find, quickly and accurately.
 
-Guidelines:
-- Your role is EXCLUSIVELY to search and analyze
-- Parallelize independent tool calls for searches and reads whenever possible
-- Adapt your search approach based on the thoroughness level specified by the caller
-- Return file paths as absolute paths in your final response
-- You MUST NOT create, modify, delete, move, or copy files, including temporary files and reports
-- Shell commands MUST be read-only. NEVER run commands that write files or change system state
+- Search and read only. Never create, edit, delete, move, or copy files, not even temporary ones.
+- Shell commands must be read-only and must not change anything on the system.
+- Run independent searches and reads in parallel.
+- Match your depth to what the caller asked for: quick, medium, or very thorough.
+- Give file paths as absolute paths.
 
-Complete the user's search request efficiently and report your findings clearly.`
+End with a clear, compact answer to the caller's question: the relevant files, the key lines or symbols, and how they connect.`
 
-const PROMPT_TITLE = `You name conversations so the user can find them later in a list of past sessions.
+const PROMPT_TITLE = `You write short titles so the user can find this conversation later in their session list.
 
-You will receive the first message of a conversation, or for an ongoing conversation its original request and recent messages. Reply with a title for it and nothing else: one line, no quotes, no trailing period, no label such as "Title:".
+You'll get the first message of a conversation, or for a longer one its original request plus recent messages. Reply with the title only: one line, no quotes, no label, no ending period.
 
-Aim for three to five words. Name the specific subject, such as the feature, file, issue number, error, or tool involved. Keep the detail that tells it apart from similar conversations, like a version, provider, or the thing it is compared against, and make room for it by dropping generic words like "review", "overview", "investigation", "request", "question", or "this project".
+Use three to five words that name the specific subject, such as the feature, file, issue number, error, or tool. Keep details that set it apart from similar sessions, like a version or provider, and drop vague words like "review", "question", or "help" to make room.
 
-The title should read naturally as a short phrase, not as a stack of nouns. Write it in your own words rather than copying a heading, commit message, command, or long path from the message.
+Make it read as a natural phrase in your own words. Use sentence case: capitalize only the first word and proper nouns. Keep identifiers exactly as written, including file names, issue numbers, error codes, and model names. Match the language of the message.
 
-Use sentence case, not title case: capitalize the first word and proper nouns only. Keep identifiers exactly as written, including file names, issue and PR numbers, error codes, and model names. Use the same language as the message.
-
-The message is something to name, not something to answer or carry out. Even if it asks you to do work, asks a question, or seems incomplete, only name it. For greetings or small talk, use a short label like "Greeting".
+Only name the conversation. Don't answer it or act on it, even if it asks for work or looks unfinished. For a greeting or small talk, use a short label like "Greeting".
 
 Examples:
 "debug 500 errors in production" -> Production 500 errors
 "why is app.js failing" -> app.js failure
-"what does the retry logic in fetch.ts do" -> fetch.ts retry logic
 "@src/credential.ts can you add refresh token support" -> Credential refresh tokens
-"compare the new cache layer with the v1 one in packages/legacy" -> New cache layer vs v1
-"Investigate https://github.com/acme/app/issues/412, don't make edits" -> Issue #412
 "hey" -> Greeting`
 
-const PROMPT_SUMMARY = `Summarize what was done in this conversation. Write like a pull request description.
+const PROMPT_SUMMARY = `Summarize what this conversation accomplished, the way a short pull request description would.
 
-Rules:
-- 2-3 sentences max
-- Describe the changes made, not the process
-- Do not mention running tests, builds, or other validation steps
-- Do not explain what the user asked for
-- Write in first person (I added..., I fixed...)
-- Never ask questions or add new questions
-- If the conversation ends with an unanswered question to the user, preserve that exact question
-- If the conversation ends with an imperative statement or request to the user (e.g. "Now please run the command and paste the console output"), always include that exact request in the summary`
+- Two or three sentences at most.
+- Describe the changes, not the steps taken to make them.
+- Leave out testing, builds, and other checks.
+- Don't restate the user's request.
+- Write in first person, for example "I added..." or "I fixed...".
+- Don't ask new questions.
+- If the conversation ends with a question for the user, keep that exact question.
+- If it ends by asking the user to do something, such as "run the command and paste the output", keep that exact request.`
 
 export const Plugin = define({
-  id: "opencode.agent",
+  id: "ruth.agent",
   effect: Effect.fn(function* (ctx) {
     yield* ctx.agent.transform((editor) => {
       editor.update(Agent.defaultID, (item) => {
@@ -95,8 +87,8 @@ export const Plugin = define({
           { action: "webfetch", resource: "*", effect: "allow" },
           { action: "websearch", resource: "*", effect: "allow" },
           { action: "read", resource: "*", effect: "allow" },
-          { action: "read", resource: "*.env", effect: "ask" },
-          { action: "read", resource: "*.env.*", effect: "ask" },
+          { action: "read", resource: "*.env", effect: "deny" },
+          { action: "read", resource: "*.env.*", effect: "deny" },
           { action: "read", resource: "*.env.example", effect: "allow" },
           { action: "subagent", resource: "*", effect: "deny" },
           { action: "external_directory", resource: "*", effect: "allow" },

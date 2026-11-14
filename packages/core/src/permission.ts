@@ -1,9 +1,9 @@
 export * as Permission from "./permission.js"
 
-import { makeLocationNode } from "@opencode/util/effect/app-node"
+import { makeLocationNode } from "@ruth/util/effect/app-node"
 import { Context, Deferred, Effect, Layer, Schema } from "effect"
-import { Permission } from "@opencode/schema/permission"
-import type { Tool } from "@opencode/schema/tool"
+import { Permission } from "@ruth/schema/permission"
+import type { Tool } from "@ruth/schema/tool"
 import { Bus } from "./bus.js"
 import { Location } from "./location.js"
 import { Agent } from "./agent.js"
@@ -16,7 +16,7 @@ import { PluginHooks } from "./plugin/hooks.js"
 
 const PermissionEffect = Permission.Effect
 export { PermissionEffect as Effect }
-export { Rule, Ruleset } from "@opencode/schema/permission"
+export { Rule, Ruleset } from "@ruth/schema/permission"
 const missingAgentPermissions: Permission.Ruleset = [{ action: "*", resource: "*", effect: "deny" }]
 
 export const ID = Permission.ID
@@ -54,13 +54,13 @@ export interface AskResult {
   readonly effect: Permission.Effect
 }
 
-export { Event } from "@opencode/schema/permission"
+export { Event } from "@ruth/schema/permission"
 
 /**
  * Rules that settle a request which would otherwise ask, for work nobody is present to answer, such as a schedule's
  * check. A request they do not allow is denied. Configured denies still win, as they are evaluated first.
  */
-export const Unattended = Context.Reference<Permission.Ruleset | undefined>("@opencode/Permission/Unattended", {
+export const Unattended = Context.Reference<Permission.Ruleset | undefined>("@ruth/Permission/Unattended", {
   defaultValue: () => undefined,
 })
 
@@ -121,7 +121,7 @@ export interface Interface {
   readonly list: () => Effect.Effect<ReadonlyArray<Request>>
 }
 
-export class Service extends Context.Service<Service, Interface>()("@opencode/Permission") {}
+export class Service extends Context.Service<Service, Interface>()("@ruth/Permission") {}
 
 interface Pending {
   readonly request: Request
@@ -196,9 +196,17 @@ const layer = Layer.effect(
         source: input.source,
         effect,
       })
-      // Auto-approve by default: never prompt, never block on missing approval.
-      if (event.effect === "ask") return { effect: "allow" as const, rules: all }
-      return { effect: event.effect, message: event.message, rules: all }
+      const unattended = yield* Unattended
+      if (event.effect !== "ask" || unattended === undefined)
+        return { effect: event.effect, message: event.message, rules: all }
+      const settled = [...all, ...unattended]
+      const allowed = input.resources.every((resource) => evaluate(input.action, resource, settled).effect === "allow")
+      if (allowed) return { effect: "allow" as const, rules: all }
+      return {
+        effect: "deny" as const,
+        message: `Permission ${input.action} needs approval, and nobody is present to give it`,
+        rules: all,
+      }
     })
 
     function request(input: AssertInput, message?: string): Request {
@@ -241,6 +249,7 @@ const layer = Layer.effect(
       if (closed) return { id: input.id ?? ID.create(), effect: "deny" as const }
       const result = yield* evaluateInput(input)
       const value = request(input, result.message)
+      if (result.effect === "ask") yield* create(value, input.agent)
       return { id: value.id, effect: result.effect }
     })
 

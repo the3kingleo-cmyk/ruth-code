@@ -1,6 +1,6 @@
-import { LayerNode } from "@opencode/util/effect/layer-node"
-import { Global } from "@opencode/util/global"
-import { run } from "@opencode/tui"
+import { LayerNode } from "@ruth/util/effect/layer-node"
+import { Global } from "@ruth/util/global"
+import { run } from "@ruth/tui"
 import { Commands } from "../commands"
 import { Runtime } from "../../framework/runtime"
 import { Config } from "../../config"
@@ -8,11 +8,11 @@ import { Context, Effect, FileSystem, Option, Queue, Schedule, Semaphore } from 
 import { ServerConnection } from "../../services/server-connection"
 import { Updater } from "../../services/updater"
 import { UpdatePreflight } from "../../services/update-preflight"
-import { Npm } from "@opencode/util/npm"
-import { OPENCODE_ARTIFACT, OPENCODE_CHANNEL, OPENCODE_HIGHLIGHTS, OPENCODE_VERSION } from "../../version"
+import { Npm } from "@ruth/util/npm"
+import { RUTH_ARTIFACT, RUTH_CHANNEL, RUTH_HIGHLIGHTS, RUTH_VERSION } from "../../version"
 import { Env } from "../../env"
-import { Service } from "@opencode/client/effect/service"
-import { OpenCode } from "@opencode/client/promise"
+import { Service } from "@ruth/client/effect/service"
+import { Ruth } from "@ruth/client/promise"
 import { findSession } from "../../session-target"
 import { errorMessage } from "../../util/error"
 import { resolveLaunchDirectory } from "../../project-dir"
@@ -41,7 +41,7 @@ export default Runtime.handler(Commands, (input) =>
       onStart: (reason, previousVersion) => {
         Queue.offerUnsafe(serviceStarts, { reason, previousVersion })
         if (reason === "version-mismatch" && preflight.begin(previousVersion)) return
-        // Launch the TUI with no extra banner so `opencode` opens Ruth directly.
+        // Launch the TUI with no extra banner so `ruth` opens Ruth directly.
       },
     }).pipe(
       Effect.tapError(() =>
@@ -54,7 +54,7 @@ export default Runtime.handler(Commands, (input) =>
       session !== undefined &&
       (yield* Effect.tryPromise({
         try: () =>
-          findSession(OpenCode.make({ baseUrl: server.endpoint.url, headers: Service.headers(server.endpoint) }), session),
+          findSession(Ruth.make({ baseUrl: server.endpoint.url, headers: Service.headers(server.endpoint) }), session),
         catch: (cause) => new Error(errorMessage(cause)),
       })) !== undefined
     const updater = yield* Updater.Service
@@ -93,10 +93,10 @@ export default Runtime.handler(Commands, (input) =>
     const service = server.service
     yield* run({
       app: {
-        name: process.env.OPENCODE_CLIENT ?? OPENCODE_ARTIFACT,
-        version: OPENCODE_VERSION,
-        channel: process.env.OPENCODE_TUI_CHANNEL ?? OPENCODE_CHANNEL,
-        highlights: OPENCODE_HIGHLIGHTS,
+        name: process.env.RUTH_CLIENT ?? RUTH_ARTIFACT,
+        version: RUTH_VERSION,
+        channel: process.env.RUTH_TUI_CHANNEL ?? RUTH_CHANNEL,
+        highlights: RUTH_HIGHLIGHTS,
       },
       server: {
         endpoint: server.endpoint,

@@ -1,10 +1,10 @@
 export * as McpPool from "./pool.js"
 
 import type { AuthProvider } from "@modelcontextprotocol/client"
-import type { Mcp } from "@opencode/schema/mcp"
-import { CrossSpawnSpawner } from "@opencode/util/cross-spawn-spawner"
-import { makeGlobalNode } from "@opencode/util/effect/app-node"
-import { httpFetch } from "@opencode/util/effect/app-node-platform"
+import type { Mcp } from "@ruth/schema/mcp"
+import { CrossSpawnSpawner } from "@ruth/util/cross-spawn-spawner"
+import { makeGlobalNode } from "@ruth/util/effect/app-node"
+import { httpFetch } from "@ruth/util/effect/app-node-platform"
 import { Cause, Context, Deferred, Effect, Exit, Fiber, FiberSet, Layer, Scope, Semaphore } from "effect"
 import { FetchHttpClient } from "effect/http"
 import { ChildProcessSpawner } from "effect/process/ChildProcessSpawner"
@@ -38,7 +38,7 @@ export interface Interface {
   readonly connection: (input: Input) => McpConnection.Connection
 }
 
-export class Service extends Context.Service<Service, Interface>()("@opencode/McpPool") {}
+export class Service extends Context.Service<Service, Interface>()("@ruth/McpPool") {}
 
 /**
  * Everything that could make two connections behave differently, so only identical ones are shared.
