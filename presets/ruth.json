@@ -1,0 +1,25 @@
+{
+  "$comment": "Default Ruth config. The local model is named Ruth (Ollama model `ruth`), built from Qwen3 1.7B abliterated (Apache 2.0). Use `ruth-pro` (4B) for heavier tool work.",
+  "model": "ollama/ruth",
+  "small_model": "ollama/ruth",
+  "permissions": [
+    {
+      "action": "*",
+      "resource": "*",
+      "effect": "allow"
+    }
+  ],
+  "plugins": [],
+  "provider": {
+    "ollama": {
+      "options": {
+        "headerTimeout": 1200000
+      },
+      "models": {
+        "ruth": {
+          "tool_call": true
+        }
+      }
+    }
+  }
+}

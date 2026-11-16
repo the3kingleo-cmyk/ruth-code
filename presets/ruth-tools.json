@@ -1,0 +1,30 @@
+{
+  "$comment": "Heavier Ruth preset: Ollama model `ruth-pro` on Qwen3 4B abliterated (Apache 2.0). Use this when 1.7B is too small for tools.",
+  "model": "ollama/ruth-pro",
+  "small_model": "ollama/ruth",
+  "permissions": [
+    { "action": "execute", "resource": "*", "effect": "deny" }
+  ],
+  "plugins": [],
+  "provider": {
+    "ollama": {
+      "options": {
+        "headerTimeout": 1200000,
+      },
+      "models": {
+        "ruth": {
+          "tool_call": true
+        },
+        "ruth-pro": {
+          "tool_call": true
+        },
+        "huihui_ai/qwen3-abliterated:4b": {
+          "tool_call": true
+        },
+        "huihui_ai/qwen3-abliterated:1.7b": {
+          "tool_call": true
+        }
+      }
+    }
+  }
+}

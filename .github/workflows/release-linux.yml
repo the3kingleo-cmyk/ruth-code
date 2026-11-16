@@ -1,0 +1,72 @@
+# linux-x64 release for the private Ruth fork.
+# Official OpenCode publish/deploy workflows stay in
+# .github/workflows-upstream-disabled: they assume anomalyco AWS roles,
+# npm tokens, and R2 credentials that this repo does not have and must
+# not use. This workflow only builds the ruth binary and, on a v* tag,
+# attaches it to a GitHub release in this private repo.
+name: Release linux-x64
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-linux-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  linux-x64:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Enable 8G swap to avoid OOM on the hosted runner
+        run: |
+          set -euo pipefail
+          sudo swapoff -a || true
+          sudo fallocate -l 8G /swapfile || sudo dd if=/dev/zero of=/swapfile bs=1M count=8192
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+          free -h
+          swapon --show
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.4.4"
+
+      - name: Install dependencies
+        env:
+          BUN_INSTALL_CONCURRENCY: "2"
+        run: bun install
+
+      - name: Compile ruth linux-x64
+        env:
+          RUTH_TARGET: linux-x64
+        run: bun run script/build.ts --skip-web-ui --skip-install
+        working-directory: packages/cli
+
+      - name: Pack asset and print version
+        run: |
+          set -euo pipefail
+          test -x packages/cli/dist/cli-linux-x64/bin/ruth
+          mkdir -p dist-release
+          tar -C packages/cli/dist/cli-linux-x64/bin -czf dist-release/ruth-linux-x64.tar.gz ruth
+          sha256sum dist-release/ruth-linux-x64.tar.gz | tee dist-release/ruth-linux-x64.tar.gz.sha256
+          packages/cli/dist/cli-linux-x64/bin/ruth --version
+          packages/cli/dist/cli-linux-x64/bin/ruth --help | head
+
+      - name: Publish GitHub release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist-release/ruth-linux-x64.tar.gz
+            dist-release/ruth-linux-x64.tar.gz.sha256
+          generate_release_notes: true
