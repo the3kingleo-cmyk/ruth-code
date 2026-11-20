@@ -1,6 +1,8 @@
 import fs from "fs"
 import { parse } from "jsonc-parser"
 import { startOllama } from "@ruth/util/local-servers"
+import { LOCAL_OLLAMA_ORIGIN } from "@ruth/util/ollama-origin"
+import { ensureRuthModel } from "./ensure-ruth-model"
 import { findExistingConfig } from "./defaults"
 
 /** The `provider/model` Ruth will use, read straight from the global config. */
@@ -23,5 +25,10 @@ export function ensureLocalModelServer() {
   if (process.env.RUTH_NO_AUTOSTART === "1" || process.env.RUTH_NO_AUTOSTART === "true") return
   const model = configuredModel() ?? "ollama/ruth"
   if (!model.startsWith("ollama/")) return
-  void startOllama({ waitMs: 20_000 }).catch(() => undefined)
+  void startOllama({ origin: LOCAL_OLLAMA_ORIGIN, waitMs: 20_000 })
+    .then((status) => {
+      if (!status.running) return
+      return ensureRuthModel({ origin: LOCAL_OLLAMA_ORIGIN })
+    })
+    .catch(() => undefined)
 }

@@ -9,6 +9,7 @@ import { EnvironmentUnavailable } from "../../environment/unavailable.js"
 import { Location } from "../../location.js"
 import { Model } from "../../model.js"
 import type { PluginInternal } from "../internal.js"
+import { preferLoopbackHost } from "@ruth/util/ollama-origin"
 import { foldSettings } from "./configured.js"
 import { activeCredential } from "./credential-settings.js"
 import { ProviderRefresh } from "./refresh.js"
@@ -242,13 +243,15 @@ function createClient(
 
 function configured(entries: readonly Entry[], providerID: string, origin: string | undefined, suffix: RegExp) {
   const settings = foldSettings(entries, providerID, undefined)
-  const baseURL = (
-    typeof settings?.baseURL === "string"
-      ? settings.baseURL
-      : origin !== undefined
-        ? `${origin.replace(/\/+$/, "")}/v1`
-        : ""
-  ).replace(/\/+$/, "")
+  const baseURL = preferLoopbackHost(
+    (
+      typeof settings?.baseURL === "string"
+        ? settings.baseURL
+        : origin !== undefined
+          ? `${origin.replace(/\/+$/, "")}/v1`
+          : ""
+    ).replace(/\/+$/, ""),
+  )
   const apiKey = typeof settings?.apiKey === "string" ? settings.apiKey : undefined
   const explicit = typeof settings?.baseURL === "string"
   if (!URL.canParse(baseURL)) return { baseURL, apiKey, explicit }

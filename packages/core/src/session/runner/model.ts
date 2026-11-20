@@ -7,6 +7,7 @@ import { Provider } from "@ruth/schema/provider"
 import { Context, Effect, Layer, Schema } from "effect"
 import type { SessionRequestKind } from "@ruth/plugin/effect/session"
 import { Agent } from "../../agent.js"
+import { modelTagMatches } from "../../model.js"
 import { ModelResolver } from "../../model-resolver.js"
 import { PluginHooks } from "../../plugin/hooks.js"
 import { SessionSchema } from "../schema.js"
@@ -82,10 +83,31 @@ const layer = Layer.effect(
       session: SessionSchema.Info,
       available: () => Effect.Effect<ReadonlyArray<Model.Info>>,
     ) {
-      const find = (ref: Model.Ref) =>
+      const lookup = (ref: Model.Ref) =>
         available().pipe(
-          Effect.map((models) => models.find((model) => model.providerID === ref.providerID && model.id === ref.id)),
+          Effect.map((models) => ({
+            info: models.find(
+              (model) => model.providerID === ref.providerID && modelTagMatches(model.id, ref.id),
+            ),
+            providerSeen: models.some((model) => model.providerID === ref.providerID),
+          })),
         )
+      // Ollama discovery fills the catalog in the background. A first prompt can
+      // otherwise fail with "Model unavailable: ollama/ruth" before /api/tags lands.
+      const find = (ref: Model.Ref) =>
+        Effect.gen(function* () {
+          const first = yield* lookup(ref)
+          if (first.info) return first.info
+          if (first.providerSeen || (ref.providerID !== "ollama" && ref.providerID !== "ollama-cloud")) return undefined
+          const deadline = Date.now() + 8_000
+          while (Date.now() < deadline) {
+            yield* Effect.sleep("200 millis")
+            const next = yield* lookup(ref)
+            if (next.info) return next.info
+            if (next.providerSeen) return undefined
+          }
+          return undefined
+        })
       if (session.model) {
         const info = yield* find(session.model)
         if (info) return { info, variant: session.model.variant }

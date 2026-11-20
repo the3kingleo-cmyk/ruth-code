@@ -1,6 +1,6 @@
 import { CrossSpawnSpawner } from "@ruth/util/cross-spawn-spawner"
 import { LayerNode } from "@ruth/util/effect/layer-node"
-import { Deferred, Effect, Schema, Stream } from "effect"
+import { Deferred, Effect, Ref, Schema, Stream } from "effect"
 import { ChildProcess, ChildProcessSpawner } from "effect/process"
 import { randomBytes } from "node:crypto"
 import { selfCommand } from "../util/process"
@@ -26,7 +26,7 @@ function command(password: string, options: Options) {
     // The server treats EOF on this pipe as the end of its ownership lease.
     // The OS closes it even when the TUI is killed before Effect finalizers run.
     stdin: "pipe",
-    stderr: process.env.RUTH_PRINT_LOGS === "1" ? "inherit" : "ignore",
+    stderr: process.env.RUTH_PRINT_LOGS === "1" ? "inherit" : "pipe",
     killSignal: "SIGTERM",
     forceKillAfter: "3 seconds",
   })
@@ -38,12 +38,30 @@ const makeEndpoint = Effect.fn("cli.standalone.endpoint")(
     const spawner = yield* ChildProcessSpawner.ChildProcessSpawner
     const proc = yield* spawner.spawn(command(password, options))
     const readyLine = yield* Deferred.make<string, Error>()
+    const stderrText = yield* Ref.make("")
+    if (proc.stderr) {
+      yield* proc.stderr.pipe(
+        Stream.decodeText(),
+        Stream.runForEach((chunk) => Ref.update(stderrText, (s) => s + chunk)),
+        Effect.catch(() => Effect.void),
+        Effect.forkScoped,
+      )
+    }
+    const readinessError = Effect.gen(function* () {
+      yield* Effect.sleep("50 millis")
+      const logs = (yield* Ref.get(stderrText)).trim()
+      const suffix = logs ? `\n${logs}` : ""
+      return yield* Deferred.fail(
+        readyLine,
+        new Error(`Standalone server exited before reporting readiness${suffix}`),
+      )
+    })
     // Keep draining stdout after readiness so later server writes cannot hit EPIPE.
     yield* proc.stdout.pipe(
       Stream.decodeText(),
       Stream.splitLines,
       Stream.runForEach((line) => Deferred.succeed(readyLine, line)),
-      Effect.ensuring(Deferred.fail(readyLine, new Error("Standalone server exited before reporting readiness"))),
+      Effect.ensuring(readinessError),
       Effect.forkScoped,
     )
     const output = yield* Deferred.await(readyLine)

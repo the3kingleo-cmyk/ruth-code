@@ -18,6 +18,9 @@ import { RetainedImage } from "./services/retained-image"
 import { ServiceRegistration } from "./services/service-registration"
 import { RemoteTunnel } from "./services/remote-tunnel"
 import { WebUi } from "./services/web-ui"
+import { recoverAfterBootFailure, recoverIfNeeded } from "./boot-recovery"
+import { ensureRuthModel } from "./ensure-ruth-model"
+import { LOCAL_OLLAMA_ORIGIN } from "@ruth/util/ollama-origin"
 import { databasePath } from "./database-path"
 import { shouldEnableFilewatcher } from "./filewatcher-policy"
 
@@ -60,6 +63,13 @@ const processEffect = Effect.fnUntraced(function* (options: Options) {
           ),
         )
   const global = yield* Global.Service
+  const roots = { data: global.data, config: global.config, state: global.state, home: global.home }
+  const recovered = recoverIfNeeded(roots, databasePath(global.data))
+  if (recovered.length > 0) {
+    yield* Effect.logWarning("Moved leftover Ruth data aside and starting with a fresh data directory", {
+      backup: recovered,
+    })
+  }
   // A sandbox may deny $HOME; the service then keeps the cwd it was launched from.
   if (options.mode === "service")
     yield* Effect.try(() => process.chdir(global.home)).pipe(
@@ -67,6 +77,18 @@ const processEffect = Effect.fnUntraced(function* (options: Options) {
     )
   return yield* Effect.scoped(
     Effect.gen(function* () {
+      // Make sure the running Ollama at 127.0.0.1:11434 has the default `ruth` model.
+      // Runs in the background so a missing server does not delay the TUI.
+      yield* Effect.forkScoped(
+        Effect.promise(() => ensureRuthModel({ origin: LOCAL_OLLAMA_ORIGIN })).pipe(
+          Effect.tap((result) =>
+            result.ok
+              ? Effect.logInfo("Connected to the local ruth model", { origin: result.origin, created: result.created })
+              : Effect.logWarning("Local ruth model is not ready yet", { origin: result.origin, reason: result.reason }),
+          ),
+          Effect.catch((cause) => Effect.logWarning("Failed to verify the local ruth model", { cause })),
+        ),
+      )
       const foreground = options.mode === "default"
       const serviceOptions = options.mode === "service" ? yield* ServiceConfig.options() : undefined
       const config = options.mode === "service" ? yield* ServiceConfig.read() : {}
@@ -212,8 +234,15 @@ const processEffect = Effect.fnUntraced(function* (options: Options) {
 
       const server = yield* launch(port).pipe(
         Effect.catch((error) => {
-          if (!addressInUse(error)) return Effect.fail(error)
-          return takeOverOrRelocate(error)
+          if (addressInUse(error)) return takeOverOrRelocate(error)
+          return Effect.gen(function* () {
+            const moved = recoverAfterBootFailure(roots, error)
+            if (!moved) return yield* Effect.fail(error)
+            yield* Effect.logWarning("Server boot failed; moved leftover data aside and retrying", {
+              backup: moved,
+            })
+            return yield* launch(port)
+          })
         }),
       )
       if (server === undefined) return

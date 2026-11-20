@@ -62,8 +62,14 @@ export function clearCloudState(): void {
   }
 }
 
+
+/** Prefer IPv4 loopback. `localhost` can resolve to ::1 on some systems (including Crostini) while Ollama binds 127.0.0.1. */
+export function preferLoopbackHost(value: string): string {
+  return value.replace(/^(https?:\/\/)(localhost|\[::1\]|::1)(?=[:/?#]|$)/i, "$1127.0.0.1")
+}
+
 export function normalizeOllamaOrigin(origin: string): string {
-  return origin.replace(/\/+$/, "").replace(/\/v1$/i, "")
+  return preferLoopbackHost(origin.replace(/\/+$/, "").replace(/\/v1$/i, ""))
 }
 
 export function cloudOriginFromState(state: CloudState): string {

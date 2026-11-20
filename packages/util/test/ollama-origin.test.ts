@@ -6,6 +6,8 @@ import {
   LOCAL_OLLAMA_ORIGIN,
   clearCloudState,
   cloudOriginFromState,
+  normalizeOllamaOrigin,
+  preferLoopbackHost,
   resolveOllamaOrigin,
   writeCloudState,
 } from "../src/ollama-origin.js"
@@ -66,5 +68,18 @@ describe("resolveOllamaOrigin", () => {
 
   test("cloudOriginFromState uses the recorded local port", () => {
     expect(cloudOriginFromState({ localPort: 12000 })).toBe("http://127.0.0.1:12000")
+  })
+})
+
+
+describe("preferLoopbackHost", () => {
+  test("rewrites localhost and IPv6 loopback to 127.0.0.1", () => {
+    expect(preferLoopbackHost("http://localhost:11434/v1")).toBe("http://127.0.0.1:11434/v1")
+    expect(preferLoopbackHost("http://[::1]:11434")).toBe("http://127.0.0.1:11434")
+    expect(preferLoopbackHost("http://127.0.0.1:11434/v1")).toBe("http://127.0.0.1:11434/v1")
+  })
+
+  test("normalizeOllamaOrigin strips /v1 and rewrites localhost", () => {
+    expect(normalizeOllamaOrigin("http://localhost:11434/v1")).toBe("http://127.0.0.1:11434")
   })
 })
