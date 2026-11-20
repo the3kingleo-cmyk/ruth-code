@@ -1,5 +1,5 @@
 {
-  "$schema": "https://the3kingleo-cmyk.github.io/ruth-install/desktop-theme.json",
+  "$schema": "/desktop-theme.json",
   "name": "Dracula",
   "id": "dracula",
   "light": {

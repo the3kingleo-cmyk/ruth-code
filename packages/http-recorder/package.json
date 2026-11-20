@@ -7,11 +7,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/the3kingleo-cmyk/ruth-code.git",
+    "url": "git+",
     "directory": "packages/http-recorder"
   },
-  "homepage": "https://github.com/the3kingleo-cmyk/ruth-code/tree/main/packages/http-recorder",
-  "bugs": "https://github.com/the3kingleo-cmyk/ruth-code/issues",
+  "homepage": "/tree/main/packages/http-recorder",
+  "bugs": "/issues",
   "keywords": [
     "effect",
     "http",

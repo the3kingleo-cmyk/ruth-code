@@ -1,7 +1,7 @@
 import { Config } from "@ruth/tui/config"
 import { Schema } from "effect"
 
-export const SchemaURL = "https://github.com/the3kingleo-cmyk/ruth-install"
+export const SchemaURL = ""
 
 export const Info = Schema.Struct({
   $schema: Schema.optional(Schema.String).annotate({ description: "JSON Schema for CLI configuration" }),

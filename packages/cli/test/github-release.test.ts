@@ -21,7 +21,7 @@ describe("github release helpers", () => {
 describe("fetchLatestRelease", () => {
   test("prefers browser_download_url so a token is not required", async () => {
     const release = await fetchLatestRelease({
-      slug: "the3kingleo-cmyk/ruth-install",
+      slug: "example/ruth",
       fetchImpl: async () =>
         new Response(
           JSON.stringify({
@@ -30,7 +30,7 @@ describe("fetchLatestRelease", () => {
               {
                 name: "ruth-linux-x64.tar.gz",
                 url: "https://api.github.com/repos/example/asset/1",
-                browser_download_url: "https://github.com/the3kingleo-cmyk/ruth-install/releases/download/v2/ruth-linux-x64.tar.gz",
+                browser_download_url: "/releases/download/v2/ruth-linux-x64.tar.gz",
               },
             ],
           }),

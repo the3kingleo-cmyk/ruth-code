@@ -123,10 +123,6 @@
     "@ruth/script": "workspace:*",
     "typescript": "catalog:"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/the3kingleo-cmyk/ruth-code"
-  },
   "license": "MIT",
   "prettier": {
     "semi": false,

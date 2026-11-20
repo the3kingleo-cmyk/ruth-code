@@ -232,7 +232,7 @@ export default { path: file, version: ${JSON.stringify(ruthPty.version)}, sha256
         name: `@ruth/${name}`,
         version: Script.version,
         license: "MIT",
-        repository: { type: "git", url: "git+https://github.com/the3kingleo-cmyk/ruth-code.git" },
+        repository: { type: "git", url: "git+" },
         os: [item.os],
         cpu: [item.arch],
       },

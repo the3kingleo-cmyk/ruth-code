@@ -41,7 +41,7 @@ describe("LLMGatewayPlugin", () => {
       yield* addPlugin()
       expect((yield* catalog.get(Provider.ID.make("llmgateway")))?.headers).toEqual({
         Existing: "value",
-        "HTTP-Referer": "https://github.com/the3kingleo-cmyk/ruth-code",
+        "HTTP-Referer": "",
         "X-Title": "ruth",
         "X-Source": "ruth",
       })

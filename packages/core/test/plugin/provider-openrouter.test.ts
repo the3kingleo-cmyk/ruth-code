@@ -36,7 +36,7 @@ describe("OpenRouterPlugin", () => {
 
       expect((yield* catalog.get(Provider.ID.openrouter))?.headers).toEqual({
         Existing: "value",
-        "HTTP-Referer": "https://github.com/the3kingleo-cmyk/ruth-code",
+        "HTTP-Referer": "",
         "X-Title": "ruth",
       })
       expect((yield* catalog.get(Provider.ID.make("nvidia")))?.headers).toBeUndefined()

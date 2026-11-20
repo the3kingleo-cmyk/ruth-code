@@ -9,7 +9,7 @@ export const KiloPlugin = define({
         if (item.provider.package !== "@ruth/ai/providers/openai-compatible") continue
         if (item.provider.settings?.baseURL !== "https://api.kilo.ai/api/gateway") continue
         evt.update(item.provider.id, (provider) => {
-          provider.headers = { ...provider.headers, "HTTP-Referer": "https://github.com/the3kingleo-cmyk/ruth-code", "X-Title": "ruth" }
+          provider.headers = { ...provider.headers, "HTTP-Referer": "", "X-Title": "ruth" }
         })
       }
     })

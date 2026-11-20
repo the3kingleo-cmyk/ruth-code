@@ -4,7 +4,6 @@ import fs from "fs"
 import os from "os"
 import path from "path"
 import { env } from "@ruth/util/env"
-import { DEFAULT_REPO_SLUG } from "./defaults"
 
 export type ReleaseAsset = {
   name: string
@@ -49,10 +48,10 @@ export function tokenFromGhAuth(
   return undefined
 }
 
-/** Release repo. Overrides are honored only inside the the3kingleo-cmyk account. */
+/** Release repo. Empty unless the user sets RUTH_REPO_SLUG to owner/repo. */
 export function repoSlug(): string {
-  const override = env("REPO_SLUG")
-  return override && /^the3kingleo-cmyk\/[A-Za-z0-9._-]+$/.test(override) ? override : DEFAULT_REPO_SLUG
+  const override = (env("REPO_SLUG") || "").trim()
+  return /^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/.test(override) ? override : ""
 }
 
 function headers(token?: string, accept = "application/vnd.github+json"): Record<string, string> {
@@ -65,7 +64,8 @@ export async function fetchLatestRelease(
   options: { token?: string; slug?: string; fetchImpl?: FetchLike } = {},
 ): Promise<GithubRelease> {
   const token = options.token ?? resolveGithubToken()
-  const slug = options.slug ?? repoSlug()
+  const slug = (options.slug ?? repoSlug()).trim()
+  if (!slug) throw new Error("No release source is configured. Update checks are off by default.")
   const fetchImpl = options.fetchImpl ?? fetch
   const response = await fetchImpl(`https://api.github.com/repos/${slug}/releases/latest`, {
     headers: headers(token),
@@ -73,7 +73,7 @@ export async function fetchLatestRelease(
   if (!response.ok) {
     const hint = token
       ? `Could not read ${slug} releases (${response.status}).`
-      : `Could not read ${slug} releases (${response.status}). Public ruth-install releases do not need a token; set GITHUB_TOKEN only if you pointed RUTH_REPO_SLUG at a private repo.`
+      : `Could not read ${slug} releases (${response.status}). Set GITHUB_TOKEN only if that release source is a private repo.`
     throw new Error(hint)
   }
   const json = (await response.json()) as {

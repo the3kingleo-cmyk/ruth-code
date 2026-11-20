@@ -17,7 +17,7 @@ describe("ruth cloud helpers", () => {
     expect(isScopeError("This API operation needs the 'codespace' scope", 401)).toBe(true)
     expect(isScopeError("ok", 200)).toBe(false)
     expect(missingScopeMessage()).toContain("codespace")
-    expect(missingScopeMessage()).toContain("the3kingleo-cmyk/ruth-codespace")
+    expect(missingScopeMessage()).toContain("")
   })
 
   test("reuses a running codespace with the Ruth display name", () => {

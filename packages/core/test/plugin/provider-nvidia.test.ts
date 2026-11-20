@@ -35,7 +35,7 @@ describe("NvidiaPlugin", () => {
       yield* addPlugin()
       expect((yield* catalog.get(Provider.ID.make("nvidia")))?.headers).toEqual({
         Existing: "value",
-        "HTTP-Referer": "https://github.com/the3kingleo-cmyk/ruth-code",
+        "HTTP-Referer": "",
         "X-Title": "ruth",
         "X-BILLING-INVOKE-ORIGIN": "Ruth",
       })
@@ -55,7 +55,7 @@ describe("NvidiaPlugin", () => {
       yield* addPlugin()
 
       expect((yield* catalog.get(Provider.ID.make("nvidia")))?.headers).toEqual({
-        "HTTP-Referer": "https://github.com/the3kingleo-cmyk/ruth-code",
+        "HTTP-Referer": "",
         "X-Title": "ruth",
         "X-BILLING-INVOKE-ORIGIN": "Ruth",
       })
@@ -75,7 +75,7 @@ describe("NvidiaPlugin", () => {
       yield* addPlugin()
 
       expect((yield* catalog.get(Provider.ID.make("nvidia")))?.headers).toEqual({
-        "HTTP-Referer": "https://github.com/the3kingleo-cmyk/ruth-code",
+        "HTTP-Referer": "",
         "X-Title": "ruth",
         "X-BILLING-INVOKE-ORIGIN": "CustomOrigin",
       })

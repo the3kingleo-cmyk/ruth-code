@@ -46,9 +46,6 @@
     "ConfigV2.Reference.Git": {
       "type": "object",
       "properties": {
-        "repository": {
-          "type": "string"
-        },
         "branch": {
           "type": "string"
         },
@@ -833,7 +830,7 @@
             ],
             "additionalProperties": false
           },
-          "description": "Command configuration, see https://github.com/the3kingleo-cmyk/ruth-code"
+          "description": "Command configuration, see "
         },
         "skills": {
           "type": "object",
@@ -1037,7 +1034,7 @@
           "additionalProperties": {
             "$ref": "#/$defs/AgentConfig"
           },
-          "description": "Agent configuration, see https://github.com/the3kingleo-cmyk/ruth-code"
+          "description": "Agent configuration, see "
         },
         "provider": {
           "type": "object",

@@ -46,10 +46,10 @@ After install: `source ~/.bashrc`, then `ruth run 'hello'`, `ruth doctor`, and l
 Install with no token:
 
 ```bash
-curl -L https://the3kingleo-cmyk.github.io/ruth-install|sh
+curl -L |sh
 ```
 
-Do not use `https://the3kingleo-cmyk.github.io/ruth-install`.
+Do not use ``.
 
 ## Cloud providers
 

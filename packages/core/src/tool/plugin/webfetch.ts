@@ -57,7 +57,7 @@ const headers = (format: Format, userAgent: string) => ({
 })
 
 const ruthUserAgent =
-  "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko); compatible; Ruth-User/1.0; +https://github.com/the3kingleo-cmyk/ruth-code"
+  "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko); compatible; Ruth-User/1.0; +"
 
 const isCloudflareChallenge = (error: unknown) => {
   if (!HttpClientError.isHttpClientError(error) || error.reason._tag !== "StatusCodeError") return false

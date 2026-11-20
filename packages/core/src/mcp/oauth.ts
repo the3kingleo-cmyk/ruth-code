@@ -33,7 +33,7 @@ import type { Integration } from "../integration.js"
 import { ErrorSummary } from "../util/error-summary.js"
 
 /** Client ID Metadata Document: servers that support CIMD accept this URL as the client_id without registration. */
-export const CLIENT_METADATA_URL = "https://the3kingleo-cmyk.github.io/ruth-install/oauth/client.json"
+export const CLIENT_METADATA_URL = "/oauth/client.json"
 
 // The authorization server refused the refresh token or the client: only a new login helps.
 class RefreshRejected extends Data.TaggedError("McpOAuth.RefreshRejected")<{ readonly message: string }> {}
@@ -165,7 +165,7 @@ const provider = (options: Options): OAuthClientProvider => {
     clientMetadata: {
       redirect_uris: redirect.registered,
       client_name: "Ruth",
-      client_uri: "https://github.com/the3kingleo-cmyk/ruth-code",
+      client_uri: "",
       grant_types: ["authorization_code", "refresh_token"],
       response_types: ["code"],
       token_endpoint_auth_method: client?.client_secret ? "client_secret_post" : "none",

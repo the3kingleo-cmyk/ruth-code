@@ -149,7 +149,7 @@ for (const target of targets) {
         name: `@ruth/${name}`,
         version: Script.version,
         license: pkg.license,
-        repository: { type: "git", url: "git+https://github.com/the3kingleo-cmyk/ruth-code.git" },
+        repository: { type: "git", url: "git+" },
         os: [target.platform],
         cpu: [target.arch],
       },

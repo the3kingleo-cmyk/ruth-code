@@ -1,5 +1,5 @@
 {
-  "$schema": "https://the3kingleo-cmyk.github.io/ruth-install/theme.json",
+  "$schema": "/theme.json",
   "base": {
     "categorical": [
       "blue",

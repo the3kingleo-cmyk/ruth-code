@@ -20,7 +20,7 @@ export async function generate() {
 
   return {
     $schema: "https://json-schema.org/draft/2020-12/schema",
-    $id: "https://the3kingleo-cmyk.github.io/ruth-install/config.json",
+    $id: "/config.json",
     type: "object",
     properties: merge(describe(current.properties ?? {}), previous.properties ?? {}),
     additionalProperties: false,

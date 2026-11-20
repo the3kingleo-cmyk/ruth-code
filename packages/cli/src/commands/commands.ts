@@ -107,7 +107,7 @@ const Root = Spec.make(typeof RUTH_CLI_NAME === "string" ? RUTH_CLI_NAME : "ruth
           description: "Create or start the Ruth Ollama codespace and forward port 11434 to localhost:11435",
           params: {
             repo: Flag.String("repo").pipe(
-              Flag.withDescription("Codespace repository (default the3kingleo-cmyk/ruth-codespace)"),
+              Flag.withDescription("Codespace repository (default )"),
               Flag.optional,
             ),
             machine: Flag.String("machine").pipe(

@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
-# Install the Ruth (ruth) linux-x64 binary from the private
-# the3kingleo-cmyk/ruth-code GitHub release. Requires a token that can
-# read that repo (GITHUB_TOKEN or GH_TOKEN). Writes only under $HOME.
+# Install a Ruth linux-x64 binary from a release the user names with RUTH_REPO_SLUG.
+# There is no default account or update URL. Writes only under $HOME.
 # Do not run this on a machine the user did not ask to modify.
 # Never prints the token.
 set -euo pipefail
 
-RUTH_REPO_SLUG="${RUTH_REPO_SLUG:-the3kingleo-cmyk/ruth-code}"
-OMO_REPO_SLUG="${OMO_REPO_SLUG:-the3kingleo-cmyk/oh-my-openagent}"
+RUTH_REPO_SLUG="${RUTH_REPO_SLUG:-}"
+OMO_REPO_SLUG="${OMO_REPO_SLUG:-}"
 OMO_REPO_BRANCH="${OMO_REPO_BRANCH:-chromebook-lite}"
 RUTH_BIN_DIR="${RUTH_BIN_DIR:-$HOME/.local/bin}"
 OMO_INSTALL_DIR="${OMO_INSTALL_DIR:-$HOME/.local/share/ruth/plugin}"
@@ -18,7 +17,8 @@ INSTALL_PLUGIN="${INSTALL_PLUGIN:-1}"
 log() { printf '%s\n' "$*"; }
 die() { printf 'error: %s\n' "$*" >&2; exit 1; }
 
-[ -n "$TOKEN" ] || die "GITHUB_TOKEN (or GH_TOKEN) is required to download the private release asset"
+[ -n "$RUTH_REPO_SLUG" ] || die "RUTH_REPO_SLUG is required (owner/repo). Ruth has no default update or release account."
+[ -n "$TOKEN" ] || die "GITHUB_TOKEN (or GH_TOKEN) is required to download a private release asset"
 
 api() {
   curl -fsSL -H "Authorization: Bearer $TOKEN" -H "Accept: application/vnd.github+json" "$1"

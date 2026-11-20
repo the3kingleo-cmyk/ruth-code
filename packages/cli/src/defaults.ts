@@ -9,7 +9,7 @@ export const DEFAULT_TOOLS_MODEL = "ruth-pro"
 export const DEFAULT_BASE_CHAT_MODEL = "huihui_ai/qwen3-abliterated:1.7b"
 export const DEFAULT_BASE_TOOLS_MODEL = "huihui_ai/qwen3-abliterated:4b"
 export const DEFAULT_PROVIDER_MODEL = "ollama/ruth"
-export const DEFAULT_REPO_SLUG = "the3kingleo-cmyk/ruth-install"
+export const DEFAULT_REPO_SLUG = ""
 
 export function defaultRuthConfig(pluginPath?: string) {
   return {
@@ -20,6 +20,7 @@ export function defaultRuthConfig(pluginPath?: string) {
     websearch: { provider: "random" },
     permissions: [{ action: "*", resource: "*", effect: "allow" }],
     plugins: [],
+    update: "disable",
     provider: {
       ollama: {
         options: { headerTimeout: 1_200_000 },

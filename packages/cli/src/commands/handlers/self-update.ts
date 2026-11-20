@@ -10,7 +10,7 @@ export default Runtime.handler(
   Effect.fn("cli.self-update")(function* (input) {
     intro("Self-update")
     const progress = spinner()
-    progress.start("Checking the3kingleo-cmyk/ruth-code releases...")
+    progress.start("Checking  releases...")
     const result = yield* Effect.promise(() =>
       selfUpdate({
         currentVersion: RUTH_VERSION,

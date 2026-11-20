@@ -5,8 +5,8 @@ import path from "path"
 import { parseRepoSpec, resolveLaunchDirectory } from "../src/project-dir"
 
 describe("parseRepoSpec", () => {
-  test("treats a bare name as the3kingleo-cmyk/<name>", () => {
-    expect(parseRepoSpec("ruth-code")).toEqual({ owner: "the3kingleo-cmyk", repo: "ruth-code" })
+  test("does not treat a bare name as a repo without an owner", () => {
+    expect(parseRepoSpec("ruth-code")).toBeUndefined()
   })
   test("accepts owner/repo and GitHub URLs", () => {
     expect(parseRepoSpec("acme/tools")).toEqual({ owner: "acme", repo: "tools" })
@@ -30,21 +30,21 @@ describe("resolveLaunchDirectory", () => {
     fs.rmSync(home, { recursive: true, force: true })
   })
 
-  test("clones a missing the3kingleo-cmyk repo on demand into ~/src", () => {
+  test("clones an explicit owner/repo on demand into ~/src", () => {
     const home = fs.mkdtempSync(path.join(os.tmpdir(), "ruth-home-"))
     process.env.RUTH_TEST_HOME = home
     process.env.RUTH_PROJECTS_DIR = path.join(home, "src")
     const clones: string[] = []
-    const result = resolveLaunchDirectory("ruth-code", {
+    const result = resolveLaunchDirectory("acme/tools", {
       cwd: home,
       clone: ({ dest, owner, repo }) => {
         clones.push(`${owner}/${repo}`)
         fs.mkdirSync(path.join(dest, ".git"), { recursive: true })
       },
     })
-    expect(clones).toEqual(["the3kingleo-cmyk/ruth-code"])
+    expect(clones).toEqual(["acme/tools"])
     expect(result.cloned).toBe(true)
-    expect(result.directory).toBe(path.join(home, "src", "the3kingleo-cmyk", "ruth-code"))
+    expect(result.directory).toBe(path.join(home, "src", "acme", "tools"))
     delete process.env.RUTH_TEST_HOME
     delete process.env.RUTH_PROJECTS_DIR
     fs.rmSync(home, { recursive: true, force: true })

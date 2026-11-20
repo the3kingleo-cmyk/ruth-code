@@ -97,7 +97,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/the3kingleo-cmyk/ruth-code.git",
+    "url": "git+",
     "directory": "packages/plugin"
   }
 }

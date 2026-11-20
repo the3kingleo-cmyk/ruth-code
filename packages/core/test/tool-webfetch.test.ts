@@ -22,7 +22,7 @@ const webFetchToolNode = makeLocationNode({
 
 const sessionID = Session.ID.make("ses_webfetch_test")
 const webFetchUserAgent =
-  "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko); compatible; Ruth-User/1.0; +https://github.com/the3kingleo-cmyk/ruth-code"
+  "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko); compatible; Ruth-User/1.0; +"
 const requests: Array<{ readonly url: string; readonly headers: Record<string, string> }> = []
 const assertions: Permission.AssertInput[] = []
 const checks: Permission.AssertInput[] = []

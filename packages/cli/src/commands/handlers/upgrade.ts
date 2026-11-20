@@ -13,7 +13,7 @@ export default Runtime.handler(
   Effect.fn("cli.upgrade")(
     function* (input) {
       intro("Upgrade")
-      log.info("Updating from the3kingleo-cmyk/ruth-install releases")
+      log.info("Updates are off unless you set a release source")
       const progress = spinner()
       progress.start("Downloading and verifying the latest Ruth release...")
       const result = yield* Effect.promise(() =>

@@ -50,7 +50,7 @@ duplicate the notification.
 | Background marker    | completed, unacknowledged | absent                      |
 
 The dynamic hold tool avoids the static adapter loading issue in
-[ruth-drive#116](https://github.com/the3kingleo-cmyk/ruth-code-drive/issues/116).
+[ruth-drive#116](-drive/issues/116).
 
 ## History
 

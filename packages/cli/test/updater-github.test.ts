@@ -45,36 +45,28 @@ test("GitHub releases are the only update method", () => {
   expect(Updater.methods).toEqual(["github"])
 })
 
-test("release repo overrides stay inside the3kingleo-cmyk", () => {
-  expect(repoSlug()).toBe("the3kingleo-cmyk/ruth-install")
+test("there is no default release repo", () => {
+  expect(repoSlug()).toBe("")
   process.env.RUTH_REPO_SLUG = "someone-else/ruth-install"
-  expect(repoSlug()).toBe("the3kingleo-cmyk/ruth-install")
-  process.env.RUTH_REPO_SLUG = "the3kingleo-cmyk/ruth-install-beta"
-  expect(repoSlug()).toBe("the3kingleo-cmyk/ruth-install-beta")
+  expect(repoSlug()).toBe("someone-else/ruth-install")
+  process.env.RUTH_REPO_SLUG = "-beta"
+  expect(repoSlug()).toBe("")
 })
 
-it.live("checks the latest version from ruth-install releases only", () =>
+it.live("does not call a remote when update checks are off", () =>
   Effect.gen(function* () {
-    const requests: string[] = []
-    const fetchSpy = spyOn(globalThis, "fetch").mockImplementation(
-      Object.assign(
-        async (input: string | URL | Request) => {
-          requests.push(input instanceof Request ? input.url : input.toString())
-          return Response.json({ tag_name: "v9.9.9", name: "v9.9.9", body: "", assets: [] })
-        },
-        { preconnect: fetch.preconnect },
-      ),
-    )
+    const fetchSpy = spyOn(globalThis, "fetch")
     try {
       const service = yield* Effect.scoped(updater)
       expect(yield* service.method()).toBe("github")
-      expect(yield* service.latest()).toBe("9.9.9")
+      const result = yield* service.check()
+      expect(result?.type).toBe("unavailable")
+      expect(fetchSpy).not.toHaveBeenCalled()
       expect(service.removal("github")).toBeUndefined()
       expect(yield* service.managed()).toBeUndefined()
     } finally {
       fetchSpy.mockRestore()
     }
-    expect(requests).toEqual(["https://api.github.com/repos/the3kingleo-cmyk/ruth-install/releases/latest"])
   }),
 )
 

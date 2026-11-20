@@ -4,7 +4,7 @@ import os from "os"
 import path from "path"
 import { env } from "@ruth/util/env"
 
-export const DEFAULT_GITHUB_OWNER = "the3kingleo-cmyk"
+export const DEFAULT_GITHUB_OWNER = ""
 
 export function projectsDir(): string {
   const home = env("TEST_HOME") || os.homedir()
@@ -87,7 +87,7 @@ export function parseRepoSpec(raw: string): { owner: string; repo: string } | un
     const [owner, repo] = trimmed.split("/")
     return { owner, repo }
   }
-  if (/^[A-Za-z0-9_.-]+$/.test(trimmed)) return { owner: DEFAULT_GITHUB_OWNER, repo: trimmed }
+  if (/^[A-Za-z0-9_.-]+$/.test(trimmed) && DEFAULT_GITHUB_OWNER) return { owner: DEFAULT_GITHUB_OWNER, repo: trimmed }
   return undefined
 }
 

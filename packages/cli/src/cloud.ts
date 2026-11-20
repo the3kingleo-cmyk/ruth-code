@@ -17,7 +17,7 @@ import {
 import { env } from "@ruth/util/env"
 import { resolveGithubToken } from "./github-release"
 
-export const DEFAULT_CLOUD_REPO = "the3kingleo-cmyk/ruth-codespace"
+export const DEFAULT_CLOUD_REPO = ""
 export const DEFAULT_CLOUD_MACHINE = "standardLinux32gb"
 export const DEFAULT_CLOUD_DISPLAY_NAME = "ruth-ollama"
 /** Personal accounts typically cap idle timeout at 4 hours. */
@@ -94,7 +94,7 @@ export function missingScopeMessage(): string {
   return [
     "This GitHub token cannot manage Codespaces.",
     "If it is a classic personal access token, add the `codespace` scope (and `repo`), then re-authenticate.",
-    "If it is a fine-grained token, grant Codespaces Read and Write on the3kingleo-cmyk/ruth-codespace,",
+    "If it is a fine-grained token, grant Codespaces Read and Write on ,",
     "plus any account-level Codespaces permission shown in the token settings.",
     "You can also run: gh auth login",
     "or: gh auth refresh -h github.com -s codespace,repo",

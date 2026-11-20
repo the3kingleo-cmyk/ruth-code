@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test"
+import { afterEach, beforeAll, describe, expect, test } from "bun:test"
 import { createHash } from "crypto"
 import fs from "fs"
 import os from "os"
@@ -11,6 +11,13 @@ function writeScript(file: string, body: string) {
 }
 
 describe("self-update", () => {
+  beforeAll(() => {
+    process.env.RUTH_REPO_SLUG = "example/ruth"
+  })
+  afterEach(() => {
+    process.env.RUTH_REPO_SLUG = "example/ruth"
+  })
+
   test("verifies sha256, replaces the binary, and keeps a previous copy", async () => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), "ruth-update-"))
     const current = path.join(root, "ruth")
@@ -129,8 +136,8 @@ describe("self-update", () => {
               assets: [
                 {
                   name: "ruth-linux-x64.tar.gz",
-                  url: "https://api.github.com/repos/the3kingleo-cmyk/ruth-install/releases/assets/1",
-                  browser_download_url: "https://github.com/the3kingleo-cmyk/ruth-install/releases/download/v2/ruth-linux-x64.tar.gz",
+                  url: "https://example.com/asset",
+                  browser_download_url: "https://example.com/releases/download/v2/ruth-linux-x64.tar.gz",
                   digest: `sha256:${sha}`,
                 },
               ],
@@ -138,7 +145,7 @@ describe("self-update", () => {
             { status: 200 },
           )
         }
-        if (!url.includes("github.com/the3kingleo-cmyk/ruth-install")) {
+        if (!url.includes("example.com/")) {
           return new Response("wrong url " + url, { status: 404 })
         }
         return new Response("ARCHIVE", { status: 200 })

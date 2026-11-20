@@ -10,8 +10,8 @@ import { action, parseReleaseVersion, type Policy } from "./updater-action"
 import { errorMessage } from "../util/error"
 
 /**
- * Ruth updates only from the3kingleo-cmyk/ruth-install GitHub releases (sha256-verified, with rollback).
- * There is no package-manager, Homebrew, or WinGet path.
+ * Updates are off by default. Ruth does not check a remote or call home unless the user
+ * turns updates on and sets a release source.
  */
 export const methods = ["github"] as const
 
@@ -84,7 +84,7 @@ const make = Effect.gen(function* () {
         Effect.orElseSucceed(() => undefined),
       ),
     )
-    return values.findLast((value) => value !== undefined) ?? "notify"
+    return values.findLast((value) => value !== undefined) ?? "disable"
   })
 
   const method = () => Effect.succeed<Method | undefined>("github")
@@ -164,6 +164,12 @@ const make = Effect.gen(function* () {
       return {
         type: "unavailable" as const,
         message: "This build runs from a source checkout. Use an installed Ruth release to check for updates.",
+      }
+    const policy = yield* readPolicy()
+    if (policy === "disable")
+      return {
+        type: "unavailable" as const,
+        message: "Update checks are off. Ruth does not call a remote unless you turn updates on.",
       }
     const version = yield* latest()
     if (!parseReleaseVersion(version)) return yield* Effect.fail(new Error(`Invalid version: ${version}`))

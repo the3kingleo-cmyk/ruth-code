@@ -48,14 +48,14 @@ test("includes the published schema when creating cli.json", async () => {
     }),
   )
 
-  expect(config).toEqual({ $schema: "https://github.com/the3kingleo-cmyk/ruth-install", animations: false })
+  expect(config).toEqual({ $schema: "", animations: false })
   expect(await Bun.file(path.join(directory.path, "cli.json")).json()).toEqual(config)
 })
 
 test("preserves the schema in an existing cli.json", async () => {
   await using directory = await tmpdir()
   const file = path.join(directory.path, "cli.json")
-  await Bun.write(file, JSON.stringify({ $schema: "https://github.com/the3kingleo-cmyk/ruth-install", animations: true }))
+  await Bun.write(file, JSON.stringify({ $schema: "", animations: true }))
 
   const config = await run(
     directory.path,
@@ -67,7 +67,7 @@ test("preserves the schema in an existing cli.json", async () => {
     }),
   )
 
-  expect(config).toEqual({ $schema: "https://github.com/the3kingleo-cmyk/ruth-install", animations: false })
+  expect(config).toEqual({ $schema: "", animations: false })
   expect(await Bun.file(file).json()).toEqual(config)
 })
 
@@ -189,7 +189,7 @@ test("migrates tui and kv config into cli.json", async () => {
   )
 
   expect(config).toMatchObject({
-    $schema: "https://github.com/the3kingleo-cmyk/ruth-install",
+    $schema: "",
     theme: { name: "legacy", mode: "light" },
     keybinds: {
       leader: "ctrl+o",
@@ -243,13 +243,13 @@ test("migrates before the first update and does not remigrate afterward", async 
   )
 
   expect(config).toEqual({
-    $schema: "https://github.com/the3kingleo-cmyk/ruth-install",
+    $schema: "",
     theme: { name: "legacy" },
     animations: false,
     mouse: false,
   })
   expect(await Bun.file(path.join(directory.path, "cli.json")).json()).toEqual({
-    $schema: "https://github.com/the3kingleo-cmyk/ruth-install",
+    $schema: "",
     theme: { name: "legacy" },
     animations: false,
     mouse: false,

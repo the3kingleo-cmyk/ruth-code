@@ -1,8 +1,8 @@
 # Ruth cloud (Ollama in a GitHub Codespace)
 
-`ruth cloud` starts a Codespace from the private `the3kingleo-cmyk/ruth-codespace` repo, serves Ollama there, and tunnels it to this machine.
+`ruth cloud` starts a Codespace from the private `` repo, serves Ollama there, and tunnels it to this machine.
 
-This is **not** `the3kingleo-cmyk/ruth-cloud` (that repo holds private memories, skills, and tools).
+This is **not** `/ruth-cloud` (that repo holds private memories, skills, and tools).
 
 ## Commands
 
@@ -36,6 +36,6 @@ Always run `ruth cloud down` when you are done.
 ## Required GitHub permission
 
 - Classic personal access token: `codespace` and `repo` scopes, then `gh auth login` or `gh auth refresh -h github.com -s codespace,repo`
-- Fine-grained token: Codespaces Read and Write on `the3kingleo-cmyk/ruth-codespace`, plus any account-level Codespaces permission shown in the token settings
+- Fine-grained token: Codespaces Read and Write on ``, plus any account-level Codespaces permission shown in the token settings
 
 The GitHub CLI (`gh`) must be installed and authenticated. The public installer tries to install `gh` when it can do so without a password prompt.

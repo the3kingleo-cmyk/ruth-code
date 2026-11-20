@@ -1,5 +1,5 @@
 {
-  "$schema": "https://the3kingleo-cmyk.github.io/ruth-install/theme.json",
+  "$schema": "/theme.json",
   "defs": {
     "darkBg0": "#282828",
     "darkBg1": "#3c3836",
