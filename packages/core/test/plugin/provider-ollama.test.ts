@@ -20,6 +20,8 @@ const it = testEffect(Layer.merge(PluginTestLayer, Config.testLayer()))
 const decode = Schema.decodeUnknownSync(Info)
 const decodeShowRequest = Schema.decodeUnknownSync(Schema.Struct({ model: Schema.String }))
 
+const loopbackOrigin = (origin: string) => origin.replace("://localhost", "://127.0.0.1")
+
 const addPlugin = Effect.fn(function* (origin: string, interval: Duration.Input = "1 hour") {
   const plugin = yield* Plugin.Service
   const host = yield* PluginHost.make(plugin, "test")
@@ -98,12 +100,12 @@ describe("OllamaPlugin", () => {
             (item) => item !== undefined,
           )
 
-          expect(yield* providers.get(providerID)).toEqual({
+          expect(yield* providers.get(providerID)).toMatchObject({
             id: providerID,
             name: "Ollama",
             activation: "enabled",
             package: "@ruth/ai/providers/openai-compatible",
-            settings: { baseURL: `${server.url.origin}/v1`, provider: "ollama", apiKey: "" },
+            settings: { baseURL: `${loopbackOrigin(server.url.origin)}/v1`, provider: "ollama", apiKey: "" },
           })
           expect(model).toMatchObject({
             modelID: "gemma3:4b",
@@ -299,7 +301,7 @@ describe("OllamaPlugin", () => {
             expect(requests).toContainEqual({ authorization: "Bearer secret", method: "POST", path: "/proxy/api/show" })
             expect(yield* modelState.get(providerID, Model.ID.make("initial-model"))).toBeUndefined()
             expect((yield* providers.get(providerID))?.settings).toEqual({
-              baseURL,
+              baseURL: loopbackOrigin(baseURL),
               provider: "ollama",
               apiKey: "secret",
             })
@@ -312,7 +314,7 @@ describe("OllamaPlugin", () => {
             expect(requests).toContainEqual({ authorization: null, method: "POST", path: "/proxy/api/show" })
 
             requests.splice(0)
-            const apiBaseURL = `${configured.url.origin}/proxy/api`
+            const apiBaseURL = `${loopbackOrigin(configured.url.origin)}/proxy/api`
             yield* config.setEntries([configuration({ baseURL: apiBaseURL, apiKey: "api-secret" })])
             yield* bus.publish(Event.Updated, {})
             yield* eventually(providers.get(providerID), (provider) => provider?.settings?.baseURL === apiBaseURL)

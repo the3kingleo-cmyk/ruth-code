@@ -78,6 +78,7 @@ if [ ! -f "$CONFIG_DIR/ruth.json" ] && [ ! -f "$CONFIG_DIR/ruth.jsonc" ]; then
   "plugins": [],
   "provider": {
     "ollama": {
+      "package": "@ruth/ai/providers/openai-compatible",
       "options": {
         "headerTimeout": 1200000,
         "chunkTimeout": false

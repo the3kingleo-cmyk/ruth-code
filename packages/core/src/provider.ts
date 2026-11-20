@@ -19,6 +19,16 @@ import { AISDKNative } from "./aisdk-native.js"
 
 export { AISDK_PREFIX, aisdk, isAISDK, mergeHeaders, mergeOverlay, packageName } from "./aisdk-native.js"
 
+/** Bundled OpenAI-compatible SDK used when a provider has no package of its own. */
+export const DEFAULT_PACKAGE = "@ruth/ai/providers/openai-compatible"
+
+export function effectivePackage(...values: Array<string | undefined>) {
+  for (const value of values) {
+    if (typeof value === "string" && value.trim()) return value
+  }
+  return DEFAULT_PACKAGE
+}
+
 export const ID = Provider.ID
 export type ID = typeof ID.Type
 

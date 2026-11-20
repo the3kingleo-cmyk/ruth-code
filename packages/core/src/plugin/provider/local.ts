@@ -74,6 +74,13 @@ export function createLocalProviderPlugin<Discovered>(input: {
         })
 
         yield* ctx.provider.transform((providers) => {
+          // If user config already created this provider, do not leave package empty
+          // while discovery is still running.
+          if (providers.get(input.providerID)) {
+            providers.update(input.providerID, (provider) => {
+              if (!provider.package?.trim()) provider.package = "@ruth/ai/providers/openai-compatible"
+            })
+          }
           if (loaded.models.length === 0) return
           for (const model of providers.get(input.providerID)?.models.values() ?? []) {
             providers.models.remove(input.providerID, model.id)
@@ -81,7 +88,7 @@ export function createLocalProviderPlugin<Discovered>(input: {
           providers.update(input.providerID, (provider) => {
             provider.name = input.name
             provider.activation = "enabled"
-            provider.package = "@ruth/ai/providers/openai-compatible"
+            provider.package = provider.package?.trim() || "@ruth/ai/providers/openai-compatible"
             provider.settings = {
               baseURL: source.current.baseURL,
               provider: input.providerID,

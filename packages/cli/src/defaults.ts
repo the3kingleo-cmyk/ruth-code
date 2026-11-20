@@ -23,6 +23,7 @@ export function defaultRuthConfig(pluginPath?: string) {
     update: "disable",
     provider: {
       ollama: {
+        package: "@ruth/ai/providers/openai-compatible",
         options: { headerTimeout: 1_200_000 },
         models: {
           [DEFAULT_CHAT_MODEL]: { tool_call: true },

@@ -307,10 +307,13 @@ const loadCatalogPackage = Effect.fn("ModelResolver.loadCatalogPackage")(functio
   credential?: Credential.Value,
   dependencies?: Dependencies,
 ) {
-  const resolved = prepareRuntimeModel(model)
+  const resolved = prepareRuntimeModel({
+    ...model,
+    package: Provider.effectivePackage(model.package),
+  })
   const configured = resolved.settings ?? {}
   const specifier = Provider.packageName(resolved.package)
-  if (!specifier || Provider.isAISDK(specifier)) return yield* unsupported(resolved)
+  if (Provider.isAISDK(specifier)) return yield* unsupported(resolved)
   const mapped = yield* prepareProviderSettings(resolved, Provider.nativeSettings(configured))
   const module = yield* (dependencies?.loadPackage ?? Provider.loadPackage)(specifier).pipe(
     Effect.mapError((error) => initialization(resolved, "load", error.cause)),

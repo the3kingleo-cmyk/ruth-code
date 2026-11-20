@@ -196,6 +196,7 @@ function overlayProvider(
     if (item.canonical !== undefined) provider.canonical = item.canonical
     if (item.name) provider.name = item.name
     if (item.package !== undefined) provider.package = item.package
+    provider.package = Provider.effectivePackage(provider.package)
     if (item.compatibility !== undefined) provider.compatibility = { ...provider.compatibility, ...item.compatibility }
     if (item.settings !== undefined) provider.settings = Provider.mergeOverlay(provider.settings, item.settings)
     if (item.headers !== undefined) provider.headers = Provider.mergeHeaders(provider.headers, item.headers)

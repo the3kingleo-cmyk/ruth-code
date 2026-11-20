@@ -248,7 +248,7 @@ export async function ensureRuthModel(
         model: "ruth",
         files: { "ruth.gguf": RUTH_MODEL_BLOB },
         system: RUTH_SYSTEM,
-        template: readSiblingTemplate(blob) ?? undefined,
+        template: readSiblingTemplate(blob) ?? DEFAULT_TEMPLATE,
         parameters: {
           temperature: 0.2,
           num_ctx: RUTH_NUM_CTX,

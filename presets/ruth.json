@@ -12,6 +12,7 @@
   "plugins": [],
   "provider": {
     "ollama": {
+      "package": "@ruth/ai/providers/openai-compatible",
       "options": {
         "headerTimeout": 1200000
       },

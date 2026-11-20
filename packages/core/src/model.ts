@@ -167,7 +167,7 @@ const layer = Layer.effect(
             const provider = input?.records.get(providerID)?.provider
             AISDKNative.rewrite(model, {
               builtins: Provider.builtinPackages,
-              specifier: model.package ?? provider?.package,
+              specifier: Provider.effectivePackage(model.package, provider?.package),
               providerID,
               canonical: model.canonical ?? provider?.canonical,
               modelID: model.modelID ?? modelID,
@@ -229,7 +229,7 @@ const layer = Layer.effect(
                   const value = {
                     ...model,
                     ...(provider?.canonical === undefined ? {} : { canonical: provider.canonical }),
-                    package: model.package ?? provider?.package,
+                    package: Provider.effectivePackage(model.package, provider?.package),
                     compatibility:
                       provider?.compatibility === undefined
                         ? model.compatibility
