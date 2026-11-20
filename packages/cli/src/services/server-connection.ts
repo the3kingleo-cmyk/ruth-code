@@ -59,10 +59,24 @@ export const resolve = Effect.fn("cli.server-connection.resolve")(function* (arg
     if (!endpoint) return { endpoint: yield* Standalone.start(), standalone: true } satisfies Resolved
     return { endpoint, service: managedService(options) } satisfies Resolved
   }
-  return {
-    endpoint: yield* resolveManaged({ ...options, onStart: args.onStart }, mismatch),
-    service: managedService(options),
-  } satisfies Resolved
+  // Plain `ruth` should always open. If the managed service cannot start (a leftover
+  // failed daemon on the default port, or a boot failure that stays registered and
+  // answers /api/info with 500), fall back to a private standalone server instead
+  // of exiting with "Background service failed to start".
+  const managed = yield* resolveManaged({ ...options, onStart: args.onStart }, mismatch).pipe(
+    Effect.map(Option.some),
+    Effect.catch(() =>
+      Effect.gen(function* () {
+        yield* Effect.logWarning("Background service failed to start; opening in standalone mode")
+        yield* Service.stop({ file: options.file, pty: "clear" }).pipe(Effect.ignore)
+        return Option.none()
+      }),
+    ),
+  )
+  if (Option.isNone(managed)) {
+    return { endpoint: yield* Standalone.start(), standalone: true } satisfies Resolved
+  }
+  return { endpoint: managed.value, service: managedService(options) } satisfies Resolved
 })
 
 function managedService(options: EnsureOptions) {
