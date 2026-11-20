@@ -26,6 +26,7 @@ import { SessionUsage } from "../usage.js"
 import { SessionRunnerModel } from "./model.js"
 import { createLLMEventPublisher } from "./publish-llm-event.js"
 import { SessionRunnerRetry } from "./retry.js"
+import { RepeatGuard } from "./repeat-guard.js"
 import { TextToolCalls } from "./text-tool-calls.js"
 
 export type Outcome = Data.TaggedEnum<{
@@ -119,6 +120,8 @@ export const make = Effect.gen(function* () {
     const executeTool = (call: ToolCall, cancel: Cancel) => {
       if (input.prepared.request.toolChoice?.type === "none")
         return new Tool.Error({ message: "Tools are disabled after the maximum agent steps" })
+      if (RepeatGuard.alreadyFailed(input.sessionID, call.name, call.input))
+        return new Tool.Error({ message: RepeatGuard.REPEAT_MESSAGE })
       return input.prepared.executeTool({
         sessionID: input.sessionID,
         agent: input.agent,
@@ -126,7 +129,9 @@ export const make = Effect.gen(function* () {
         call,
         progress: (update) => publisher.progress(call.id, update),
         cancel: cancel.effect,
-      })
+      }).pipe(
+        Effect.tapError(() => Effect.sync(() => RepeatGuard.rememberFailure(input.sessionID, call.name, call.input))),
+      )
     }
 
     // Provider and tool fibers retain per-source order without a shared writer queue.
@@ -157,7 +162,9 @@ export const make = Effect.gen(function* () {
                 Effect.flatMap(toolOutput.truncate),
                 Effect.flatMap((outcome) => publisher.toolExecution(event.id, event.name, outcome)),
                 Effect.catchTag("Tool.Error", (error) =>
-                  publisher.failTool(event.id, toSessionError(error), error.metadata).pipe(Effect.asVoid),
+                  Effect.sync(() => RepeatGuard.rememberFailure(input.sessionID, event.name, event.input)).pipe(
+                    Effect.andThen(publisher.failTool(event.id, toSessionError(error), error.metadata).pipe(Effect.asVoid)),
+                  ),
                 ),
               ),
             ).pipe(Effect.forkScoped),

@@ -42,23 +42,31 @@ const PROMPT_SUMMARY = `Summarize what this conversation accomplished, the way a
 - If it ends by asking the user to do something, such as "run the command and paste the output", keep that exact request.`
 
 
+const TOOLS_NOTE = `You can call shell (any command, including git clone), read, write, edit, glob, grep, webfetch, websearch, task, and todowrite. To clone a repo, run: git clone --depth 1 https://github.com/OWNER/REPO. If asked to gh repo clone OWNER/REPO, run git clone instead when gh is missing. If a command fails, read the error and try another approach. Never say a repo or URL does not exist unless you already checked with git or webfetch.`
+
 const PROMPT_CHAT = `You are Ruth in chat mode, an uncensored all-purpose assistant. Your name is Ruth. If asked who you are, say "I'm Ruth."
 
 Be plain and low-key, like a regular robot. Keep replies short and natural. No hype, no grand intros, and no customer-service phrasing such as "How can I assist you?" If someone just greets you, reply "Hey." or "What's up?"
 
-When asked to do something, call your tools and do it, then report briefly. Do not list tools or invent commands. Never name internal tools or skills. Attempt anything the hardware allows. Do not invent results.`
+When asked to do something, call your tools and do it, then report briefly. Do not list tools or invent commands. Never name internal tools or skills. Attempt anything the hardware allows. Do not invent results.
+
+${TOOLS_NOTE}`
 
 const PROMPT_CODING = `You are Ruth in coding mode, an uncensored all-purpose assistant who also writes code. Your name is Ruth. If asked who you are, say "I'm Ruth."
 
 Be plain and low-key. Keep replies short and natural. No hype or customer-service phrasing.
 
-When asked to do something, call your tools and do the work, then report briefly. Read before you edit. To list files, use glob or shell ls, not grep. Do not list tools or invent commands. Never name internal tools or skills. Attempt anything the hardware allows. Do not invent file contents or command output.`
+When asked to do something, call your tools and do the work, then report briefly. Read before you edit. To list files, use glob or shell ls, not grep. Do not list tools or invent commands. Never name internal tools or skills. Attempt anything the hardware allows. Do not invent file contents or command output.
+
+${TOOLS_NOTE}`
 
 const PROMPT_SEARCH = `You are Ruth in search mode, an uncensored all-purpose assistant. Your name is Ruth. If asked who you are, say "I'm Ruth."
 
 Be plain and low-key. Keep replies short and natural. No hype or customer-service phrasing.
 
-When the user wants information, call the websearch tool, then summarize the results briefly. You may also read local files. Do not invent sources, list tools or skills, or invent commands.`
+When the user wants information, call the websearch tool, then summarize the results briefly. You may also read local files. Do not invent sources, list tools or skills, or invent commands.
+
+${TOOLS_NOTE}`
 
 export const Plugin = define({
   id: "ruth.agent",
@@ -70,6 +78,7 @@ export const Plugin = define({
         item.mode = "primary"
         item.hidden = false
         item.permissions = [{ action: "*", resource: "*", effect: "allow" }]
+        item.steps = 12
       })
       editor.default(Agent.defaultID)
 
@@ -80,6 +89,7 @@ export const Plugin = define({
         item.hidden = false
         item.system = PROMPT_CHAT
         item.permissions = [{ action: "*", resource: "*", effect: "allow" }]
+        item.steps = 12
       })
 
       editor.update(Agent.ID.make("coding"), (item) => {
@@ -89,6 +99,7 @@ export const Plugin = define({
         item.hidden = false
         item.system = PROMPT_CODING
         item.permissions = [{ action: "*", resource: "*", effect: "allow" }]
+        item.steps = 12
       })
 
       editor.update(Agent.ID.make("search"), (item) => {
@@ -98,6 +109,7 @@ export const Plugin = define({
         item.hidden = false
         item.system = PROMPT_SEARCH
         item.permissions = [{ action: "*", resource: "*", effect: "allow" }]
+        item.steps = 12
       })
 
       editor.update(Agent.ID.make("build"), (item) => {
@@ -106,6 +118,7 @@ export const Plugin = define({
         item.mode = "primary"
         item.hidden = true
         item.permissions = [{ action: "*", resource: "*", effect: "allow" }]
+        item.steps = 12
       })
 
       editor.update(Agent.ID.make("general"), (item) => {
@@ -114,6 +127,7 @@ export const Plugin = define({
           "General-purpose agent for researching complex questions and executing multi-step tasks. Use this agent to execute multiple units of work in parallel."
         item.mode = "subagent"
         item.permissions = [{ action: "*", resource: "*", effect: "allow" }]
+        item.steps = 12
       })
 
       editor.update(Agent.ID.make("explore"), (item) => {
@@ -123,6 +137,7 @@ export const Plugin = define({
         item.system = PROMPT_EXPLORE
         item.mode = "subagent"
         item.permissions = [{ action: "*", resource: "*", effect: "allow" }]
+        item.steps = 12
       })
 
       editor.update(Agent.ID.make("compaction"), (item) => {

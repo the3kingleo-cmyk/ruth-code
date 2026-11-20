@@ -20,6 +20,8 @@ import { ShellParse } from "../../shell/parse.js"
 import { ShellSelect } from "../../shell/select.js"
 import { ShellResult } from "../../shell/result.js"
 import { toolFailure } from "../runtime.js"
+import { commandOnPath, GIT_MISSING_HINT, rewriteShellCommand } from "./shell-rewrite.js"
+import { RepeatGuard } from "../../session/runner/repeat-guard.js"
 
 export const name = "shell"
 export const DEFAULT_TIMEOUT_MS = 2 * 60 * 1_000
@@ -351,6 +353,12 @@ export const Plugin = {
           input: Input,
           output: StructuredOutput,
           execute: (input, context) => {
+            const command = rewriteShellCommand(input.command)
+            const failureKey = { command, workdir: input.workdir ?? "" }
+            if (RepeatGuard.alreadyFailed(context.sessionID, name, failureKey)) {
+              const hint = !commandOnPath("git") && /\bgit\b/.test(command) ? ` ${GIT_MISSING_HINT}` : ""
+              return Effect.fail(new ToolFailure({ message: RepeatGuard.REPEAT_MESSAGE + hint }))
+            }
             // A foreground timeout of 0 falls back to the default, so a call can't block until the command exits.
             const foreground = input.timeout || DEFAULT_TIMEOUT_MS
             const timeout = input.background === true ? (input.timeout ?? 0) : foreground
@@ -371,7 +379,7 @@ export const Plugin = {
                 return yield* Effect.gen(function* () {
                   const info = yield* shell.create(
                     {
-                      command: input.command,
+                      command,
                       cwd: input.workdir,
                       timeout,
                       shell: yield* compatibleShell,
@@ -462,11 +470,17 @@ export const Plugin = {
                     yield* notifyWhenDone(context.sessionID, job.id, info.id, info.command, settled)
                     return backgroundResult(info, yield* Clock.currentTimeMillis, elapsed)
                   }
-                  if (result?.info.status === "error")
+                  if (result?.info.status === "error") {
+                    RepeatGuard.rememberFailure(context.sessionID, name, failureKey)
                     return yield* Effect.fail(new Error(result.info.error ?? "Command failed"))
+                  }
                   if (result?.info.status === "cancelled") return yield* Effect.fail(new Error("Command cancelled"))
 
-                  return yield* Deferred.await(settled)
+                  const settledOutput = yield* Deferred.await(settled)
+                  if ((settledOutput.exit ?? 0) !== 0) {
+                    RepeatGuard.rememberFailure(context.sessionID, name, failureKey)
+                  }
+                  return settledOutput
                 }).pipe(Effect.ensuring(listener ? Fiber.interrupt(listener) : Effect.void))
               }),
             ).pipe(
@@ -476,7 +490,11 @@ export const Plugin = {
                 ...(input.background === true ? { "ruth.shell.background": true } : {}),
               }),
               Effect.map((output) => toolResult(output, finalTimeout)),
-              Effect.mapError(toolFailure(`Unable to execute command: ${input.command}`)),
+              Effect.mapError((error) => {
+                RepeatGuard.rememberFailure(context.sessionID, name, failureKey)
+                const hint = !commandOnPath("git") && /\bgit\b/.test(command) ? `. ${GIT_MISSING_HINT}` : ""
+                return toolFailure(`Unable to execute command: ${command}${hint}`)(error)
+              }),
             )
           },
         }),

@@ -33,7 +33,10 @@ import { PersistentPty } from "../../persistent-pty/index.js"
 import { ToolOutput } from "../../tool-output.js"
 import { Plugin } from "../../plugin.js"
 import { PluginHooks } from "../../plugin/hooks.js"
-import { MAX_STEPS_PROMPT } from "./max-steps.js"
+import { DEFAULT_MAX_STEPS, MAX_STEPS_PROMPT } from "./max-steps.js"
+import { RepeatGuard } from "./repeat-guard.js"
+import { alreadyClonedWithTool, fulfillCloneRequest, parseCloneRequest } from "./clone-fallback.js"
+import { Location } from "../../location.js"
 
 const CONTINUE_AFTER_OUTPUT_LIMIT =
   "Your last response hit the output token limit (stop reason: length). Do not apologize, recap, or repeat yourself. Break the remaining work into smaller pieces."
@@ -56,6 +59,7 @@ const layer = Layer.effect(
     const title = yield* SessionTitle.Service
     const steps = yield* SessionStep.make
     const pty = yield* PersistentPty.Service
+    const location = yield* Location.Service
     // Title generation starts once input is visible and must not delay model execution.
     const titles = yield* FiberMap.make<SessionSchema.ID, void, never>()
 
@@ -209,7 +213,10 @@ const layer = Layer.effect(
                     yield* FiberMap.run(titles, sessionID, title.generate(sessionID), {
                       onlyIfMissing: true,
                     })
-                  if (promoted > 0) step = 1
+                  if (promoted > 0) {
+                    step = 1
+                    RepeatGuard.clear(sessionID)
+                  }
                   return { _tag: "Ready" as const, context: yield* context.load(selected) }
                 }),
               )
@@ -223,6 +230,12 @@ const layer = Layer.effect(
         const next = yield* advanceToStep()
         if (next._tag !== "Ready") return next
         continuing = yield* runStep(next.context, step, input.interruption)
+        if (!continuing) {
+          const lastUser = [...next.context.messages].reverse().find((message) => message.type === "user")
+          if (lastUser && parseCloneRequest(lastUser.text) && !alreadyClonedWithTool(next.context.messages)) {
+            fulfillCloneRequest(lastUser.text, location.directory, { alreadyCloned: false })
+          }
+        }
         stepped = true
         step++
         force = false
@@ -264,7 +277,14 @@ const layer = Layer.effect(
           continue
         }
         yield* compaction.precompute(Effect.succeed(loaded), estimate)
-        const stepLimitReached = loaded.agent.info.steps !== undefined && step >= loaded.agent.info.steps
+        const providerID = loaded.model.ref.providerID
+        const stepLimit =
+          loaded.agent.info.steps ??
+          (providerID === "ollama" || providerID === "ollama-cloud" ? DEFAULT_MAX_STEPS : undefined)
+        const stepLimitReached = stepLimit !== undefined && step >= stepLimit
+        const lastUser = [...loaded.messages].reverse().find((message) => message.type === "user")
+        const forceCloneTool =
+          !stepLimitReached && step === 1 && Boolean(lastUser && parseCloneRequest(lastUser.text))
         const transcript = SessionModelRequest.baseTranscript({
           agent: loaded.agent.info,
           model: loaded.model,
@@ -283,7 +303,7 @@ const layer = Layer.effect(
               ? [...transcript.messages, Message.assistant(MAX_STEPS_PROMPT)]
               : transcript.messages,
             // Keep tool definitions on the final Step to preserve the provider's cached prefix.
-            toolChoice: stepLimitReached ? "none" : undefined,
+            toolChoice: stepLimitReached ? "none" : forceCloneTool ? "required" : undefined,
             webSocket: "session",
             inputTokens: estimate,
           })
