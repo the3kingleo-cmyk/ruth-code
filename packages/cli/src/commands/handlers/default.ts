@@ -3,6 +3,7 @@ import { Global } from "@ruth/util/global"
 import { run } from "@ruth/tui"
 import { Commands } from "../commands"
 import { Runtime } from "../../framework/runtime"
+import { ensureLocalModelServer } from "../../local-server"
 import { Config } from "../../config"
 import { Context, Effect, FileSystem, Option, Queue, Schedule, Semaphore } from "effect"
 import { ServerConnection } from "../../services/server-connection"
@@ -22,6 +23,7 @@ export default Runtime.handler(Commands, (input) =>
     const requestedDirectory = Option.getOrUndefined(input.directory)
     const requestedServer = Option.getOrUndefined(input.server)
     const launch = resolveLaunchDirectory(requestedDirectory)
+    ensureLocalModelServer()
     if (launch.directory !== process.cwd()) process.chdir(launch.directory)
     const preflight = UpdatePreflight.make()
     yield* Effect.addFinalizer(() => Effect.promise(() => preflight.close()))

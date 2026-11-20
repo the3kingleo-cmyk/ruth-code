@@ -56,6 +56,7 @@ const Handlers = Runtime.handlers(Commands, {
   upgrade: () => import("./commands/handlers/upgrade"),
   "self-update": () => import("./commands/handlers/self-update"),
   doctor: () => import("./commands/handlers/doctor"),
+  connect: () => import("./commands/handlers/connect"),
   cloud: {
     up: () => import("./commands/handlers/cloud/up"),
     down: () => import("./commands/handlers/cloud/down"),

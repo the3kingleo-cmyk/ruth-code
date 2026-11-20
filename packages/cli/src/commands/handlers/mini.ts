@@ -1,6 +1,7 @@
 import { Context, Effect, FileSystem, Option } from "effect"
 import { Commands } from "../commands"
 import { Runtime } from "../../framework/runtime"
+import { ensureLocalModelServer } from "../../local-server"
 import { ServerConnection } from "../../services/server-connection"
 import { Config } from "../../config"
 import { resolve } from "@ruth/tui/config"
@@ -8,6 +9,7 @@ import { Global } from "@ruth/util/global"
 
 export default Runtime.handler(Commands.commands.mini, (input) =>
   Effect.gen(function* () {
+    ensureLocalModelServer()
     const { runMini, validateMiniTerminal } = yield* Effect.promise(() => import("../../mini"))
     yield* Effect.promise(async () => validateMiniTerminal())
     const server = yield* ServerConnection.resolve({

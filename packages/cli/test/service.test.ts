@@ -440,7 +440,7 @@ test("concurrent service processes elect one server", async () => {
     })
     // The managed service is loopback-only and refuses requests without its random token.
     expect(new URL(info.url).hostname).toBe("127.0.0.1")
-    expect(info.password.length).toBeGreaterThanOrEqual(16)
+    expect(info.password?.length ?? 0).toBeGreaterThanOrEqual(16)
     expect((await fetch(new URL("/api/info", info.url))).status).toBe(401)
     expect(
       (
