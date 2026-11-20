@@ -1,7 +1,7 @@
 import fs from "node:fs"
 import os from "node:os"
 import path from "node:path"
-import { LOCAL_OLLAMA_ORIGIN, normalizeOllamaOrigin, preferLoopbackHost } from "@ruth/util/ollama-origin"
+import { LOCAL_OLLAMA_ORIGIN, normalizeOllamaOrigin, preferLoopbackHost, RUTH_NUM_CTX } from "@ruth/util/ollama-origin"
 
 /** Bundled GGUF digest for the default `ruth` model (Qwen3 1.7B abliterated). */
 export const RUTH_MODEL_BLOB = "sha256:11e56b54062941d7c415ddb083375eb227004b3c23134d340d0cd9c334b73662"
@@ -167,7 +167,7 @@ export function ruthModelfile(options: { readonly blobDigest?: string; readonly 
 TEMPLATE """${template}"""
 SYSTEM """${RUTH_SYSTEM}"""
 PARAMETER temperature 0.2
-PARAMETER num_ctx 16384
+PARAMETER num_ctx ${RUTH_NUM_CTX}
 PARAMETER top_k 20
 PARAMETER top_p 0.95
 PARAMETER stop <|im_start|>
@@ -217,7 +217,6 @@ export async function ensureRuthModel(
   try {
     const tags = await fetchJson(`${origin}/api/tags`)
     if (!tags.ok) return { ok: false, created: false, origin, reason: `Ollama at ${origin} returned ${tags.status}` }
-    if (hasRuthModel(listModelNames(tags.json))) return { ok: true, created: false, origin }
   } catch (error) {
     return { ok: false, created: false, origin, reason: error instanceof Error ? error.message : String(error) }
   }
@@ -228,11 +227,23 @@ export async function ensureRuthModel(
 
   try {
     await uploadBlob(origin, blob, RUTH_MODEL_BLOB)
-    const modelfile = ruthModelfile({ template: readSiblingTemplate(blob) })
     const created = await fetchJson(`${origin}/api/create`, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ model: "ruth", modelfile, stream: false }),
+      body: JSON.stringify({
+        model: "ruth",
+        files: { "ruth.gguf": RUTH_MODEL_BLOB },
+        system: RUTH_SYSTEM,
+        template: readSiblingTemplate(blob) ?? undefined,
+        parameters: {
+          temperature: 0.2,
+          num_ctx: RUTH_NUM_CTX,
+          top_k: 20,
+          top_p: 0.95,
+          stop: ["<|im_start|>", "<|im_end|>"],
+        },
+        stream: false,
+      }),
       timeoutMs: 120_000,
     })
     if (!created.ok) return { ok: false, created: false, origin, reason: created.text || `create failed (${created.status})` }

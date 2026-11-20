@@ -1,5 +1,5 @@
 import { Effect, Schema } from "effect"
-import { resolveOllamaOrigin } from "@ruth/util/ollama-origin"
+import { resolveOllamaOrigin, RUTH_NUM_CTX } from "@ruth/util/ollama-origin"
 import { createLocalProviderPlugin } from "./local.js"
 
 const Details = Schema.Struct({
@@ -112,12 +112,16 @@ export const make = createLocalProviderPlugin({
     family: item.show.details?.family || item.details.family,
     tools: item.show.capabilities?.includes("tools") || shouldAssumeOllamaTools(),
     vision: item.show.capabilities?.includes("vision"),
-    context: ollamaContext(
-      item.show.parameters,
-      Object.entries(item.show.model_info ?? {}).flatMap(([key, value]) =>
-        key.endsWith(".context_length") && typeof value === "number" && value > 0 ? [value] : [],
-      )[0],
-    ),
+    context: (() => {
+      const id = item.model.endsWith(":latest") ? item.model.slice(0, -":latest".length) : item.model
+      if (id === "ruth") return RUTH_NUM_CTX
+      return ollamaContext(
+        item.show.parameters,
+        Object.entries(item.show.model_info ?? {}).flatMap(([key, value]) =>
+          key.endsWith(".context_length") && typeof value === "number" && value > 0 ? [value] : [],
+        )[0],
+      )
+    })(),
   }),
 })
 

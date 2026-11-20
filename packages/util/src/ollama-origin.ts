@@ -7,6 +7,9 @@ import { env } from "./env.js"
 /** Default local Ollama bind used when no healthy cloud tunnel is available. */
 export const LOCAL_OLLAMA_ORIGIN = "http://127.0.0.1:11434"
 
+/** Context length for the default `ruth` model. Sized for a ~6.4 GB RAM machine. */
+export const RUTH_NUM_CTX = 8192
+
 /** Local side of the Codespace port-forward. Leaves 11434 free for a local Ollama. */
 export const DEFAULT_CLOUD_LOCAL_PORT = 11435
 

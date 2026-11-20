@@ -77,18 +77,22 @@ const processEffect = Effect.fnUntraced(function* (options: Options) {
     )
   return yield* Effect.scoped(
     Effect.gen(function* () {
-      // Make sure the running Ollama at 127.0.0.1:11434 has the default `ruth` model.
-      // Runs in the background so a missing server does not delay the TUI.
-      yield* Effect.forkScoped(
-        Effect.promise(() => ensureRuthModel({ origin: LOCAL_OLLAMA_ORIGIN })).pipe(
-          Effect.tap((result) =>
-            result.ok
-              ? Effect.logInfo("Connected to the local ruth model", { origin: result.origin, created: result.created })
-              : Effect.logWarning("Local ruth model is not ready yet", { origin: result.origin, reason: result.reason }),
-          ),
-          Effect.catch((cause) => Effect.logWarning("Failed to verify the local ruth model", { cause })),
-        ),
+      // Recreate the default `ruth` model from the bundled files so a leftover tag cannot
+      // keep a short context or an old SYSTEM prompt. A down Ollama does not fail boot.
+      const ensured = yield* Effect.promise(() => ensureRuthModel({ origin: LOCAL_OLLAMA_ORIGIN })).pipe(
+        Effect.timeout("90 seconds"),
+        Effect.option,
       )
+      if (Option.isSome(ensured) && ensured.value.ok) {
+        yield* Effect.logInfo("Connected to the local ruth model", {
+          origin: ensured.value.origin,
+          created: ensured.value.created,
+        })
+      } else {
+        yield* Effect.logWarning("Local ruth model is not ready yet", {
+          reason: Option.isSome(ensured) ? ensured.value.reason : "timed out",
+        })
+      }
       const foreground = options.mode === "default"
       const serviceOptions = options.mode === "service" ? yield* ServiceConfig.options() : undefined
       const config = options.mode === "service" ? yield* ServiceConfig.read() : {}

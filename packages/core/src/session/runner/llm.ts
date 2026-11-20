@@ -199,7 +199,13 @@ const layer = Layer.effect(
                   )
                   // A control admitted during context preparation owns this boundary.
                   if (promoted === undefined) return undefined
-                  if (promoted > 0 && !selected.session.parentID && SessionTitle.isUntitled(selected.session))
+                  if (
+                    promoted > 0 &&
+                    !selected.session.parentID &&
+                    SessionTitle.isUntitled(selected.session) &&
+                    selected.session.model?.providerID !== "ollama" &&
+                    selected.session.model?.providerID !== "ollama-cloud"
+                  )
                     yield* FiberMap.run(titles, sessionID, title.generate(sessionID), {
                       onlyIfMissing: true,
                     })

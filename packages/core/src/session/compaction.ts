@@ -442,6 +442,15 @@ export const layer = Layer.effect(
       // A compaction just completed; let the runner rebuild the request from it first.
       const last = messages.at(-1)
       if (last?.type === "compaction" && last.status === "completed") return false
+      // The first user message has no history to summarize. Compacting it only delays the
+      // reply, and a pessimistic tool-schema estimate can otherwise exceed a small local window.
+      const hasHistory = messages.some(
+        (message) =>
+          message.type === "assistant" ||
+          message.type === "tool" ||
+          (message.type === "compaction" && message.status === "completed"),
+      )
+      if (!hasHistory) return false
       // An encrypted native window estimates as nothing, so wait for a response to measure it.
       const measured = messages.findLastIndex((message) => hasMeasuredPrompt(message, context.model.ref))
       if (measured < messages.findLastIndex(SessionHistory.isNativeCompaction)) return false

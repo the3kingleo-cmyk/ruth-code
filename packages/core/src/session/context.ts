@@ -189,13 +189,30 @@ const layer = Layer.effect(
         model,
         initial: history.initial,
         messages: history.entries.map((entry) => entry.message),
-        tools: selection.tools,
+        tools: toolsForModel(model, selection.tools),
       }
     })
 
     return Service.of({ select, load, resolveModel, selectTitle, request })
   }),
 )
+
+
+/** Coding tools that fit the default local `ruth` model window. Extra tools bloat the prompt and invite loops. */
+const LOCAL_CODING_TOOLS = new Set(["read", "write", "edit", "patch", "shell", "glob", "grep", "todowrite"])
+
+function toolsForModel(model: { readonly ref: { readonly providerID: string; readonly id: string }; readonly limit: { readonly context?: number } }, tools: Tool.Snapshot): Tool.Snapshot {
+  const id = model.ref.id.endsWith(":latest") ? model.ref.id.slice(0, -":latest".length) : model.ref.id
+  const small =
+    (model.ref.providerID === "ollama" || model.ref.providerID === "ollama-cloud") &&
+    (id === "ruth" || (model.limit.context ?? 0) > 0 && (model.limit.context ?? 0) <= 8192)
+  if (!small) return tools
+  return {
+    ...tools,
+    definitions: tools.definitions.filter((tool) => LOCAL_CODING_TOOLS.has(tool.name)),
+    codeModeCatalog: undefined,
+  }
+}
 
 /** Variant IDs that minimize reasoning output, in preference order. */
 const MINIMAL_REASONING_VARIANTS = ["none", "minimal", "low"].map((id) => Model.VariantID.make(id))
