@@ -2086,7 +2086,7 @@ describe("SessionRunnerLLM", () => {
     ])
   })
 
-  scenario("uses the selected model family prompt when the agent does not override it", function* (s) {
+  scenario("uses Ruth's prompt for the selected model when the agent does not override it", function* (s) {
     s.currentModel = LanguageModel.make({ id: "gpt-5", provider: "openai", route: OpenAIChat.route })
     yield* s.admit("First")
 
@@ -2094,13 +2094,13 @@ describe("SessionRunnerLLM", () => {
     yield* s.resume
 
     expect(s.requests.at(-1)?.system.map((part) => part.text)).toEqual([
-      expect.stringContaining("# Delegation"),
+      expect.stringContaining("You are Ruth"),
       gptIdentity,
       "Initial context",
     ])
   })
 
-  scenario("uses the selected model family prompt when the agent system override is empty", function* (s) {
+  scenario("uses Ruth's prompt for the selected model when the agent system override is empty", function* (s) {
     s.currentModel = LanguageModel.make({ id: "gpt-5", provider: "openai", route: OpenAIChat.route })
     const agent = yield* Agent.Service
     yield* agent.transform((editor) =>
@@ -2115,7 +2115,7 @@ describe("SessionRunnerLLM", () => {
     yield* s.resume
 
     expect(s.requests.at(-1)?.system.map((part) => part.text)).toEqual([
-      expect.stringContaining("# Delegation"),
+      expect.stringContaining("You are Ruth"),
       gptIdentity,
       "Initial context",
     ])

@@ -21,7 +21,7 @@ it.effect("keeps cloud models listed and defaults to ollama/ruth when ruth exist
     const providers = yield* Provider.Service
     const models = yield* Model.Service
     const ollama = Provider.ID.make("ollama")
-    const zen = Provider.ID.make("openrouter")
+    const zen = Provider.ID.make("gateway")
     const ruth = Model.ID.make("ruth:latest")
     const iceman = Model.ID.make("iceman-contributor-free")
     yield* providers.transform((editor) => {

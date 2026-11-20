@@ -32,7 +32,7 @@ import {
   type SubscribeInput,
   type WireResponse,
 } from "./daemon.js"
-import { resolveBinary } from "#persistent-pty-binary"
+import { available, resolveBinary } from "#persistent-pty-binary"
 
 export type { Metadata, Role, Signal, StreamEvent } from "./daemon.js"
 export { Handoff } from "@ruth/schema/persistent-pty"
@@ -191,6 +191,8 @@ export interface Interface {
   readonly terminatePipe: (id: number) => Effect.Effect<void, UnavailableError | RequestError>
   /** Never starts the daemon; empty when none is running. */
   readonly listPipes: () => Effect.Effect<PipeInfo[], UnavailableError | RequestError>
+  /** Whether this build can run the daemon at all. Omitted means available. */
+  readonly available?: boolean
 }
 
 export class Service extends Context.Service<Service, Interface>()("@ruth/PersistentPty") {}
@@ -512,6 +514,8 @@ const makeLayer = (options: Options = {}) =>
       })
 
       return Service.of({
+        // A configured daemon root (tests, embedders) brings its own daemon.
+        available: options.root !== undefined || available,
         list,
         get,
         create,

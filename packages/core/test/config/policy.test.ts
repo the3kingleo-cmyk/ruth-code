@@ -199,7 +199,7 @@ describe("ConfigPolicyPlugin.Plugin", () => {
       yield* catalog.transform((catalog) => {
         catalog.update(Provider.ID.openai, () => {})
         catalog.update(Provider.ID.anthropic, () => {})
-        catalog.update(Provider.ID.make("openrouter"), () => {})
+        catalog.update(Provider.ID.make("gateway"), () => {})
       })
       yield* addPlugin([
         organizationPolicy([provider("deny", "*"), provider("allow", "gateway")]),
@@ -208,7 +208,7 @@ describe("ConfigPolicyPlugin.Plugin", () => {
 
       expect(yield* catalog.get(Provider.ID.anthropic)).toBeUndefined()
       expect(yield* catalog.get(Provider.ID.openai)).toBeUndefined()
-      expect(yield* catalog.get(Provider.ID.make("openrouter"))).toBeDefined()
+      expect(yield* catalog.get(Provider.ID.make("gateway"))).toBeDefined()
     }),
   )
 
@@ -274,7 +274,7 @@ describe("integration policy", () => {
       })
       yield* catalog.transform((catalog) => {
         // The signed-out free tier enables Ruth without any connection.
-        catalog.update(Provider.ID.make("openrouter"), (provider) => {
+        catalog.update(Provider.ID.make("gateway"), (provider) => {
           provider.activation = "enabled"
         })
         // An env API key: Anthropic's integration with no account.
@@ -333,7 +333,7 @@ describe("integration policy", () => {
         value: consoleCredential("org_other"),
       })
       yield* catalog.transform((catalog) => {
-        catalog.update(Provider.ID.make("openrouter"), () => {})
+        catalog.update(Provider.ID.make("gateway"), () => {})
         catalog.update(Provider.ID.anthropic, () => {})
       })
       yield* addPlugin([
@@ -345,7 +345,7 @@ describe("integration policy", () => {
       ])
       expect(yield* catalog.get(Provider.ID.anthropic)).toBeDefined()
       // `gateway` names only account-less use; a connected account needs `gateway#*` or its own ID.
-      expect(yield* catalog.get(Provider.ID.make("openrouter"))).toBeUndefined()
+      expect(yield* catalog.get(Provider.ID.make("gateway"))).toBeUndefined()
     }),
   )
 

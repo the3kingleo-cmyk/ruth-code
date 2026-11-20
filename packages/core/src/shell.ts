@@ -263,6 +263,8 @@ export interface DaemonInterface {
   /** Runs `effect` until it ends or the server stops, outliving the caller's Location (e.g. a job's completion notice). */
   readonly watch: (effect: Effect.Effect<void, unknown>) => Effect.Effect<void>
   readonly handoffPrepared: () => boolean
+  /** False when this build has no process daemon, so commands are spawned by the server. */
+  readonly enabled?: boolean
 }
 
 /** The process daemon's shell commands, owned by the server and grouped by Location. */
@@ -582,6 +584,7 @@ const daemonLayer = Layer.effect(
 
     return Daemon.of({
       at,
+      enabled: pty.available !== false,
       handoffPrepared: pty.handoffPrepared,
       watch: (effect) =>
         fork(effect.pipe(Effect.catch((error) => Effect.logError("shell watcher failed", { error })))).pipe(
@@ -617,7 +620,7 @@ const layer = () =>
       const exitOrder: Shell.ID[] = []
       // Take local commands back before returning the service so session restart recovery sees them.
       const runs =
-        location.workspaceID === undefined && PersistentPty.available ? yield* daemon.at(location) : undefined
+        location.workspaceID === undefined && daemon.enabled !== false ? yield* daemon.at(location) : undefined
 
       const outputDir = path.join(global.data, DIRECTORY, location.project.id)
       const { mkdir, unlink, stat } = yield* Effect.promise(() => import("fs/promises"))

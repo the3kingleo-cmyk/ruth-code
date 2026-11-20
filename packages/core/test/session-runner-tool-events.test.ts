@@ -62,7 +62,7 @@ const capture = (
       agent: Agent.ID.make("build"),
       model: {
         id: Model.ID.make("model"),
-        providerID: Provider.ID.make("openrouter"),
+        providerID: Provider.ID.make("gateway"),
       },
       providerMetadataKey,
       pendingSnapshot: options?.pendingSnapshot,
@@ -168,7 +168,7 @@ testEffect(
         sessionID,
         assistantMessageID,
         agent: Agent.defaultID,
-        model: { id: Model.ID.make("test-model"), providerID: Provider.ID.make("openrouter") },
+        model: { id: Model.ID.make("test-model"), providerID: Provider.ID.make("gateway") },
         providerMetadataKey: "openai",
         started: 0,
       },
