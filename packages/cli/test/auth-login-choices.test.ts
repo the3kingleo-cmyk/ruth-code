@@ -22,9 +22,9 @@ test("groups the CLI choices like /connect while keeping stable login IDs", () =
   ).toEqual([
     { value: "github", label: "GitHub", category: "MCP", connected: false },
     { value: "linear", label: "Linear", category: "MCP", connected: false },
-    { value: "openrouter", label: "OpenRouter", category: "Popular", connected: false },
-    { value: "anthropic", label: "Anthropic", category: "Popular", connected: true },
-    { value: "openai", label: "OpenAI", category: "Popular", connected: false },
+    { value: "anthropic", label: "Anthropic", category: "Services", connected: true },
     { value: "mistral", label: "Mistral", category: "Services", connected: false },
+    { value: "openai", label: "OpenAI", category: "Services", connected: false },
+    { value: "openrouter", label: "OpenRouter", category: "Services", connected: false },
   ])
 })

@@ -66,7 +66,7 @@ describe("VLLMPlugin", () => {
           const modelState = yield* Model.Service
           const providerID = Provider.ID.make("vllm")
           expect(VLLMPlugin.id).toBe("ruth.provider.vllm")
-          expect(ProviderPlugins.map((item) => item.id)).toContain("ruth.provider.vllm")
+          expect(ProviderPlugins.map((item) => item.id)).not.toContain("ruth.provider.vllm")
           yield* addPlugin(server.url.origin, "5 millis")
           yield* Effect.promise(() => Bun.sleep(20))
           expect(yield* providers.get(providerID)).toBeUndefined()

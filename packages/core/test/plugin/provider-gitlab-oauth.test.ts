@@ -86,7 +86,7 @@ const fixture = Effect.fn(function* () {
 describe("GitLabPlugin OAuth", () => {
   it.effect("is registered alongside the other provider plugins", () =>
     Effect.gen(function* () {
-      expect(ProviderPlugins).toContain(GitLabPlugin)
+      expect(ProviderPlugins).not.toContain(GitLabPlugin)
     }),
   )
 

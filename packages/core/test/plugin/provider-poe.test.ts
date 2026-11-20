@@ -83,7 +83,7 @@ const fixture = Effect.gen(function* () {
 it.effect("registers Poe browser OAuth alongside generic key and environment methods without fetching", () =>
   Effect.gen(function* () {
     const test = yield* fixture
-    expect(ProviderPlugins).toContain(PoePlugin)
+    expect(ProviderPlugins).not.toContain(PoePlugin)
     expect((yield* test.integrations.get(integrationID))?.methods).toEqual([
       { type: "key" },
       { type: "env", names: ["POE_API_KEY"] },

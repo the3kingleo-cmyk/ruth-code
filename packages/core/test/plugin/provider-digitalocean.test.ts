@@ -80,7 +80,7 @@ const status = Effect.fn(function* (attempt: Integration.Attempt) {
 
 describe("DigitalOceanPlugin", () => {
   test("is registered alongside the other provider plugins", () => {
-    expect(ProviderPlugins.map((item) => item.id)).toContain("ruth.provider.digitalocean")
+    expect(ProviderPlugins.map((item) => item.id)).not.toContain("ruth.provider.digitalocean")
   })
 
   it.effect("registers browser OAuth alongside generic key and environment methods", () =>

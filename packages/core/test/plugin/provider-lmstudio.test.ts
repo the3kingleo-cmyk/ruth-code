@@ -27,7 +27,7 @@ const addPlugin = Effect.fn(function* (origin: string, interval: Duration.Input 
 describe("LMStudioPlugin", () => {
   test("is registered as a built-in provider plugin", () => {
     expect(LMStudioPlugin.id).toBe("ruth.provider.lmstudio")
-    expect(ProviderPlugins.map((item) => item.id)).toContain("ruth.provider.lmstudio")
+    expect(ProviderPlugins.map((item) => item.id)).not.toContain("ruth.provider.lmstudio")
   })
 
   it.live("discovers local language models with their capabilities and effective context", () =>

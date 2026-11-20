@@ -18,13 +18,7 @@ import {
   type ConnectMethod,
 } from "./shared"
 
-const integrationPriority = new Map([
-  ["openrouter", 0],
-  ["anthropic", 1],
-  ["openai", 2],
-  ["github-copilot", 3],
-  ["google", 4],
-])
+const integrationPriority = new Map<string, number>()
 
 export default Runtime.handler(
   Commands.commands.auth.commands.login,

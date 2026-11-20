@@ -189,47 +189,8 @@ const sdkEntries = (provider: unknown) =>
  * the providers a user configures.
  */
 export function curate(catalog: Record<string, unknown>): Record<string, unknown> {
-  const scopes = new Set<string>()
-  for (const provider of Object.values(catalog))
-    for (const [key, value] of sdkEntries(provider)) {
-      const scope = key !== "aisdk" && typeof value === "string" ? /^@([\w.-]+)\/ai\//.exec(value)?.[1] : undefined
-      if (scope && scope !== "ruth") scopes.add(scope)
-    }
-  const hosted = (id: string) => [...scopes].some((scope) => id === scope || id.startsWith(`${scope}-`))
-  return Object.fromEntries(
-    Object.entries(catalog)
-      .filter(([id]) => !hosted(id))
-      .map(([id, provider]) => {
-        if (!provider || typeof provider !== "object" || !("models" in provider)) return [id, provider]
-        const models = (provider as { models: Record<string, unknown> }).models
-        return [
-          id,
-          {
-            ...provider,
-            models: Object.fromEntries(
-              Object.entries(models ?? {}).map(([modelID, model]) => {
-                const api = (model as { api?: Record<string, { sdk?: Record<string, string> }> })?.api
-                if (!api || typeof api !== "object") return [modelID, model]
-                return [
-                  modelID,
-                  {
-                    ...(model as object),
-                    api: Object.fromEntries(
-                      Object.entries(api).map(([protocol, entry]) => {
-                        const native = nativePackage(entry?.sdk)
-                        if (!entry?.sdk || !native) return [protocol, entry]
-                        const { aisdk } = entry.sdk
-                        return [protocol, { ...entry, sdk: { ...(aisdk ? { aisdk } : {}), ruth: native } }]
-                      }),
-                    ),
-                  },
-                ]
-              }),
-            ),
-          },
-        ]
-      }),
-  )
+  // Local-only: drop every cloud or third-party catalog provider. Ollama is discovered live from the machine.
+  return Object.fromEntries(Object.entries(catalog).filter(([id]) => id === "ollama"))
 }
 
 const normalize = Effect.fnUntraced(function* (input: Record<string, unknown>) {
@@ -618,7 +579,7 @@ export const layer = (options?: Options) =>
       )
 
       const source = options?.url || defaultSource
-      const fetch = options?.fetch ?? true
+      const fetch = options?.fetch ?? false
       const userAgent = App.useragent(app)
       const key = cacheKey(source)
       const metaKey = `${key}:meta`
