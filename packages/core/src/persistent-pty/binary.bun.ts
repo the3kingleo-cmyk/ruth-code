@@ -3,7 +3,7 @@ import { chmod, lstat, mkdir, open, readFile, rename, rm } from "node:fs/promise
 import path from "node:path"
 import asset from "./pty-binding.js"
 
-export const available = true
+export const available = asset !== undefined || Boolean(process.env.RUTH_PTY_BIN)
 
 export async function resolveBinary(bin: string) {
   if (process.env.RUTH_PTY_BIN) return process.env.RUTH_PTY_BIN

@@ -31,7 +31,6 @@
     "@effect/platform-node": "catalog:",
     "@ruth/client": "workspace:*",
     "@ruth/plugin": "workspace:*",
-    "@ruth/pty": "npm:@opencode/pty@0.5.2",
     "@ruth/schema": "workspace:*",
     "@ruth/server": "workspace:*",
     "@ruth/tui": "workspace:*",

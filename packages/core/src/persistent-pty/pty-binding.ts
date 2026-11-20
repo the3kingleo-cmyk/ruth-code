@@ -1,6 +1,5 @@
-import { binaryPath } from "@ruth/pty"
-
+// Release builds replace this module with the embedded ruth-pty binary when one is bundled for the target.
 const binding: string | { readonly path: string; readonly version: string; readonly sha256: string } | undefined =
-  binaryPath
+  undefined
 
 export default binding

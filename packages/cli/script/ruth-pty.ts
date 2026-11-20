@@ -1,6 +1,5 @@
 import { createHash } from "node:crypto"
 import { readFile } from "node:fs/promises"
-import { createRequire } from "node:module"
 import path from "node:path"
 
 export type RuthPtyAsset = {
@@ -15,33 +14,16 @@ type Target = {
   readonly libc?: "glibc" | "musl"
 }
 
-const core = createRequire(path.resolve(import.meta.dirname, "../../core/package.json"))
-const pty = createRequire(core.resolve("@ruth/pty/package.json"))
-
+/** The persistent-PTY daemon to embed: only a local build named by RUTH_PTY_BIN, for the current platform. */
 export async function resolveRuthPty(target: Target): Promise<RuthPtyAsset | undefined> {
-  if (target.platform !== "darwin" && target.platform !== "linux" && target.platform !== "win32") return undefined
-  if (target.arch !== "arm64" && target.arch !== "x64") return undefined
-
-  const suffix = [target.platform, target.arch, target.platform === "linux" ? (target.libc ?? "glibc") : undefined]
-    .filter(Boolean)
-    .map((value) => (value === "glibc" ? "gnu" : value))
-    .join("-")
-  const name = `@opencode/pty-${suffix}`
   const local = process.env.RUTH_PTY_BIN
-  if (local && (target.platform !== process.platform || target.arch !== process.arch))
+  if (!local) return undefined
+  if (target.platform !== process.platform || target.arch !== process.arch)
     throw new Error("RUTH_PTY_BIN can only be embedded in a build for the current platform and architecture")
-  const source = local
-    ? path.resolve(local)
-    : pty.resolve(`${name}/bin/${target.platform === "win32" ? "opencode-pty.exe" : "opencode-pty"}`)
-  const manifest: unknown = local
-    ? { version: "local" }
-    : JSON.parse(await readFile(pty.resolve(`${name}/package.json`), "utf8"))
-  if (!manifest || typeof manifest !== "object" || !("version" in manifest) || typeof manifest.version !== "string")
-    throw new Error(`Invalid package metadata for ${name}`)
-
+  const source = path.resolve(local)
   return {
     source,
-    version: manifest.version,
+    version: "local",
     sha256: createHash("sha256")
       .update(await readFile(source))
       .digest("hex"),

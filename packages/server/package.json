@@ -37,7 +37,6 @@
     "effect": "catalog:"
   },
   "devDependencies": {
-    "@ruth/pty": "npm:@opencode/pty@0.5.2",
     "@ruth/client": "workspace:*",
     "@ruth/plugin": "workspace:*",
     "@tsconfig/bun": "catalog:",
