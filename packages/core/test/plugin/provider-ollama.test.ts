@@ -6,11 +6,11 @@ import { Integration } from "@ruth/core/integration"
 import { Model } from "@ruth/core/model"
 import { Plugin } from "@ruth/core/plugin"
 import { PluginHost } from "@ruth/core/plugin/host"
-import { OllamaPlugin, make } from "@ruth/core/plugin/provider/ollama"
+import { OllamaPlugin, make, ollamaContext } from "@ruth/core/plugin/provider/ollama"
 import { ProviderPlugins } from "@ruth/core/plugin/provider"
 import { Provider } from "@ruth/core/provider"
 import { Document, Event, Info } from "@ruth/schema/config"
-import { describe, expect } from "bun:test"
+import { describe, expect, test } from "bun:test"
 import { Duration, Effect, Layer, Schema } from "effect"
 import { eventually } from "../lib/eventually"
 import { testEffect } from "../lib/effect"
@@ -74,6 +74,7 @@ describe("OllamaPlugin", () => {
                 body.model === "gemma3:4b"
                   ? {
                       capabilities: ["completion", "tools", "vision"],
+                      parameters: "num_ctx 16384",
                       model_info: { "gemma3.context_length": 131_072 },
                     }
                   : body.model === "unknown-context"
@@ -109,10 +110,12 @@ describe("OllamaPlugin", () => {
             name: "gemma3:4b",
             family: "gemma3",
             capabilities: { tools: true, input: ["text", "image"], output: ["text"] },
-            limit: { context: 131_072, output: 32_000 },
+            // The Modelfile's num_ctx, not the training context, is what Ollama runs with.
+            limit: { context: 16_384, output: 32_000 },
           })
+          // Without num_ctx or a known server setting, Ollama runs with its 4096-token default.
           expect(yield* modelState.get(providerID, Model.ID.make("unknown-context"))).toMatchObject({
-            limit: { context: 200_000, output: 32_000 },
+            limit: { context: 4096, output: 32_000 },
           })
           expect(yield* modelState.get(providerID, Model.ID.make("nomic-embed"))).toBeUndefined()
           expect(requests).toContainEqual({ method: "GET", path: "/api/tags" })
@@ -350,7 +353,7 @@ function summary(model: string, digest: string, family = "llama") {
 function show(input: { family?: string; capabilities: string[]; context: number }) {
   const family = input.family ?? "llama"
   return {
-    parameters: "temperature 0.7",
+    parameters: `temperature 0.7\nnum_ctx ${input.context}`,
     details: {
       parent_model: "",
       format: "gguf",
@@ -373,3 +376,12 @@ function configuration(settings: Record<string, string | null>) {
     info: decode({ providers: { ollama: { settings } } }),
   })
 }
+
+describe("ollamaContext", () => {
+  test("prefers num_ctx, then the server setting, then Ollama's default, within the trained context", () => {
+    expect(ollamaContext("num_ctx 12288\ntemperature 1", 262_144, {})).toBe(12_288)
+    expect(ollamaContext("temperature 1", 262_144, { OLLAMA_CONTEXT_LENGTH: "16384" })).toBe(16_384)
+    expect(ollamaContext(undefined, 262_144, {})).toBe(4096)
+    expect(ollamaContext("num_ctx 65536", 32_768, {})).toBe(32_768)
+  })
+})
