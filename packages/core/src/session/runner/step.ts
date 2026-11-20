@@ -133,9 +133,10 @@ export const make = Effect.gen(function* () {
     // A local execution starts only after its Tool.Called publication completes.
     // Read to the end, not just the finish event, so the next request can reuse this response.
     // The span covers only the provider stream, so model time separates from tools, which run in this consumer.
-    const textToolNames = TextToolCalls.enabled(input.model.ref.providerID)
-      ? TextToolCalls.toolNames(input.prepared.request.tools)
-      : new Set<string>()
+    const textToolNames = new Set([
+      ...(TextToolCalls.enabled(input.model.ref.providerID) ? TextToolCalls.toolNames(input.prepared.request.tools) : []),
+      ...(input.prepared.textTools ?? []),
+    ])
     const providerStream = llm.stream(input.prepared.request, input.prepared.options).pipe(
       TextToolCalls.recover(textToolNames),
       Stream.withSpan("LLM.stream", { attributes: modelAttributes }),
