@@ -112,8 +112,6 @@
     "./providers/openai/embeddings": "./src/providers/openai/embeddings.ts",
     "./providers/openai/images": "./src/providers/openai/images.ts",
     "./providers/openai/responses": "./src/providers/openai/responses.ts",
-    "./providers/ruth": "./src/providers/ruth.ts",
-    "./providers/ruth/decisions": "./src/providers/ruth/decisions.ts",
     "./providers/openrouter": "./src/providers/openrouter.ts",
     "./providers/openrouter/decisions": "./src/providers/openrouter/decisions.ts",
     "./providers/openrouter/embeddings": "./src/providers/openrouter/embeddings.ts",

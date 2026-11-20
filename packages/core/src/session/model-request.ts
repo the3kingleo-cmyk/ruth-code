@@ -327,15 +327,11 @@ export const layer = Layer.effect(
       const base = ai.request({
         model: model.model,
         headers: {
-          "x-opencode-session-id": session.id,
-          ...(session.parentID ? { "x-opencode-parent-session-id": session.parentID } : {}),
+          "x-ruth-session-id": session.id,
           "x-session-affinity": affinity,
           "X-Session-Id": affinity,
           ...(session.parentID ? { "x-parent-session-id": session.parentID } : {}),
           "User-Agent": App.useragent(app),
-          "x-opencode-project": session.projectID,
-          "x-opencode-session": affinity,
-          "x-opencode-client": app.name,
         },
         // TODO: Persist cache lineage so nested forks reuse the root session's cache key.
         promptCacheKey: /^ses_[0-9a-f]{64}$/.test(affinity) ? affinity.slice(4) : affinity,

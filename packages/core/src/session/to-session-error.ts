@@ -28,11 +28,6 @@ const tokenSharingMessages = {
     "This ChatGPT connection isn't authorized for this request. Reconnect to ChatGPT or choose another connection.",
 }
 
-const FREE_USAGE_LIMIT_MESSAGE =
-  "Free usage limit reached. Connect a provider or switch models to keep going."
-const BUDGET_LIMIT_MESSAGE = "Workspace usage limit reached. Model use is paused until the limit resets."
-const MODEL_BUDGET_LIMIT_MESSAGE = "You've reached the spend limit for this model. Switch models to keep going."
-
 export function toSessionError(cause: unknown): SessionError.Error {
   if (cause instanceof AIError) {
     // ChatGPT's usage limit arrives in HTTP and stream errors alike, whatever their reason, so its code decides the type.
@@ -44,10 +39,6 @@ export function toSessionError(cause: unknown): SessionError.Error {
       case "Authentication":
         return providerError("provider.auth", cause.reason)
       case "QuotaExceeded":
-        if (cause.reason.body?.includes("FreeUsageLimitError"))
-          return { ...providerError("provider.free-limit", cause.reason), message: FREE_USAGE_LIMIT_MESSAGE }
-        if (cause.reason.body?.includes("BudgetLimitError")) return budgetLimit(cause.reason)
-        if (cause.reason.body?.includes("GoUsageLimitError")) return goLimit(cause.reason)
         return providerError("provider.quota", cause.reason)
       case "ContentPolicy":
         return providerError("provider.content-filter", cause.reason)
@@ -105,22 +96,6 @@ export function contentFilterError(summary: string, reason: FinishReasonDetails)
     message: [reason.category === undefined ? summary : `${summary} (${reason.category})`, reason.explanation]
       .filter(Boolean)
       .join(": "),
-  }
-}
-
-// Zen Console names what a refusing budget covers, in its envelope's metadata or, for Google clients, ErrorInfo.
-function budgetLimit(reason: AIError["reason"]): SessionError.Error {
-  if (/"coverage"\s*:\s*"models"/.test(reason.body ?? ""))
-    return { ...providerError("provider.model-budget-limit", reason), message: MODEL_BUDGET_LIMIT_MESSAGE }
-  return { ...providerError("provider.budget-limit", reason), message: BUDGET_LIMIT_MESSAGE }
-}
-
-// Zen Console names the Go limit that refused the request (5 hour, weekly or monthly) in its envelope's metadata.
-function goLimit(reason: AIError["reason"]): SessionError.Error {
-  const name = /"limitName"\s*:\s*"([^"]+)"/.exec(reason.body ?? "")?.[1]
-  return {
-    ...providerError("provider.go-limit", reason),
-    message: `${name ? `${name} ` : ""}usage limit reached. Switch to a free model to keep going.`,
   }
 }
 

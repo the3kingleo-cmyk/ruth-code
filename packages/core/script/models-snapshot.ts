@@ -8,7 +8,7 @@ const MINIMUM_PROVIDERS = 100
 export const committedSnapshot = new URL("../src/models-dev/snapshot.txt", import.meta.url)
 
 export async function fetchModelsSnapshot() {
-  const source = process.env.RUTH_MODELS_URL || "https://models.opencode.ai"
+  const source = process.env.RUTH_MODELS_URL || "https://models.dev"
   const url = `${source}${ModelsDev.catalogPath}`
   const response = await fetch(url, { signal: AbortSignal.timeout(30_000) })
   if (!response.ok) throw new Error(`${url} returned ${response.status} ${response.statusText}`)
@@ -38,13 +38,14 @@ const Catalog = Schema.fromJsonString(
 )
 
 function trim(text: string) {
-  const catalog = Schema.decodeUnknownSync(Catalog)(text)
+  const catalog = Schema.decodeUnknownSync(Catalog)(JSON.stringify(ModelsDev.curate(JSON.parse(text))))
   return JSON.stringify(
     Object.fromEntries(
       Object.entries(catalog).map(([id, provider]) => [
         id,
         {
-          ...provider,
+          // Provider doc links are never read, and they point at third-party setup guides for other tools.
+          ...Object.fromEntries(Object.entries(provider).filter(([key]) => key !== "doc")),
           models: Object.fromEntries(
             Object.entries(provider.models).map(([modelID, model]) => [
               modelID,

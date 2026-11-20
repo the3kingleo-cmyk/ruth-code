@@ -147,7 +147,6 @@ const builtins = new Map<string, () => Promise<unknown>>([
     "@ruth/ai/providers/openai-compatible-responses",
     () => import("@ruth/ai/providers/openai-compatible-responses"),
   ],
-  ["@ruth/ai/providers/ruth/decisions", () => import("@ruth/ai/providers/ruth/decisions")],
   ["@ruth/ai/providers/openrouter", () => import("@ruth/ai/providers/openrouter")],
   ["@ruth/ai/providers/openrouter/decisions", () => import("@ruth/ai/providers/openrouter/decisions")],
   ["@ruth/ai/providers/openrouter/embeddings", () => import("@ruth/ai/providers/openrouter/embeddings")],

@@ -27,14 +27,14 @@ describe("GoogleVertexPlugin", () => {
     Effect.gen(function* () {
       const catalog = yield* Provider.Service
       yield* catalog.transform((catalog) =>
-        catalog.update(Provider.ID.zen, (provider) => {
+        catalog.update(Provider.ID.make("openrouter"), (provider) => {
           provider.package = "@ruth/ai/providers/openai-compatible"
           provider.settings = { ...provider.settings, baseURL: "https://opencode.ai/zen/v1" }
         }),
       )
       yield* addPlugin()
 
-      const provider = required(yield* catalog.get(Provider.ID.zen))
+      const provider = required(yield* catalog.get(Provider.ID.make("openrouter")))
       expect(provider.settings).toEqual({ baseURL: "https://opencode.ai/zen/v1" })
     }),
   )

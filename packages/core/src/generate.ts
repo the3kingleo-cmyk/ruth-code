@@ -3,7 +3,6 @@ export * as Generate from "./generate.js"
 import { ai, AIError, DecisionClient, ImageClient, LLMClient, Media } from "@ruth/ai/effect"
 import type { DecisionRequest, DecisionResult, ImageRequest, ImageResult } from "@ruth/schema/generate"
 import { Money } from "@ruth/schema/money"
-import { SessionID } from "@ruth/schema/session-id"
 import { Context, Effect, Layer, Schema } from "effect"
 import { RequestExecutor } from "@ruth/ai/route"
 import { makeLocationNode } from "@ruth/util/effect/app-node"
@@ -116,8 +115,6 @@ export const layer = Layer.effect(
           ai.request({
             model: resolved.model,
             prompt: input.prompt,
-            // Gateways require session attribution even for a stateless call; no Session is stored.
-            headers: { "x-opencode-session": SessionID.create() },
           }),
         )
         .pipe(

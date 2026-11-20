@@ -76,9 +76,8 @@ const SourceApi = Schema.Struct({
       tools: Schema.optional(Schema.Struct({ freeform: Schema.optional(Schema.Array(Schema.String)) })),
     }),
   ),
-  sdk: Schema.optional(
-    Schema.Struct({ aisdk: Schema.optional(Schema.String), ruthai: Schema.optional(Schema.String) }),
-  ),
+  // `aisdk` names an AI SDK package; another key may name a native `@<scope>/ai/...` entrypoint.
+  sdk: Schema.optional(Schema.Record(Schema.String, Schema.String)),
   compatibility: Schema.optional(
     Schema.Struct({
       reasoning_field: Schema.optional(Schema.String),
@@ -179,7 +178,62 @@ const BUILDS_OWN_URL = new Set([
   "aisdk:watsonx-ai-provider",
 ])
 
-const normalize = Effect.fnUntraced(function* (catalog: Record<string, unknown>) {
+const sdkEntries = (provider: unknown) =>
+  Object.values((provider as { models?: Record<string, { api?: Record<string, { sdk?: unknown }> }> }).models ?? {})
+    .flatMap((model) => Object.values(model?.api ?? {}))
+    .flatMap((api) => (api?.sdk && typeof api.sdk === "object" ? Object.entries(api.sdk) : []))
+
+/**
+ * Makes a catalog Ruth's own: native entrypoints point at `@ruth/ai`, and providers named after the catalog
+ * publisher's scope (its own hosted gateways, which need the publisher's account) are dropped. Ruth only talks to
+ * the providers a user configures.
+ */
+export function curate(catalog: Record<string, unknown>): Record<string, unknown> {
+  const scopes = new Set<string>()
+  for (const provider of Object.values(catalog))
+    for (const [key, value] of sdkEntries(provider)) {
+      const scope = key !== "aisdk" && typeof value === "string" ? /^@([\w.-]+)\/ai\//.exec(value)?.[1] : undefined
+      if (scope && scope !== "ruth") scopes.add(scope)
+    }
+  const hosted = (id: string) => [...scopes].some((scope) => id === scope || id.startsWith(`${scope}-`))
+  return Object.fromEntries(
+    Object.entries(catalog)
+      .filter(([id]) => !hosted(id))
+      .map(([id, provider]) => {
+        if (!provider || typeof provider !== "object" || !("models" in provider)) return [id, provider]
+        const models = (provider as { models: Record<string, unknown> }).models
+        return [
+          id,
+          {
+            ...provider,
+            models: Object.fromEntries(
+              Object.entries(models ?? {}).map(([modelID, model]) => {
+                const api = (model as { api?: Record<string, { sdk?: Record<string, string> }> })?.api
+                if (!api || typeof api !== "object") return [modelID, model]
+                return [
+                  modelID,
+                  {
+                    ...(model as object),
+                    api: Object.fromEntries(
+                      Object.entries(api).map(([protocol, entry]) => {
+                        const native = nativePackage(entry?.sdk)
+                        if (!entry?.sdk || !native) return [protocol, entry]
+                        const { aisdk } = entry.sdk
+                        return [protocol, { ...entry, sdk: { ...(aisdk ? { aisdk } : {}), ruth: native } }]
+                      }),
+                    ),
+                  },
+                ]
+              }),
+            ),
+          },
+        ]
+      }),
+  )
+}
+
+const normalize = Effect.fnUntraced(function* (input: Record<string, unknown>) {
+  const catalog = curate(input)
   const failed: { readonly model: string; readonly issue: unknown }[] = []
   const unknown = new Set<string>()
   const snapshots = Object.values(isV1(catalog) ? toV2(catalog) : catalog).flatMap((value) => {
@@ -254,16 +308,16 @@ function route(providerID: Provider.ID, model: SourceModel, unknown: Set<string>
   // ruth entrypoint for their type (`providers/<P>/images`) that this build can load, and are skipped
   // without one: a chat entrypoint loads a chat model, which can't generate images or decisions.
   const apis = entries(model.api, decodeApi).map(
-    ([protocol, entry]) => [protocol, entry, loadable(entry.sdk?.ruthai, unknown)] as const,
+    ([protocol, entry]) => [protocol, entry, loadable(nativePackage(entry.sdk), unknown)] as const,
   )
-  const [protocol, api, ruthai] =
+  const [protocol, api, native] =
     (model.type === "chat"
-      ? apis.find(([, entry, ruthai]) => ruthai || entry.sdk?.aisdk)
-      : apis.find(([, , ruthai]) => ruthai?.endsWith(`/${model.type}s`))) ?? []
+      ? apis.find(([, entry, native]) => native || entry.sdk?.aisdk)
+      : apis.find(([, , native]) => native?.endsWith(`/${model.type}s`))) ?? []
   if (!protocol || !api) return undefined
   const aisdk = api.sdk?.aisdk
   const packageName =
-    ruthai ??
+    native ??
     (aisdk &&
       (AISDKNative.native(aisdk, {
         providerID,
@@ -288,10 +342,19 @@ function route(providerID: Provider.ID, model: SourceModel, unknown: Set<string>
   }
 }
 
+// Catalogs name native entrypoints under their publisher's scope (`@<scope>/ai/providers/...`). Ruth ships the
+// same entrypoints under `@ruth/ai`, so any such key maps onto Ruth's own package.
+const NATIVE_ENTRYPOINT = /^@[\w.-]+\/ai\/(?=providers\/|protocols\/)/
+export function nativePackage(sdk: Readonly<Record<string, string>> | undefined) {
+  if (!sdk) return undefined
+  const found = Object.entries(sdk).find(([key, value]) => key !== "aisdk" && NATIVE_ENTRYPOINT.test(value))
+  return found && found[1].replace(NATIVE_ENTRYPOINT, "@ruth/ai/")
+}
+
 // Newer catalogs may name @ruth/ai entrypoints that older builds don't ship, so those count as no package.
-function loadable(ruthai: string | undefined, unknown: Set<string>) {
-  const name = Provider.packageName(ruthai)
-  if (!name?.startsWith("@ruth/ai/") || Provider.builtinPackages.has(name)) return ruthai
+function loadable(native: string | undefined, unknown: Set<string>) {
+  const name = Provider.packageName(native)
+  if (!name?.startsWith("@ruth/ai/") || Provider.builtinPackages.has(name)) return native
   unknown.add(name)
   return undefined
 }
@@ -502,7 +565,7 @@ const CacheMeta = Schema.Struct({
   digest: Schema.optional(Schema.String),
   etag: Schema.optional(Schema.String),
 })
-const defaultSource = "https://models.opencode.ai"
+const defaultSource = "https://models.dev"
 
 // The experimental v2 API, limited to the model types ruth keeps.
 export const catalogPath = `/experimental/v2.0/api.json?type=${TYPES.join(",")}`

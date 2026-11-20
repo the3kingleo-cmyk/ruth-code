@@ -19,12 +19,11 @@ import {
 } from "./shared"
 
 const integrationPriority = new Map([
-  ["opencode-go", 0],
-  ["opencode", 1],
+  ["openrouter", 0],
+  ["anthropic", 1],
   ["openai", 2],
   ["github-copilot", 3],
-  ["anthropic", 4],
-  ["google", 5],
+  ["google", 4],
 ])
 
 export default Runtime.handler(

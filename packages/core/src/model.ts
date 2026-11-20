@@ -118,9 +118,6 @@ const layer = Layer.effect(
     const providers = yield* Provider.Service
     const bus = yield* Bus.Service
     const location = yield* Location.Service
-    const disableFree = ["1", "true"].includes(
-      (process.env.RUTH_DISABLE_FREE_MODELS ?? "").toLowerCase(),
-    )
     let input: Provider.Snapshot | undefined
     const state: State.Interface<Data, Editor> = State.create<Data, Editor>({
       name: "model",
@@ -251,13 +248,6 @@ const layer = Layer.effect(
             ]
           }),
         )
-        // Only hide the free catalog when explicitly requested. A local Ruth
-        // default must not remove Zen / Zen Go models from /models.
-        if (disableFree)
-          for (const providerID of [Provider.ID.zen, Provider.ID.make("opencode-go")])
-            byProvider.get(providerID)?.forEach((model, id, models) => {
-              if (!model.cost.some((cost) => cost.input > 0)) models.delete(id)
-            })
         dedupeOllamaLatest(byProvider)
         hideUninstalledOptionalOllama(byProvider)
         // Non-chat models (image, decision…) only show up when listed by type, so nothing that
@@ -275,7 +265,7 @@ const layer = Layer.effect(
           .sort((left, right) => right.time.released - left.time.released)
         other.forEach((models) => models.sort((left, right) => right.time.released - left.time.released))
         cached = freeze(
-          { data, all, available: preferFree(all.filter((model) => model.enabled)), other, byProvider },
+          { data, all, available: all.filter((model) => model.enabled), other, byProvider },
           true,
         )
         return cached
@@ -352,11 +342,7 @@ const layer = Layer.effect(
           )
           .find(Boolean)
         if (local) return local
-        // Never fall back to Ruth free-catalog models when a local Ruth default is configured.
-        const requestedLocal = requested?.providerID === "ollama" || requested?.providerID === "ollama-cloud"
-        return value.available.find(
-          (item) => supportsText(item) && !(requestedLocal && isRuthFreeCatalog(item)),
-        )
+        return value.available.find((item) => supportsText(item))
       }),
       small: Effect.fn("Model.small")(function* (providerID) {
         const value = yield* read()
@@ -409,31 +395,6 @@ function hideUninstalledOptionalOllama(byProvider: Map<Provider.ID, Map<ID, Info
     if (id === "ruth" || id === "ruth:latest") continue
     models.delete(id)
   }
-}
-
-function isRuthFreeCatalog(model: Pick<Info, "providerID" | "cost">) {
-  return (
-    (model.providerID === Provider.ID.zen || model.providerID === "opencode-go") &&
-    !model.cost.some((cost) => cost.input > 0)
-  )
-}
-
-// Signed out, only free Ruth models are enabled. Clients default to the first available model, so keep
-// these free models ahead of each new free launch instead of letting release order pick the default.
-const PREFERRED_FREE = [
-  "big-pickle",
-  "deepseek-v4.1-flash-free",
-  "glm-5.3-flash-free",
-  "muse-spark-1.3-contributor-free",
-]
-
-function preferFree(models: Info[]) {
-  const freeOnly = models.every(
-    (model) => model.providerID === Provider.ID.zen && !model.cost.some((cost) => cost.input > 0),
-  )
-  if (!freeOnly) return models
-  const picks = PREFERRED_FREE.flatMap((id) => models.find((model) => model.id === id) ?? [])
-  return [...picks, ...models.filter((model) => !picks.includes(model))]
 }
 
 export function supportsText(model: Pick<Info, "capabilities">) {

@@ -46,7 +46,6 @@ import { SessionInbox } from "@ruth/schema/session-inbox"
 import { Shell } from "@ruth/schema/shell"
 import { Skill } from "@ruth/schema/skill"
 import { Snapshot } from "@ruth/schema/snapshot"
-import { UsageLimits } from "@ruth/schema/usage-limits"
 import { Vcs } from "@ruth/schema/vcs"
 import { WebSearch } from "@ruth/schema/websearch"
 import { Workspace } from "@ruth/schema/workspace"
@@ -104,7 +103,6 @@ const effectTypeReferences = [
   ...namespaceTypes("Shell", "@ruth/schema/shell", Shell),
   ...namespaceTypes("Skill", "@ruth/schema/skill", Skill),
   ...namespaceTypes("Snapshot", "@ruth/schema/snapshot", Snapshot),
-  ...namespaceTypes("UsageLimits", "@ruth/schema/usage-limits", UsageLimits),
   ...namespaceTypes("Vcs", "@ruth/schema/vcs", Vcs),
   ...namespaceTypes("WebSearch", "@ruth/schema/websearch", WebSearch),
   ...namespaceTypes("Workspace", "@ruth/schema/workspace", Workspace),

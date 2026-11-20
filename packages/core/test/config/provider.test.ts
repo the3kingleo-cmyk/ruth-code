@@ -1088,7 +1088,7 @@ describe("ConfigProviderPlugin.Plugin", () => {
   it.effect("keeps configured model variant bodies unchanged", () =>
     Effect.gen(function* () {
       const models = yield* Model.Service
-      const providerID = Provider.ID.zen
+      const providerID = Provider.ID.make("openrouter")
       const modelID = Model.ID.make("alpha-gpt-next")
       const entries = [
         new Document({
@@ -1137,7 +1137,7 @@ describe("ConfigProviderPlugin.Plugin", () => {
   it.effect("keeps layered model variant bodies unchanged", () =>
     Effect.gen(function* () {
       const models = yield* Model.Service
-      const providerID = Provider.ID.zen
+      const providerID = Provider.ID.make("openrouter")
       const modelID = Model.ID.make("alpha-gpt-next")
       const entries = [
         new Document({

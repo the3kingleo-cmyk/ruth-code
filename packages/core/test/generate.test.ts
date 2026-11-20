@@ -283,7 +283,7 @@ describe("image and decision generation", () => {
       package: "@ruth/ai/providers/openai/images",
     }),
     Info.make({
-      ...Info.default(Provider.ID.zen, ID.make("gpt-image-2.5-sunburst")),
+      ...Info.default(Provider.ID.make("openrouter"), ID.make("gpt-image-2.5-sunburst")),
       type: "image",
       package: "@ruth/ai/providers/openai/images",
     }),
@@ -474,7 +474,7 @@ describe("image and decision generation", () => {
     Effect.gen(function* () {
       requests.length = 0
       const generate = yield* Generate.Service
-      yield* generate.image({ model: ref(Provider.ID.zen, "gpt-image-2.5-sunburst"), prompt: "A black circle" })
+      yield* generate.image({ model: ref(Provider.ID.make("openrouter"), "gpt-image-2.5-sunburst"), prompt: "A black circle" })
       expect(requests[0]).toMatchObject({
         url: "https://api.openai.com/v1/images/generations",
         headers: { authorization: "Bearer console-token" },

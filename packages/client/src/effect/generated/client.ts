@@ -311,8 +311,6 @@ import type {
   WebsearchProvidersOutput,
   WebsearchQueryInput,
   WebsearchQueryOutput,
-  ExperimentalUsageLimitsInput,
-  ExperimentalUsageLimitsOutput,
   ConfigGetInput,
   ConfigGetOutput,
   ConfigShellsOutput,
@@ -1930,15 +1928,6 @@ const adaptGroupWebsearch = (raw: RawClient["server.websearch"]) => ({
   query: EndpointWebsearchQuery(raw),
 })
 
-const EndpointExperimentalUsageLimits = (raw: RawClient["server.usage"]) => (input?: ExperimentalUsageLimitsInput) =>
-  preserveEffect<ExperimentalUsageLimitsOutput>()(
-    raw["usage.limits"]({ query: { location: input?.["location"] } }).pipe(Effect.mapError(mapClientError)),
-  )
-
-const adaptGroupExperimentalUsage = (raw: RawClient["server.usage"]) => ({
-  limits: EndpointExperimentalUsageLimits(raw),
-})
-
 const EndpointConfigGet = (raw: RawClient["server.config"]) => (input?: ConfigGetInput) =>
   preserveEffect<ConfigGetOutput>()(
     raw["config.get"]({ query: { location: input?.["location"] } }).pipe(Effect.mapError(mapClientError)),
@@ -1977,7 +1966,6 @@ const adaptClient = (raw: RawClient) => {
       mcp: adaptGroupExperimentalMcp(raw["server.mcp"]),
       file: adaptGroupExperimentalFile(raw["server.fs"]),
       migration: adaptGroupExperimentalMigration(raw["server.migration"]),
-      usage: adaptGroupExperimentalUsage(raw["server.usage"]),
       config: adaptGroupExperimentalConfig(raw["server.config"]),
     },
     message: adaptGroupMessage(raw["server.message"]),
@@ -2086,11 +2074,6 @@ const adaptClient = (raw: RawClient) => {
         /** @deprecated Use `client.experimental.migration.v1.status`. Removed in the next minor. */
         status: client.experimental.migration.v1.status,
       },
-    },
-    /** @deprecated Use `client.experimental.usage`. Removed in the next minor. */
-    usage: {
-      /** @deprecated Use `client.experimental.usage.limits`. Removed in the next minor. */
-      limits: client.experimental.usage.limits,
     },
     config: {
       ...client.config,

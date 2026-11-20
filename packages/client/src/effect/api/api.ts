@@ -44,7 +44,6 @@ import type { Reference } from "@ruth/schema/reference"
 import type { Worktree } from "@ruth/schema/worktree"
 import type { Vcs } from "@ruth/schema/vcs"
 import type { WebSearch } from "@ruth/schema/websearch"
-import type { UsageLimits } from "@ruth/schema/usage-limits"
 import type { Config } from "@ruth/schema/config"
 
 export type ServerInfoOutput = {
@@ -2773,21 +2772,6 @@ export interface WebsearchApi<E = never> {
   readonly query: WebsearchQueryOperation<E>
 }
 
-export type ExperimentalUsageLimitsInput = {
-  readonly location?: { readonly directory?: string | undefined } | undefined
-}
-export type ExperimentalUsageLimitsOutput = {
-  readonly location: Location.PublicRef
-  readonly data: UsageLimits.Info | null
-}
-export type ExperimentalUsageLimitsOperation<E = never> = (
-  input?: ExperimentalUsageLimitsInput,
-) => Effect.Effect<ExperimentalUsageLimitsOutput, E>
-
-export interface ExperimentalUsageApi<E = never> {
-  readonly limits: ExperimentalUsageLimitsOperation<E>
-}
-
 export type ConfigGetInput = { readonly location?: { readonly directory?: string | undefined } | undefined }
 export type ConfigGetOutput = ReadonlyArray<Config.Entry>
 export type ConfigGetOperation<E = never> = (input?: ConfigGetInput) => Effect.Effect<ConfigGetOutput, E>
@@ -3018,15 +3002,6 @@ export type MigrationV1StatusOutput = ExperimentalMigrationV1StatusOutput
 /** @deprecated Use `ExperimentalMigrationV1StatusOperation`. Removed in the next minor. */
 export type MigrationV1StatusOperation<E = never> = ExperimentalMigrationV1StatusOperation<E>
 
-/** @deprecated Use `ExperimentalUsageLimitsInput`. Removed in the next minor. */
-export type UsageLimitsInput = ExperimentalUsageLimitsInput
-
-/** @deprecated Use `ExperimentalUsageLimitsOutput`. Removed in the next minor. */
-export type UsageLimitsOutput = ExperimentalUsageLimitsOutput
-
-/** @deprecated Use `ExperimentalUsageLimitsOperation`. Removed in the next minor. */
-export type UsageLimitsOperation<E = never> = ExperimentalUsageLimitsOperation<E>
-
 /** @deprecated Use `ExperimentalConfigUpdateInput`. Removed in the next minor. */
 export type ConfigUpdateInput = ExperimentalConfigUpdateInput
 
@@ -3045,9 +3020,6 @@ export type VoiceApi<E = never> = ExperimentalVoiceApi<E>
 /** @deprecated Use `ExperimentalMigrationApi`. Removed in the next minor. */
 export type MigrationApi<E = never> = ExperimentalMigrationApi<E>
 
-/** @deprecated Use `ExperimentalUsageApi`. Removed in the next minor. */
-export type UsageApi<E = never> = ExperimentalUsageApi<E>
-
 export interface AppApi<E = never> {
   readonly server: ServerApi<E>
   readonly location: LocationApi<E>
@@ -3062,7 +3034,6 @@ export interface AppApi<E = never> {
     readonly mcp: ExperimentalMcpApi<E>
     readonly file: ExperimentalFileApi<E>
     readonly migration: ExperimentalMigrationApi<E>
-    readonly usage: ExperimentalUsageApi<E>
     readonly config: ExperimentalConfigApi<E>
   }
   readonly message: MessageApi<E>
@@ -3116,11 +3087,5 @@ export interface AppApi<E = never> {
       /** @deprecated Use `client.experimental.migration.v1.status`. Removed in the next minor. */
       readonly status: ExperimentalMigrationV1StatusOperation<E>
     }
-  }
-
-  /** @deprecated Use `client.experimental.usage`. Removed in the next minor. */
-  readonly usage: {
-    /** @deprecated Use `client.experimental.usage.limits`. Removed in the next minor. */
-    readonly limits: ExperimentalUsageLimitsOperation<E>
   }
 }

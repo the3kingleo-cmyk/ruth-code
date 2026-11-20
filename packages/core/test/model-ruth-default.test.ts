@@ -16,12 +16,12 @@ const layer = AppNodeBuilder.build(LayerNode.group([Provider.node, Model.node]),
 
 const it = testEffect(layer)
 
-it.effect("keeps Zen free models listed and defaults to ollama/ruth when ruth exists", () =>
+it.effect("keeps cloud models listed and defaults to ollama/ruth when ruth exists", () =>
   Effect.gen(function* () {
     const providers = yield* Provider.Service
     const models = yield* Model.Service
     const ollama = Provider.ID.make("ollama")
-    const zen = Provider.ID.zen
+    const zen = Provider.ID.make("openrouter")
     const ruth = Model.ID.make("ruth:latest")
     const iceman = Model.ID.make("iceman-contributor-free")
     yield* providers.transform((editor) => {

@@ -72,9 +72,6 @@ function DialogConnectedModels(props: {
     if (newDesigns()) return favorite ? <FavoriteMarker /> : undefined
     return isFreeModel(model) ? "Free" : undefined
   }
-  // Ruth's own free models get their own group at the end of the list instead of joining "Ruth".
-  const freeGroup = (model: ModelInfo) =>
-    newDesigns() && !props.providerID && model.providerID === "opencode" && isFreeModel(model)
 
   const connected = useConnected()
   const providers = createMemo(
@@ -136,7 +133,7 @@ function DialogConnectedModels(props: {
             title: model.name,
             releaseDate: model.time.released,
             description: newDesigns() ? undefined : favorite ? "(Favorite)" : undefined,
-            category: connected() ? (freeGroup(model) ? "Free" : (provider?.name ?? model.providerID)) : undefined,
+            category: connected() ? (provider?.name ?? model.providerID) : undefined,
             footer: trailing(model, favorite),
             free: isFreeModel(model),
             onSelect() {

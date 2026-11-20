@@ -38,7 +38,7 @@ export const Remote = Schema.Struct({
 export type Remote = typeof Remote.Type
 
 /**
- * A config document delivered by an integration connection, such as the Zen Console's config. Config loads it
+ * A config document delivered by an integration connection, such as an organization's managed config. Config loads it
  * right after managed policies, so user and project config override its settings while its policies outrank theirs.
  * Its providers authenticate with, and only exist for, that connection.
  */

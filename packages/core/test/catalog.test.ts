@@ -564,10 +564,10 @@ describe("Provider and Model", () => {
       const providers = yield* Provider.Service
       const models = yield* Model.Service
       yield* providers.transform((editor) => {
-        editor.update(Provider.ID.zen, () => {})
+        editor.update(Provider.ID.make("openrouter"), () => {})
         ;["muse-spark-1.3-contributor-free", "new-free", "deepseek-v4.1-flash-free", "big-pickle"].forEach(
           (id, index) =>
-            editor.models.update(Provider.ID.zen, Model.ID.make(id), (model) => {
+            editor.models.update(Provider.ID.make("openrouter"), Model.ID.make(id), (model) => {
               model.time.released = 4000 - index * 1000
             }),
         )
@@ -588,11 +588,11 @@ describe("Provider and Model", () => {
       const providers = yield* Provider.Service
       const models = yield* Model.Service
       yield* providers.transform((editor) => {
-        editor.update(Provider.ID.zen, () => {})
-        editor.models.update(Provider.ID.zen, Model.ID.make("big-pickle"), (model) => {
+        editor.update(Provider.ID.make("openrouter"), () => {})
+        editor.models.update(Provider.ID.make("openrouter"), Model.ID.make("big-pickle"), (model) => {
           model.time.released = 1000
         })
-        editor.models.update(Provider.ID.zen, Model.ID.make("paid"), (model) => {
+        editor.models.update(Provider.ID.make("openrouter"), Model.ID.make("paid"), (model) => {
           model.time.released = 2000
           model.cost = [
             {

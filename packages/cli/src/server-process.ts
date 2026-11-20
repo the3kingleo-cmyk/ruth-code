@@ -118,7 +118,10 @@ const processEffect = Effect.fnUntraced(function* (options: Options) {
           models: {
             url: process.env.RUTH_MODELS_URL,
             file: process.env.RUTH_MODELS_PATH,
-            fetch: !truthy(process.env.RUTH_DISABLE_MODELS_FETCH),
+            // Local-first: the bundled catalog is used offline. Live refreshes only run when asked for.
+            fetch:
+              !truthy(process.env.RUTH_DISABLE_MODELS_FETCH) &&
+              (truthy(process.env.RUTH_MODELS_FETCH) || Boolean(process.env.RUTH_MODELS_URL)),
           },
           config: {
             directory: process.env.RUTH_CONFIG_DIR,

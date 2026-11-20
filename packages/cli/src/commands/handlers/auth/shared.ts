@@ -18,9 +18,7 @@ export function request<A>(run: (signal: AbortSignal) => Promise<A>) {
 export const loadIntegrations = Effect.fn("cli.auth.integrations")(function* (client: RuthClient) {
   yield* waitForPlugins(client, location.directory)
   return yield* request((signal) => client.integration.list({ location }, { signal })).pipe(
-    Effect.map((response) =>
-      response.data.toSorted((a, b) => Number(b.id === "opencode-go") - Number(a.id === "opencode-go")),
-    ),
+    Effect.map((response) => response.data),
   )
 })
 
