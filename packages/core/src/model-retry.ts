@@ -62,6 +62,19 @@ const unreachableSchedule = Schedule.max([
 
 // A timed-out attempt already waited minutes before failing, so the general allowance would let a
 // dead provider hold a call for most of an hour. Cap those attempts well below it.
+/**
+ * A refused connection to this machine means the local model server is not running. Waiting out the general schedule
+ * (about a minute and a half) only hides that, so these fail after two quick retries with a clear message instead.
+ */
+const LOCAL_DOWN_RETRIES = 2
+const LOOPBACK = /^(?:localhost|127(?:\.\d{1,3}){3}|\[?::1\]?|0\.0\.0\.0|host\.docker\.internal)$/i
+export const isLocalServerDown = (error: AIError) => {
+  const reason = error.reason
+  if (reason._tag !== "Transport" || reason.code !== "ECONNREFUSED") return false
+  const host = reason.url === undefined ? undefined : URL.parse(reason.url)?.hostname
+  return host !== undefined && LOOPBACK.test(host)
+}
+
 const MAX_TIMEOUT_RETRIES = 3
 
 const TIMEOUT_CODES = new Set(["Timeout", "idle-timeout"])
@@ -74,8 +87,10 @@ export const policy = Effect.gen(function* () {
   const unreachable = yield* Schedule.toStep(unreachableSchedule)
   let attempt = 1
   let timeouts = 0
+  let refused = 0
   return (input: Input) =>
     Effect.gen(function* () {
+      if (isLocalServerDown(input.cause) && ++refused > LOCAL_DOWN_RETRIES) return undefined
       const now = yield* Clock.currentTimeMillis
       // Unreachable failures don't spend the general allowance, so a flaky link that also drops streams keeps it.
       const next = yield* (input.retry && isUnreachable(input.cause) ? unreachable : step)(now, input).pipe(

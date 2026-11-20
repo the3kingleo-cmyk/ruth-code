@@ -22,6 +22,8 @@ import { ModelResolver } from "@ruth/core/model-resolver"
 import { Provider } from "@ruth/core/provider"
 import { Tool } from "@ruth/schema/tool"
 import { toSessionError } from "@ruth/core/session/to-session-error"
+import { ModelRetry } from "@ruth/core/model-retry"
+import { Effect } from "effect"
 import { SessionRunnerRetry } from "@ruth/core/session/runner/retry"
 
 const llm = (reason: AIError["reason"]) => new AIError({ reason })
@@ -345,5 +347,42 @@ describe("toSessionError", () => {
         llm(new InvalidRequestError({ message: "retry", http: http({ "x-should-retry": "true" }) })),
       ),
     ).toBeTrue()
+  })
+})
+
+describe("local model server down", () => {
+  const refused = (url: string) =>
+    llm(
+      new TransportError({
+        message: "Unable to connect",
+        transport: "http",
+        operation: "request",
+        code: "ECONNREFUSED",
+        url,
+      }),
+    )
+
+  test("names the server and how to start it", () => {
+    const error = toSessionError(refused("http://127.0.0.1:11434/v1/chat/completions"))
+    expect(error.type).toBe("provider.transport")
+    expect(error.message).toContain("Ollama isn't running at 127.0.0.1:11434")
+    expect(error.message).toContain("ollama serve")
+    expect(toSessionError(refused("http://localhost:1234/v1/chat/completions")).message).toContain("LM Studio")
+  })
+
+  test("stops retrying a refused local connection after two quick attempts", async () => {
+    const decisions = await Effect.runPromise(
+      Effect.gen(function* () {
+        const decide = yield* ModelRetry.policy
+        const cause = refused("http://127.0.0.1:11434/v1/chat/completions")
+        return [
+          yield* decide({ cause, retry: true }),
+          yield* decide({ cause, retry: true }),
+          yield* decide({ cause, retry: true }),
+        ]
+      }),
+    )
+    expect(decisions.map((decision) => decision !== undefined)).toEqual([true, true, false])
+    expect(ModelRetry.isLocalServerDown(refused("https://api.example.com/v1"))).toBe(false)
   })
 })
