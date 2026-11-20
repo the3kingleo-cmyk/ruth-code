@@ -198,10 +198,7 @@ const layer = Layer.effect(
 )
 
 
-/** Tools that fit the default local `ruth` model window. Internal, skill, and catalog tools are hidden. */
-const LOCAL_CODING_TOOLS = new Set(["read", "write", "edit", "patch", "shell", "glob", "grep", "todowrite"])
-const LOCAL_CHAT_TOOLS = new Set(["read", "write", "shell", "glob", "grep"])
-const LOCAL_SEARCH_TOOLS = new Set(["websearch", "webfetch", "read", "glob", "grep"])
+/** Drop bulky catalog text for small local models. Tools themselves stay available. */
 const SMALL_MODEL_INSTRUCTION_DROP = new Set([
   "core/skill-guidance",
   "core/mcp-guidance",
@@ -217,23 +214,35 @@ function isSmallLocalModel(model: { readonly ref: { readonly providerID: string;
   )
 }
 
-function toolsForAgent(agentID: string | undefined) {
-  if (agentID === "search" || agentID?.endsWith("/search")) return LOCAL_SEARCH_TOOLS
-  if (agentID === "chat" || agentID?.endsWith("/chat")) return LOCAL_CHAT_TOOLS
-  return LOCAL_CODING_TOOLS
+function shortenText(text: string, max: number) {
+  const first = text.split(/(?<=\.)\s+/)[0]?.trim() || text.trim()
+  if (first.length <= max) return first
+  return first.slice(0, Math.max(1, max - 1)).trimEnd() + "…"
+}
+
+function shortenSchema(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(shortenSchema)
+  if (!value || typeof value !== "object") return value
+  const next: Record<string, unknown> = {}
+  for (const [key, item] of Object.entries(value as Record<string, unknown>)) {
+    next[key] = key === "description" && typeof item === "string" ? shortenText(item, 120) : shortenSchema(item)
+  }
+  return next
 }
 
 function toolsForModel(
   model: { readonly ref: { readonly providerID: string; readonly id: string }; readonly limit: { readonly context?: number } },
   tools: Tool.Snapshot,
-  agentID?: string,
+  _agentID?: string,
 ): Tool.Snapshot {
   if (!isSmallLocalModel(model)) return tools
-  const allowed = toolsForAgent(agentID)
   return {
     ...tools,
-    definitions: tools.definitions.filter((tool) => allowed.has(tool.name)),
-    codeModeCatalog: undefined,
+    definitions: tools.definitions.map((tool) => ({
+      ...tool,
+      description: shortenText(tool.description, 160),
+      inputSchema: shortenSchema(tool.inputSchema) as typeof tool.inputSchema,
+    })),
   }
 }
 

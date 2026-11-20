@@ -17,7 +17,9 @@ import { Permission } from "../../permission.js"
 export const name = "glob"
 
 export const Input = Schema.Struct({
-  pattern: FileSystem.GlobInput.fields.pattern.annotate({ description: "Glob pattern to match files against" }),
+  pattern: Schema.optionalKey(Schema.String).annotate({
+    description: 'Glob pattern to match files. Use "*" to list every file in the folder.',
+  }),
   path: Schema.optionalKey(RelativePath).annotate({
     description: "Directory to search. Defaults to the current working directory.",
   }),
@@ -44,6 +46,21 @@ export const toModelContent = (entries: EncodedOutput, truncated = false) => {
 }
 
 /** Glob leaf that defaults its filesystem root to the active Location. */
+
+function normalizeGlobPath(path: string | undefined) {
+  if (!path || path === "." || path === "./") return undefined
+  if (path === "/" || path === "//" || path === "/think" || path === "/no_think") return undefined
+  return path
+}
+
+function normalizeGlobPattern(pattern: string) {
+  const raw = pattern.trim() || "*"
+  if (raw === "." || raw === "./" || raw === "/*" || raw === "//*" || raw === "/**" || raw === "/**/*" || raw === "*/*")
+    return "*"
+  if (/^\/+$/.test(raw)) return "*"
+  return raw.replace(/^\/+/, "") || "*"
+}
+
 export const Plugin = {
   id: "ruth.tool.glob",
   effect: Effect.fn("GlobTool.Plugin")(function* (ctx: Context) {
@@ -58,17 +75,18 @@ export const Plugin = {
         editor.add({
           name,
           options: { codemode: false },
-          description: 'Search file paths using a glob pattern (examples: "**/*.ts", "src/**/*.tsx").',
+          description: 'List files in a folder or find paths matching a glob pattern (examples: "*", "**/*", "*.md", "src/**/*.tsx"). Use this, or shell ls, to list a directory. This is not a content search.',
           input: Input,
           output: Output,
           execute: (input, context) =>
             Effect.gen(function* () {
-              const searchPath = input.path === "undefined" || input.path === "null" ? undefined : input.path
+              const searchPath = normalizeGlobPath(input.path === "undefined" || input.path === "null" ? undefined : input.path)
+              const pattern = normalizeGlobPattern(input.pattern ?? "*")
               const target = yield* access.resolve({ path: searchPath ?? ".", kind: "directory" })
               yield* access.authorizeExternal([target], context)
               yield* permission.assert({
                 action: name,
-                resources: [input.pattern],
+                resources: [pattern],
                 save: ["*"],
                 metadata: {
                   root: searchPath ?? ".",
@@ -85,7 +103,7 @@ export const Plugin = {
                 )
               const root = target.absolute
               const result = yield* ToolSearch.bounded(input.limit ?? FileSystem.DEFAULT_SEARCH_LIMIT, (limit) =>
-                ripgrep.glob({ cwd: root, pattern: input.pattern, hidden: input.hidden, limit }),
+                ripgrep.glob({ cwd: root, pattern, hidden: input.hidden, limit }),
               )
               return {
                 entries: result.items.map((entry) =>
@@ -105,7 +123,7 @@ export const Plugin = {
                 ),
                 metadata: { count: result.entries.length, truncated: result.truncated },
               })),
-              Effect.mapError(toolFailure(`Unable to find files matching ${input.pattern}`)),
+              Effect.mapError(toolFailure(`Unable to find files matching ${input.pattern ?? "*"}`)),
             ),
         }),
       )

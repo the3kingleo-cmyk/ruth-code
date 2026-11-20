@@ -6,10 +6,10 @@ import { WebSearchTavily } from "./tavily.js"
 import { WebSearchTinyFish } from "./tinyfish.js"
 
 export const WebSearchPlugins = [
-  WebSearchDuckDuckGo.Plugin,
   WebSearchExa.Plugin,
   WebSearchFirecrawl.Plugin,
   WebSearchParallel.Plugin,
   WebSearchTavily.Plugin,
   WebSearchTinyFish.Plugin,
+  WebSearchDuckDuckGo.Plugin,
 ] as const

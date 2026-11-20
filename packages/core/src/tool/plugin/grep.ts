@@ -62,6 +62,10 @@ export const toModelContent = (matches: EncodedOutput, truncated = false) => {
 }
 
 /** Grep leaf that defaults its filesystem root to the active Location. */
+function looksLikeGlob(pattern: string) {
+  return pattern.includes("**") || /^\*(\/\*)*$/.test(pattern) || /[?*]/.test(pattern) && !/[\[(|]/.test(pattern) && pattern.includes("/")
+}
+
 export const Plugin = {
   id: "ruth.tool.grep",
   effect: Effect.fn("GrepTool.Plugin")(function* (ctx: Context) {
@@ -77,7 +81,7 @@ export const Plugin = {
           name,
           options: { codemode: false },
           description:
-            "Search file contents using ripgrep's regular expression syntax or literal text matching. Use it to locate specific code, symbols, or text patterns, and narrow searches with `path` or `include`. Returns matching file paths, line numbers, and line previews.",
+            "Search text inside files using a regular expression or literal string. This does not list files in a folder — use the glob tool (pattern \"*\" or \"**/*\") or shell ls for that. Narrow content searches with `path` or `include`. Returns matching file paths, line numbers, and line previews.",
           input: Input,
           output: Output,
           execute: (input, context) =>
@@ -98,6 +102,12 @@ export const Plugin = {
                 },
                 ...Permission.invocation(context),
               })
+              if (looksLikeGlob(input.pattern) && !input.literal) {
+                return yield* new ToolFailure({
+                  message:
+                    `grep searches text inside files, not file names. "${input.pattern}" looks like a glob. Use the glob tool with that pattern, or shell ls, to list files in a folder.`,
+                })
+              }
               const root = target.absolute
               const type = yield* ToolSearch.pathType(environment.files, root, input.path ?? ".")
               const cwd = type === "directory" ? root : path.dirname(root)

@@ -2,6 +2,7 @@ import { castDraft, produce, type WritableDraft } from "immer"
 import { DateTime, Effect, Match, pipe, Schema } from "effect"
 import { SessionEvent } from "./event.js"
 import { SessionMessage } from "./message.js"
+import { stripOllamaThinking } from "@ruth/util/strip-thinking"
 
 export interface Adapter {
   readonly getAgent: () => Effect.Effect<SessionMessage.AgentSelected["agent"] | undefined>
@@ -305,7 +306,7 @@ export function update(adapter: Adapter, event: SessionEvent.DurableEvent) {
       },
       "session.text.ended": (event) => {
         return adapter.updateAssistantPart(event.data.assistantMessageID, { type: "text" }, (match) => {
-          match.text = event.data.text
+          match.text = stripOllamaThinking(event.data.text)
           match.native = castDraft(event.data.native)
         })
       },

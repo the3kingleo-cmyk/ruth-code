@@ -230,7 +230,11 @@ function ollamaRequestBody(model: { readonly providerID: string; readonly id: st
   const bare = model.id.endsWith(":latest") ? model.id.slice(0, -":latest".length) : model.id
   return {
     think: false,
-    ...(bare === "ruth" ? { options: { num_ctx: RUTH_NUM_CTX } } : {}),
+    chat_template_kwargs: { enable_thinking: false },
+    options: {
+      think: false,
+      ...(bare === "ruth" ? { num_ctx: RUTH_NUM_CTX } : {}),
+    },
   }
 }
 

@@ -16,6 +16,7 @@ import { SessionMessage } from "@ruth/schema/session-message"
 import { EOL } from "node:os"
 import { toolOutputText, type MiniToolPart } from "@ruth/tui/mini/tool"
 import { UI } from "./ui"
+import { stripOllamaThinking } from "@ruth/util/strip-thinking"
 
 type Input = {
   client: RuthClient
@@ -405,10 +406,11 @@ function renderer(input: Input) {
   ) => {
     if (part.kind === "reasoning" && !input.thinking) return
     const id = key(part.kind, part.messageID, part.ordinal)
+    const visible = part.kind === "text" ? stripOllamaThinking(part.text) : part.text
     const previous = printed.get(id) ?? ""
-    if (printed.has(id) && (previous === part.text || !part.text.startsWith(previous))) return
-    printed.set(id, part.text)
-    const value = part.text.slice(previous.length)
+    if (printed.has(id) && (previous === visible || !visible.startsWith(previous))) return
+    printed.set(id, visible)
+    const value = visible.slice(previous.length)
     const json = {
       id: part.id,
       sessionID: input.sessionID,

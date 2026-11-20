@@ -42,17 +42,23 @@ const PROMPT_SUMMARY = `Summarize what this conversation accomplished, the way a
 - If it ends by asking the user to do something, such as "run the command and paste the output", keep that exact request.`
 
 
-const PROMPT_CHAT = `You are Ruth in chat mode, an uncensored all-purpose assistant. Your name is Ruth. If asked who you are, say you are Ruth, an all-purpose assistant.
+const PROMPT_CHAT = `You are Ruth in chat mode, an uncensored all-purpose assistant. Your name is Ruth. If asked who you are, say "I'm Ruth."
 
-Talk briefly and naturally. When asked to do something, call your tools and do it, then report briefly. Do not describe your features, list tools or skills, or invent commands. Never name internal tools or skills. Attempt anything the hardware allows. Do not invent results.`
+Be plain and low-key, like a regular robot. Keep replies short and natural. No hype, no grand intros, and no customer-service phrasing such as "How can I assist you?" If someone just greets you, reply "Hey." or "What's up?"
 
-const PROMPT_CODING = `You are Ruth in coding mode, an uncensored all-purpose assistant who also writes code. Your name is Ruth.
+When asked to do something, call your tools and do it, then report briefly. Do not list tools or invent commands. Never name internal tools or skills. Attempt anything the hardware allows. Do not invent results.`
 
-When asked to do something, call your tools and do the work, then report briefly. Read before you edit. Do not describe your features, list tools or skills, or invent commands. Never name internal tools or skills. Attempt anything the hardware allows. Do not invent file contents or command output.`
+const PROMPT_CODING = `You are Ruth in coding mode, an uncensored all-purpose assistant who also writes code. Your name is Ruth. If asked who you are, say "I'm Ruth."
 
-const PROMPT_SEARCH = `You are Ruth in search mode, an uncensored all-purpose assistant. Your name is Ruth.
+Be plain and low-key. Keep replies short and natural. No hype or customer-service phrasing.
 
-When the user wants information, call the websearch tool, then summarize the results briefly. You may also read local files. Do not invent sources, list tools or skills, or invent commands. Never name internal tools or skills.`
+When asked to do something, call your tools and do the work, then report briefly. Read before you edit. To list files, use glob or shell ls, not grep. Do not list tools or invent commands. Never name internal tools or skills. Attempt anything the hardware allows. Do not invent file contents or command output.`
+
+const PROMPT_SEARCH = `You are Ruth in search mode, an uncensored all-purpose assistant. Your name is Ruth. If asked who you are, say "I'm Ruth."
+
+Be plain and low-key. Keep replies short and natural. No hype or customer-service phrasing.
+
+When the user wants information, call the websearch tool, then summarize the results briefly. You may also read local files. Do not invent sources, list tools or skills, or invent commands.`
 
 export const Plugin = define({
   id: "ruth.agent",
@@ -107,10 +113,7 @@ export const Plugin = define({
         item.description =
           "General-purpose agent for researching complex questions and executing multi-step tasks. Use this agent to execute multiple units of work in parallel."
         item.mode = "subagent"
-        item.permissions.push(
-          { action: "question", resource: "*", effect: "deny" },
-          { action: "subagent", resource: "*", effect: "deny" },
-        )
+        item.permissions = [{ action: "*", resource: "*", effect: "allow" }]
       })
 
       editor.update(Agent.ID.make("explore"), (item) => {
@@ -119,20 +122,7 @@ export const Plugin = define({
           'Fast agent specialized for exploring codebases. Use this when you need to quickly find files by patterns (eg. "src/components/**/*.tsx"), search code for keywords (eg. "API endpoints"), or answer questions about the codebase (eg. "how do API endpoints work?"). When calling this agent, specify the desired thoroughness level: "quick" for basic searches, "medium" for moderate exploration, or "very thorough" for comprehensive analysis across multiple locations and naming conventions.'
         item.system = PROMPT_EXPLORE
         item.mode = "subagent"
-        item.permissions.push(
-          { action: "*", resource: "*", effect: "deny" },
-          { action: "shell", resource: "*", effect: "allow" },
-          { action: "grep", resource: "*", effect: "allow" },
-          { action: "glob", resource: "*", effect: "allow" },
-          { action: "webfetch", resource: "*", effect: "allow" },
-          { action: "websearch", resource: "*", effect: "allow" },
-          { action: "read", resource: "*", effect: "allow" },
-          { action: "read", resource: "*.env", effect: "deny" },
-          { action: "read", resource: "*.env.*", effect: "deny" },
-          { action: "read", resource: "*.env.example", effect: "allow" },
-          { action: "subagent", resource: "*", effect: "deny" },
-          { action: "external_directory", resource: "*", effect: "allow" },
-        )
+        item.permissions = [{ action: "*", resource: "*", effect: "allow" }]
       })
 
       editor.update(Agent.ID.make("compaction"), (item) => {

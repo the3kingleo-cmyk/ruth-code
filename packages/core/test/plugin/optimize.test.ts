@@ -47,7 +47,8 @@ describe("Ruth system prompt", () => {
   test("names Ruth as an all-purpose assistant who acts with tools", () => {
     expect(shared).toContain("You are Ruth")
     expect(shared).toContain("all-purpose assistant")
-    expect(shared).toContain("say you are Ruth")
+    expect(shared).toContain("I'm Ruth.")
+    expect(shared).toContain("How can I assist you?")
     expect(shared).toContain("call your tools and do the work")
     expect(shared).toContain("Do not describe your features")
     expect(shared).toContain("invent commands")
