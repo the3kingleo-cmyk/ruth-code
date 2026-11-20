@@ -173,8 +173,8 @@ export const Definitions = {
   "usage.show": keybind("none", "View usage limits"),
   "provider.connect": keybind("none", "Connect integration"),
   "agent.list": keybind("<leader>a", "List agents"),
-  "agent.cycle": keybind("shift+tab", "Next agent"),
-  "agent.cycle.reverse": keybind("none", "Previous agent"),
+  "agent.cycle": keybind("tab", "Next agent"),
+  "agent.cycle.reverse": keybind("shift+tab", "Previous agent"),
   "variant.cycle": keybind("ctrl+t", "Cycle model variants"),
   "variant.list": keybind("none", "List model variants"),
 

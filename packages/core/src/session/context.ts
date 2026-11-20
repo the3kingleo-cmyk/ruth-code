@@ -187,9 +187,9 @@ const layer = Layer.effect(
         session: selection.session,
         agent: selection.agent,
         model,
-        initial: history.initial,
+        initial: instructionsForModel(model, history.initial),
         messages: history.entries.map((entry) => entry.message),
-        tools: toolsForModel(model, selection.tools),
+        tools: toolsForModel(model, selection.tools, selection.agent.id),
       }
     })
 
@@ -198,20 +198,51 @@ const layer = Layer.effect(
 )
 
 
-/** Coding tools that fit the default local `ruth` model window. Extra tools bloat the prompt and invite loops. */
+/** Tools that fit the default local `ruth` model window. Internal, skill, and catalog tools are hidden. */
 const LOCAL_CODING_TOOLS = new Set(["read", "write", "edit", "patch", "shell", "glob", "grep", "todowrite"])
+const LOCAL_CHAT_TOOLS = new Set(["read", "write", "shell", "glob", "grep"])
+const LOCAL_SEARCH_TOOLS = new Set(["websearch", "webfetch", "read", "glob", "grep"])
+const SMALL_MODEL_INSTRUCTION_DROP = new Set([
+  "core/skill-guidance",
+  "core/mcp-guidance",
+  "core/codemode",
+  "core/reference-guidance",
+])
 
-function toolsForModel(model: { readonly ref: { readonly providerID: string; readonly id: string }; readonly limit: { readonly context?: number } }, tools: Tool.Snapshot): Tool.Snapshot {
+function isSmallLocalModel(model: { readonly ref: { readonly providerID: string; readonly id: string }; readonly limit: { readonly context?: number } }) {
   const id = model.ref.id.endsWith(":latest") ? model.ref.id.slice(0, -":latest".length) : model.ref.id
-  const small =
+  return (
     (model.ref.providerID === "ollama" || model.ref.providerID === "ollama-cloud") &&
-    (id === "ruth" || (model.limit.context ?? 0) > 0 && (model.limit.context ?? 0) <= 8192)
-  if (!small) return tools
+    (id === "ruth" || ((model.limit.context ?? 0) > 0 && (model.limit.context ?? 0) <= 8192))
+  )
+}
+
+function toolsForAgent(agentID: string | undefined) {
+  if (agentID === "search" || agentID?.endsWith("/search")) return LOCAL_SEARCH_TOOLS
+  if (agentID === "chat" || agentID?.endsWith("/chat")) return LOCAL_CHAT_TOOLS
+  return LOCAL_CODING_TOOLS
+}
+
+function toolsForModel(
+  model: { readonly ref: { readonly providerID: string; readonly id: string }; readonly limit: { readonly context?: number } },
+  tools: Tool.Snapshot,
+  agentID?: string,
+): Tool.Snapshot {
+  if (!isSmallLocalModel(model)) return tools
+  const allowed = toolsForAgent(agentID)
   return {
     ...tools,
-    definitions: tools.definitions.filter((tool) => LOCAL_CODING_TOOLS.has(tool.name)),
+    definitions: tools.definitions.filter((tool) => allowed.has(tool.name)),
     codeModeCatalog: undefined,
   }
+}
+
+function instructionsForModel(
+  model: { readonly ref: { readonly providerID: string; readonly id: string }; readonly limit: { readonly context?: number } },
+  initial: ReadonlyArray<{ readonly key: string; readonly text: string }>,
+) {
+  if (!isSmallLocalModel(model)) return initial
+  return initial.filter((item) => !SMALL_MODEL_INSTRUCTION_DROP.has(String(item.key)))
 }
 
 /** Variant IDs that minimize reasoning output, in preference order. */

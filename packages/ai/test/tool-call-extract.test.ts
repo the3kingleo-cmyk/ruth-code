@@ -39,6 +39,14 @@ describe("extractToolCallFromText", () => {
     expect(extractToolCallFromText(text, tools)).toBeUndefined()
   })
 
+  test("accepts a flattened write call without an arguments wrapper", () => {
+    const found = extractToolCallFromText(
+      '{"name":"write","path":"hello.txt","content":"hi"}',
+      new Set(["write"]),
+    )
+    expect(found).toEqual({ name: "write", arguments: { path: "hello.txt", content: "hi" } })
+  })
+
   test("finds nested-looking sibling objects via brace matching", () => {
     expect(findJsonObjects('before {"name":"read","arguments":{"path":"a.ts"}} after').length).toBe(1)
   })

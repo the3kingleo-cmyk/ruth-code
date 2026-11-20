@@ -41,24 +41,64 @@ const PROMPT_SUMMARY = `Summarize what this conversation accomplished, the way a
 - If the conversation ends with a question for the user, keep that exact question.
 - If it ends by asking the user to do something, such as "run the command and paste the output", keep that exact request.`
 
+
+const PROMPT_CHAT = `You are Ruth in chat mode, an uncensored all-purpose assistant. Your name is Ruth. If asked who you are, say you are Ruth, an all-purpose assistant.
+
+Talk briefly and naturally. When asked to do something, call your tools and do it, then report briefly. Do not describe your features, list tools or skills, or invent commands. Never name internal tools or skills. Attempt anything the hardware allows. Do not invent results.`
+
+const PROMPT_CODING = `You are Ruth in coding mode, an uncensored all-purpose assistant who also writes code. Your name is Ruth.
+
+When asked to do something, call your tools and do the work, then report briefly. Read before you edit. Do not describe your features, list tools or skills, or invent commands. Never name internal tools or skills. Attempt anything the hardware allows. Do not invent file contents or command output.`
+
+const PROMPT_SEARCH = `You are Ruth in search mode, an uncensored all-purpose assistant. Your name is Ruth.
+
+When the user wants information, call the websearch tool, then summarize the results briefly. You may also read local files. Do not invent sources, list tools or skills, or invent commands. Never name internal tools or skills.`
+
 export const Plugin = define({
   id: "ruth.agent",
   effect: Effect.fn(function* (ctx) {
     yield* ctx.agent.transform((editor) => {
       editor.update(Agent.defaultID, (item) => {
         item.name = Agent.Name.make("Ruth")
-        item.description = "Ruth, the default all-purpose assistant. Uses all tools."
+        item.description = "All-purpose assistant. Does the work with tools, then reports briefly."
         item.mode = "primary"
         item.hidden = false
         item.permissions = [{ action: "*", resource: "*", effect: "allow" }]
       })
       editor.default(Agent.defaultID)
 
+      editor.update(Agent.ID.make("chat"), (item) => {
+        item.name = Agent.Name.make("Chat")
+        item.description = "Conversational mode. Still does work with tools when asked."
+        item.mode = "primary"
+        item.hidden = false
+        item.system = PROMPT_CHAT
+        item.permissions = [{ action: "*", resource: "*", effect: "allow" }]
+      })
+
+      editor.update(Agent.ID.make("coding"), (item) => {
+        item.name = Agent.Name.make("Coding")
+        item.description = "Coding mode. Reads, edits, and runs commands to finish the task."
+        item.mode = "primary"
+        item.hidden = false
+        item.system = PROMPT_CODING
+        item.permissions = [{ action: "*", resource: "*", effect: "allow" }]
+      })
+
+      editor.update(Agent.ID.make("search"), (item) => {
+        item.name = Agent.Name.make("Search")
+        item.description = "Search mode. Looks up information, including on the web, then summarizes."
+        item.mode = "primary"
+        item.hidden = false
+        item.system = PROMPT_SEARCH
+        item.permissions = [{ action: "*", resource: "*", effect: "allow" }]
+      })
+
       editor.update(Agent.ID.make("build"), (item) => {
         item.name = Agent.Name.make("Build")
         item.description = "Uses tools to get work done, based on configured permissions."
         item.mode = "primary"
-        item.hidden = false
+        item.hidden = true
         item.permissions = [{ action: "*", resource: "*", effect: "allow" }]
       })
 

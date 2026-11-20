@@ -32,7 +32,14 @@ function toolArgs(value: unknown): Record<string, unknown> | undefined {
       }
     }
   }
-  // A bare {name, arguments}-shaped object already handled; if only name+other primitive fields, ignore.
+  // Flattened calls such as {"name":"write","path":"hello.txt","content":"hi"}
+  const rest: Record<string, unknown> = {}
+  for (const [key, item] of Object.entries(rec)) {
+    if ((NAME_KEYS as readonly string[]).includes(key)) continue
+    if ((ARG_KEYS as readonly string[]).includes(key)) continue
+    rest[key] = item
+  }
+  if (Object.keys(rest).length > 0) return rest
   return undefined
 }
 
