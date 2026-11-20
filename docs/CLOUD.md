@@ -1,8 +1,6 @@
 # Ruth cloud (Ollama in a GitHub Codespace)
 
-`ruth cloud` starts a Codespace from the private `` repo, serves Ollama there, and tunnels it to this machine.
-
-This is **not** `/ruth-cloud` (that repo holds private memories, skills, and tools).
+`ruth cloud` can start a Codespace you configure, serve Ollama there, and tunnel it to this machine.
 
 ## Commands
 

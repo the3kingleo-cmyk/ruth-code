@@ -1,6 +1,6 @@
 # Chromebook lite setup for Ruth
 
-This is a personal fork of Ruth, rebranded as Ruth (`ruth`). See `LICENSE` and `NOTICE`.
+Notes for running Ruth on a Chromebook. See `LICENSE` and `NOTICE`.
 
 It is meant for an HP Chromebook (or similar) running ChromeOS + Linux (Crostini), with about 6–8 GB of RAM, local Ollama, and no dedicated GPU.
 
