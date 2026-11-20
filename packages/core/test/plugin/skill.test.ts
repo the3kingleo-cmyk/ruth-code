@@ -48,7 +48,7 @@ describe("SkillPlugin.Plugin", () => {
           id: "report",
           name: "Report",
           path: "skill://report/SKILL.md",
-          description: expect.stringContaining("ruth issue"),
+          description: expect.stringContaining("Ruth issue"),
         }),
       )
       expect(report?.content).toContain("- ruth version: 1.2.3")

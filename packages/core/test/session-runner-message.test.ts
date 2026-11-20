@@ -897,7 +897,7 @@ Earlier work
     ])
   })
 
-  test("replays flat state under an Ruth hosted model's route key", () => {
+  test("replays flat state under a Ruth hosted model's route key", () => {
     const ruth = Model.Ref.make({ id: Model.ID.make("claude-fable-5"), providerID: Provider.ID.zen })
     const messages = toLLMMessages(
       [

@@ -1025,7 +1025,7 @@ describe("Session.create", () => {
         .run()
         .pipe(Effect.orDie)
 
-      expect(yield* session.create(input)).toMatchObject({ id: created.id, agent: "build" })
+      expect(yield* session.create(input)).toMatchObject({ id: created.id, agent: Agent.defaultID })
     }),
   )
 

@@ -4,7 +4,7 @@
   content.
 -->
 
-# Report an Ruth Issue
+# Report a Ruth Issue
 
 Use this skill when the user wants to report a Ruth issue or bug. Your job
 is to turn the user's problem into a useful GitHub issue with standard

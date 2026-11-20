@@ -229,13 +229,12 @@ permissions:
         Effect.provide(Config.testLayer(entries)),
       )
 
-      const build = yield* agents.get(Agent.defaultID)
+      const build = yield* agents.get(Agent.ID.make("build"))
       if (!build) throw new Error("expected configured build agent")
       const ruthData = path.join(global.home, ".local", "share", "ruth", "*")
       const mcpAuth = path.join(global.home, ".local", "share", "ruth", "mcp-auth.json")
       expect(build.permissions).toEqual([
         ...defaultPermissions,
-        { action: "question", resource: "*", effect: "allow" },
         { action: "shell", resource: "*", effect: "ask" },
         { action: "edit", resource: "*", effect: "ask" },
         { action: "webfetch", resource: "*", effect: "ask" },

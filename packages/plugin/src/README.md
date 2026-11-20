@@ -2,7 +2,7 @@
 
 The Promise plugin API at `@ruth/plugin` is the async/await equivalent of `@ruth/plugin/effect`. It grants plugins the same two in-process capabilities:
 
-- `hook` installs behavior at an Ruth extension point.
+- `hook` installs behavior at a Ruth extension point.
 - `reload` reruns every transform hook for a stateful domain.
 
 The Promise API uses Promises instead of Effects for setup, runtime hook

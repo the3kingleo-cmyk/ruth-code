@@ -498,7 +498,7 @@ describe("SessionProjector", () => {
       expect(
         yield* db.select().from(SessionTable).where(eq(SessionTable.id, sessionID)).get().pipe(Effect.orDie),
       ).toMatchObject({
-        agent: "build",
+        agent: Agent.defaultID,
         model,
         time_updated: DateTime.toEpochMillis(created),
       })

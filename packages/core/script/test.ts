@@ -2,7 +2,7 @@ import fs from "fs/promises"
 import path from "path"
 import { tmpdir } from "../test/fixture/tmpdir"
 
-await using directory = await tmpdir("oc-")
+await using directory = await tmpdir("ruth-")
 const home = directory.path
 const temporary = path.join(home, "tmp")
 await fs.mkdir(temporary)

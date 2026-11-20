@@ -60,7 +60,9 @@ export function createLocalProviderPlugin<Discovered>(input: {
           (Option.isSome(environment) && environment.value.spawner === EnvironmentUnavailable.spawner)
             ? undefined
             : input.origin)
-        const currentOrigin = () => input.resolveOrigin?.() ?? fallbackOrigin
+        // An explicit origin wins, and no origin means no local discovery; the resolver only replaces the default.
+        const currentOrigin = () =>
+          origin === undefined && fallbackOrigin !== undefined ? (input.resolveOrigin?.() ?? fallbackOrigin) : fallbackOrigin
         const source = { current: configured(yield* config.entries(), input.providerID, currentOrigin(), suffix) }
         const loaded = { models: [] as readonly Discovered[], connected: false, hash: "[]", failing: false }
 
