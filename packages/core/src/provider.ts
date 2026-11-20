@@ -245,7 +245,7 @@ export const DEFAULT_TIMEOUT_MS = 300_000
 /** 20 minutes: local models can sit quiet a long time before the first token. */
 export const DEFAULT_LOCAL_HEADER_TIMEOUT_MS = 1_200_000
 
-const LOCAL_PROVIDER_IDS = new Set(["ollama", "lmstudio", "llama.cpp", "llamacpp", "local"])
+const LOCAL_PROVIDER_IDS = new Set(["ollama", "lmstudio", "llama.cpp", "llamacpp", "vllm", "local"])
 
 export function isLocalProvider(providerID: string | undefined): boolean {
   if (!providerID) return false

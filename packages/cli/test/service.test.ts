@@ -435,8 +435,20 @@ test("concurrent service processes elect one server", async () => {
       urls: [info.url],
       // The server reports the canonical tmp directory; Windows os.tmpdir() can be an 8.3 short name.
       paths: { tmp: await fs.realpath(path.join(os.tmpdir(), "ruth")) },
-      capabilities: { persistentPty: true },
+      // The persistent PTY helper is optional, so the capability reflects whether it is bundled.
+      capabilities: { persistentPty: expect.any(Boolean) },
     })
+    // The managed service is loopback-only and refuses requests without its random token.
+    expect(new URL(info.url).hostname).toBe("127.0.0.1")
+    expect(info.password.length).toBeGreaterThanOrEqual(16)
+    expect((await fetch(new URL("/api/info", info.url))).status).toBe(401)
+    expect(
+      (
+        await fetch(new URL("/api/info", info.url), {
+          headers: { authorization: "Basic " + btoa("ruth:wrong-token") },
+        })
+      ).status,
+    ).toBe(401)
     const contender = Bun.spawn(command, { env, stderr: "pipe", stdout: "ignore" })
     try {
       const contenderExited = await Promise.race([

@@ -92,8 +92,8 @@ flowchart TD
   repo[Organization profile repo] --> build[Build]
   build --> worker[Isolated organization Worker]
   worker --> sessions[SessionDOs]
-  sessions --> ruth[Ruth + native plugins]
-  ruth --> modal[Modal workspaces]
+  sessions --> ruthcore[RuthCore + native plugins]
+  ruthcore --> modal[Modal workspaces]
 \`\`\``,
     syntaxStyle,
     renderNode: createMermaidMarkdownRenderer(renderer),

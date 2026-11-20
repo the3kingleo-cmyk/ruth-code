@@ -26,6 +26,7 @@ import { SessionUsage } from "../usage.js"
 import { SessionRunnerModel } from "./model.js"
 import { createLLMEventPublisher } from "./publish-llm-event.js"
 import { SessionRunnerRetry } from "./retry.js"
+import { TextToolCalls } from "./text-tool-calls.js"
 
 export type Outcome = Data.TaggedEnum<{
   Completed: { readonly needsContinuation: boolean }
@@ -132,7 +133,11 @@ export const make = Effect.gen(function* () {
     // A local execution starts only after its Tool.Called publication completes.
     // Read to the end, not just the finish event, so the next request can reuse this response.
     // The span covers only the provider stream, so model time separates from tools, which run in this consumer.
+    const textToolNames = TextToolCalls.enabled(input.model.ref.providerID)
+      ? TextToolCalls.toolNames(input.prepared.request.tools)
+      : new Set<string>()
     const providerStream = llm.stream(input.prepared.request, input.prepared.options).pipe(
+      TextToolCalls.recover(textToolNames),
       Stream.withSpan("LLM.stream", { attributes: modelAttributes }),
       Stream.runForEach((event) =>
         Effect.gen(function* () {

@@ -36,7 +36,6 @@ test("exposes every standard HTTP API group", () => {
     "generate",
     "voice",
     "migration",
-    "usage",
   ])
   expect(Object.keys(client.debug)).toEqual(["heapDump", "location"])
   expect(Object.keys(client.debug.location)).toEqual(["list", "evict"])
@@ -65,7 +64,6 @@ test("exposes every standard HTTP API group", () => {
     "artifacts",
     "job",
     "migration",
-    "usage",
     "config",
   ])
   expect(Object.keys(client.experimental.job)).toEqual(["list"])
@@ -165,7 +163,6 @@ test("nests a method under client.experimental exactly when its route is experim
     "session.skill",
     "session.stats",
     "session.wait",
-    "usage.limits",
     "voice.models",
     "voice.session",
   ])

@@ -33,7 +33,6 @@ import {
   Google,
   Meta,
   MiniMax,
-  Ruth,
   OpenAI,
   OpenAICompatible,
   OpenRouter,
@@ -157,7 +156,6 @@ describe("public exports", () => {
     expect(OpenRouter.model).toBeFunction()
     expect(OpenRouter.decision).toBeFunction()
     expect(TypeSafeAI.decision).toBeFunction()
-    expect(Ruth.decision).toBeFunction()
     expect(VercelAIGateway.decision("typesafe-ai/jev").route.id).toBe("openai-decisions")
     expect(Baseten.decision).toBeFunction()
     expect(DigitalOcean.decision).toBeFunction()

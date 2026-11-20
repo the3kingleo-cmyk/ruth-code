@@ -264,7 +264,7 @@ ${ids
     expect(output).toContain("S0")
     expect(output).toContain("S300")
     expect(renderedStateDimensions(output).width).toBeLessThanOrEqual(stringWidth(label) + 8)
-  })
+  }, 30_000) // Builds a deliberately oversized diagram; slow CPUs need more than the 5 s default.
 
   test.each(["TB", "TD", "BT"] as const)("preserves explicit %s layouts under a narrow width target", (direction) => {
     const source = `stateDiagram-v2

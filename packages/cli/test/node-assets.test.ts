@@ -8,7 +8,8 @@ test("collects each SEA asset key once", async () => {
   const keys = assets.map((asset) => asset.key)
 
   expect(new Set(keys).size).toBe(keys.length)
-  expect(keys.filter((key) => key === nodeTarget(process.platform, process.arch).ruthPtyAsset)).toHaveLength(1)
+  // The persistent PTY helper is optional: it is bundled once when a build for this target exists.
+  expect(keys.filter((key) => key === nodeTarget(process.platform, process.arch).ruthPtyAsset).length).toBeLessThanOrEqual(1)
   expect(assets.filter((asset) => asset.key === photonWasmAsset)).toEqual([
     {
       key: photonWasmAsset,

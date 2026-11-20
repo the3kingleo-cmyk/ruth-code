@@ -7,7 +7,6 @@ import {
   CloudflareWorkersAI,
   Google,
   OpenAI,
-  Ruth,
   OpenRouter,
   TypeSafeAI,
   VercelAIGateway,
@@ -154,7 +153,7 @@ describe("Decision", () => {
   it.effect("sends a lone input object as the System One state and maps boolean choices back", () =>
     ai.decision
       .generate({
-        model: Ruth.configure({ apiKey: "ruth-key", baseURL: "https://ruth.test/v1" }).decision("jev-1.13"),
+        model: TypeSafeAI.configure({ apiKey: "ruth-key", baseURL: "https://ruth.test/v1" }).decision("jev-1.13"),
         input: { ticket: "hello" },
         questions: [
           {
@@ -179,7 +178,7 @@ describe("Decision", () => {
               new DecisionUsage({ inputTokens: 10, outputTokens: 2, totalTokens: 12, cost: 0.0004 }),
             )
             expect(response.providerMetadata).toEqual({
-              gateway: { model: "jev-1.13.0", usage: { input_tokens: 10, output_tokens: 2, cost: 0.0004 } },
+              typesafe: { model: "jev-1.13.0", usage: { input_tokens: 10, output_tokens: 2, cost: 0.0004 } },
             })
           }),
         ),

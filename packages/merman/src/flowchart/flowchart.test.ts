@@ -949,7 +949,7 @@ describe("FlowchartDiagram", () => {
       `flowchart LR
   C[ReceiveInput] --> P[Persist ActivityRequested]
   P --> S[Self RunPendingActivity]
-  S --> O[Ruth async task]
+  S --> O[RuthCore async task]
   O --> M[Self OutputObserved]
   M --> E[Persist OutputObserved]`,
       { layoutMaxWidth: 120 },
@@ -978,7 +978,7 @@ describe("FlowchartDiagram", () => {
                     │
                     ▼
          ╭─────────────────────╮
-         │ Ruth async task │
+         │ RuthCore async task │
          ╰──────────┬──────────╯
                     │
                     │
@@ -1002,7 +1002,7 @@ describe("FlowchartDiagram", () => {
       `flowchart LR
   C[Commands] --> A[AgentThread activation]
   A -->|persist facts| J[(AgentThread journal)]
-  A -->|resume / steer / abort| O[Ruth session]
+  A -->|resume / steer / abort| O[RuthCore session]
   O -->|observed output| A
   J -->|visible output requested| R[Reactor]
   R --> D[Discord]`,
@@ -1026,7 +1026,7 @@ describe("FlowchartDiagram", () => {
                  ▼                                                       │           │
       ╭─────────────────────╮                                            ▼           │
       ├─────────────────────┤                                  ╭──────────────────╮  │
-      │ AgentThread journal │                                  │ Ruth session ├──╯
+      │ AgentThread journal │                                  │ RuthCore session ├──╯
       ├─────────────────────┤                                  ╰──────────────────╯
       ╰──────────┬──────────╯
                  │
