@@ -377,7 +377,7 @@ it.live("applies organization integration changes to running external plugins", 
       )
       expect(yield* Effect.promise(() => Bun.file(entered).exists())).toBe(true)
       yield* config.integration?.(
-        Integration.ID.make("opencode"),
+        Integration.ID.make("gateway"),
         organizationPolicy([{ action: "plugin.use", resource: root, effect: "deny" }]),
       ) ?? Effect.void
       yield* commands.get("policy-greet").pipe(
@@ -386,7 +386,7 @@ it.live("applies organization integration changes to running external plugins", 
       )
       yield* plugins.awaitActivation
       expect((yield* plugins.list()).some((plugin) => plugin.id === "greeter")).toBe(false)
-      yield* config.integration?.(Integration.ID.make("opencode"), undefined) ?? Effect.void
+      yield* config.integration?.(Integration.ID.make("gateway"), undefined) ?? Effect.void
       yield* commands.get("policy-greet").pipe(
         Effect.flatMap((command) => (command ? Effect.void : Effect.fail("pending"))),
         Effect.retry({ times: 200, schedule: Schedule.spaced("10 millis") }),

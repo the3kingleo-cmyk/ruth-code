@@ -16568,9 +16568,6 @@
               "artifacts": {
                 "type": "boolean"
               },
-              "console_watches": {
-                "type": "boolean"
-              },
               "mcp_events": {
                 "type": "boolean"
               },

@@ -1095,7 +1095,7 @@ describe("ConfigProviderPlugin.Plugin", () => {
           type: "document",
           info: decode({
             providers: {
-              opencode: {
+              gateway: {
                 package: "aisdk:@ai-sdk/openai",
                 settings: { baseURL: "https://ruth.test/v1" },
                 models: {
@@ -1144,7 +1144,7 @@ describe("ConfigProviderPlugin.Plugin", () => {
           type: "document",
           info: decode({
             providers: {
-              opencode: {
+              gateway: {
                 package: "aisdk:@ai-sdk/openai",
                 settings: { baseURL: "https://ruth.test/v1" },
               },
@@ -1155,7 +1155,7 @@ describe("ConfigProviderPlugin.Plugin", () => {
           type: "document",
           info: decode({
             providers: {
-              opencode: {
+              gateway: {
                 models: {
                   "alpha-gpt-next": {
                     variants: [{ id: "high", body: { reasoningEffort: "high" } }],

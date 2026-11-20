@@ -246,8 +246,8 @@ describe("provider error classification", () => {
     ).toEqual(["ContentPolicy", "ContentPolicy"])
   })
 
-  test("recovers policy codes that Zen preserves only in its message label", () => {
-    // Zen drops upstream codes outside its allow-list and replaces the type, but
+  test("recovers policy codes that a gateway preserves only in its message label", () => {
+    // A gateway drops upstream codes outside its allow-list and replaces the type, but
     // `Protocol.errorMessage` keeps the original code as a `[code]` prefix.
     const zen = {
       error: {
@@ -305,7 +305,7 @@ describe("provider error classification", () => {
     expect(classifyProviderFailure({ message: "Payment Required", status: 402 })._tag).toBe("QuotaExceeded")
   })
 
-  test("classifies Zen account limits as quota rather than throttling", () => {
+  test("classifies gateway account limits as quota rather than throttling", () => {
     const typed = (type: string, message: string) => ({ type: "error", error: { type, message } })
     const substituted = (message: string) => ({
       error: { type: "server_error", message: `Upstream request failed: ${message}` },
@@ -325,7 +325,7 @@ describe("provider error classification", () => {
               {
                 "@type": "type.googleapis.com/google.rpc.ErrorInfo",
                 reason: "BudgetLimitError",
-                domain: "opencode.ai",
+                domain: "example.com",
                 metadata: { coverage: "models", resetsAt: "2026-11-01T00:00:00.000Z" },
               },
             ],

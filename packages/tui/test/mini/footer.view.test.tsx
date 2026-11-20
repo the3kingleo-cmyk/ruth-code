@@ -110,7 +110,7 @@ function model(input: {
 
 function provider() {
   return {
-    id: "opencode",
+    id: "openrouter",
     name: "ruth",
     models: {
       "gpt-5": model({ id: "gpt-5", name: "GPT-5", variants: { high: {}, minimal: {} } }),
@@ -567,7 +567,7 @@ test("direct footer leads with the active agent and default model", async () => 
 test("direct footer describes commands and context and shows the model provider", async () => {
   const app = await renderFooter({
     providers: [provider()],
-    currentModel: { providerID: "opencode", modelID: "gpt-5" },
+    currentModel: { providerID: "openrouter", modelID: "gpt-5" },
     state: { first: true },
   })
   try {
@@ -584,7 +584,7 @@ test.each([56, 160])("exit confirmation replaces routine footer details at %i co
     width,
     currentAgent: "Build",
     providers: [provider()],
-    currentModel: { providerID: "opencode", modelID: "gpt-5" },
+    currentModel: { providerID: "openrouter", modelID: "gpt-5" },
     currentVariant: "high",
     state: { usage: { tokens: 12000, percent: 10 } },
     queuedPrompts: [{ messageID: "queued", prompt: { text: "later", parts: [] }, delivery: "queue" }],
@@ -1742,7 +1742,7 @@ test("direct footer counts queued and steering work while running", async () => 
   const app = await renderFooter({
     width: 160,
     state: { phase: "running" },
-    currentModel: { providerID: "opencode", modelID: "a-model-name-long-enough-to-force-responsive-truncation" },
+    currentModel: { providerID: "openrouter", modelID: "a-model-name-long-enough-to-force-responsive-truncation" },
     subagents: {
       tabs: [subagent({ sessionID: "s-1", label: "Explore", description: "Inspect auth flow" })],
       details: {},
@@ -1803,7 +1803,7 @@ test.each([16, 20, 24, 32])("status takeovers retain complete instructions at %i
       mono,
       currentVariant: "high",
       providers: [provider()],
-      currentModel: { providerID: "opencode", modelID: "gpt-5" },
+      currentModel: { providerID: "openrouter", modelID: "gpt-5" },
       state: { exit: 1, usage: { tokens: 12000, percent: 10 } },
       queuedPrompts: [{ messageID: "queued", prompt: { text: "later", parts: [] }, delivery: "queue" }],
     })
@@ -1852,7 +1852,7 @@ test.each([
     width: 80,
     currentAgent: field === "agent" ? long : "Build",
     currentVariant: "high",
-    currentModel: { providerID: "opencode", modelID: "gpt-5" },
+    currentModel: { providerID: "openrouter", modelID: "gpt-5" },
     providers: [
       {
         ...provider(),
@@ -2020,7 +2020,7 @@ test("identity and context precede the provider and a non-fitting provider block
   const app = await renderFooter({
     width: 56,
     providers: [{ ...provider(), name: "Long provider display name" }],
-    currentModel: { providerID: "opencode", modelID: "gpt-5" },
+    currentModel: { providerID: "openrouter", modelID: "gpt-5" },
     currentVariant: "high",
     state: { usage: { tokens: 12000, percent: 10 } },
   })
@@ -2392,7 +2392,7 @@ test("direct model panel keeps native V2 light search and options readable on a 
     provider(),
     { id: "openai", name: "OpenAI", models: { "gpt-5": model({ id: "gpt-5", name: "GPT-5" }) } },
   ])
-  const [current] = createSignal<RunInput["model"]>({ providerID: "opencode", modelID: "gpt-5" })
+  const [current] = createSignal<RunInput["model"]>({ providerID: "openrouter", modelID: "gpt-5" })
 
   const app = await testRender(
     () => (

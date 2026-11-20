@@ -179,7 +179,7 @@ describe("Decision", () => {
               new DecisionUsage({ inputTokens: 10, outputTokens: 2, totalTokens: 12, cost: 0.0004 }),
             )
             expect(response.providerMetadata).toEqual({
-              opencode: { model: "jev-1.13.0", usage: { input_tokens: 10, output_tokens: 2, cost: 0.0004 } },
+              gateway: { model: "jev-1.13.0", usage: { input_tokens: 10, output_tokens: 2, cost: 0.0004 } },
             })
           }),
         ),

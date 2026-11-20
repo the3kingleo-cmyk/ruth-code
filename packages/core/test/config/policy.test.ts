@@ -49,9 +49,9 @@ const orgID = "org_01M3CAP8H43Z49CER6NT0Y3ZF1"
 const lockdown = () =>
   document(
     integration("integration.connect", "deny", "*"),
-    integration("integration.connect", "allow", "opencode"),
+    integration("integration.connect", "allow", "gateway"),
     integration("integration.use", "deny", "*"),
-    integration("integration.use", "allow", `opencode#${orgID}`),
+    integration("integration.use", "allow", `gateway#${orgID}`),
   )
 
 const consoleCredential = (org: string) =>
@@ -202,7 +202,7 @@ describe("ConfigPolicyPlugin.Plugin", () => {
         catalog.update(Provider.ID.make("openrouter"), () => {})
       })
       yield* addPlugin([
-        organizationPolicy([provider("deny", "*"), provider("allow", "opencode")]),
+        organizationPolicy([provider("deny", "*"), provider("allow", "gateway")]),
         document(provider("allow", "anthropic")),
       ])
 
@@ -244,7 +244,7 @@ describe("ConfigPolicyPlugin.Plugin", () => {
       const bus = yield* Bus.Service
       const test = yield* Config.Test
       const host = yield* PluginHost.make(yield* Plugin.Service, "test")
-      const zen = Integration.ID.make("opencode")
+      const zen = Integration.ID.make("gateway")
       yield* catalog.transform((catalog) => catalog.update(Provider.ID.openai, () => {}))
       yield* ConfigPolicyPlugin.Plugin.effect(host)
       expect(yield* catalog.get(Provider.ID.openai)).toBeDefined()
@@ -287,11 +287,11 @@ describe("integration policy", () => {
         })
         // A provider the Console organization supplies.
         catalog.update(Provider.ID.make("acme-gateway"), (provider) => {
-          provider.integrationID = Integration.ID.make("opencode")
+          provider.integrationID = Integration.ID.make("gateway")
         })
       })
       yield* websearch.transform((editor) => {
-        editor.add(search("opencode"))
+        editor.add(search("gateway"))
         editor.add(search("exa"))
       })
       yield* ConfigPolicyPlugin.Plugin.effect(host)
@@ -306,16 +306,16 @@ describe("integration policy", () => {
 
       // A personal Console account is a different account of the same integration.
       const personal = yield* credentials.create({
-        integrationID: Integration.ID.make("opencode"),
+        integrationID: Integration.ID.make("gateway"),
         value: consoleCredential("org_personal"),
       })
       expect(yield* available()).toEqual([])
 
       // Only the required organization's connection works, and with it everything that organization supplies.
-      yield* credentials.create({ integrationID: Integration.ID.make("opencode"), value: consoleCredential(orgID) })
+      yield* credentials.create({ integrationID: Integration.ID.make("gateway"), value: consoleCredential(orgID) })
       yield* waitUntil(available().pipe(Effect.map((ids) => ids.length > 0)))
-      expect(yield* available()).toEqual(["acme-gateway", "opencode"])
-      expect(yield* searches()).toEqual(["opencode"])
+      expect(yield* available()).toEqual(["acme-gateway", "gateway"])
+      expect(yield* searches()).toEqual(["gateway"])
 
       // Switching back to the personal account revokes it again.
       yield* credentials.activate(personal.id)
@@ -329,7 +329,7 @@ describe("integration policy", () => {
       const catalog = yield* Provider.Service
       const credentials = yield* Credential.Service
       yield* credentials.create({
-        integrationID: Integration.ID.make("opencode"),
+        integrationID: Integration.ID.make("gateway"),
         value: consoleCredential("org_other"),
       })
       yield* catalog.transform((catalog) => {
@@ -340,11 +340,11 @@ describe("integration policy", () => {
         document(
           integration("integration.use", "deny", "*"),
           integration("integration.use", "allow", "anthropic"),
-          integration("integration.use", "allow", "opencode"),
+          integration("integration.use", "allow", "gateway"),
         ),
       ])
       expect(yield* catalog.get(Provider.ID.anthropic)).toBeDefined()
-      // `opencode` (Zen) names only account-less use; a connected account needs `opencode#*` or its own ID.
+      // `gateway` names only account-less use; a connected account needs `gateway#*` or its own ID.
       expect(yield* catalog.get(Provider.ID.make("openrouter"))).toBeUndefined()
     }),
   )

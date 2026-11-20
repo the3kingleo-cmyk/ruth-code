@@ -4,7 +4,7 @@ import { RUTH_VERSION } from "../src/version"
 import type { FormFields } from "@ruth/client"
 
 const consoleForm = [
-  { type: "string", key: "server", hidden: true, format: "uri", default: "https://opencode.ai/console" },
+  { type: "string", key: "server", hidden: true, format: "uri", default: "https://console.example.com" },
 ] satisfies FormFields
 
 describe("auth command", () => {
@@ -75,15 +75,15 @@ describe("auth command", () => {
     expect(requests.indexOf("/api/model/default")).toBeLessThan(requests.indexOf("/api/integration"))
   })
 
-  test("lists Zen Go before Zen and preserves the remaining integration order", async () => {
+  test("preserves the server integration order", async () => {
     using server = authServer((request, url) => {
       if (url.pathname === "/api/integration") {
         return Response.json(
           located(
             [
-              { id: "opencode", name: "Zen" },
+              { id: "openrouter", name: "OpenRouter" },
               { id: "anthropic", name: "Anthropic" },
-              { id: "opencode-go", name: "Zen Go" },
+              { id: "deepinfra", name: "DeepInfra" },
             ].map((integration) => ({
               ...integration,
               methods: [],
@@ -102,7 +102,7 @@ describe("auth command", () => {
         .trim()
         .split("\n")
         .map((line) => line.split(/\s{2,}/)[0]),
-    ).toEqual(["Zen Go", "Zen", "Anthropic"])
+    ).toEqual(["OpenRouter", "Anthropic", "DeepInfra"])
   })
 
   test("runs command authentication without interactive input", async () => {
@@ -144,14 +144,14 @@ describe("auth command", () => {
   test.each([
     { id: "openai", method: "browser", form: undefined, args: [], answer: undefined },
     {
-      id: "opencode",
+      id: "openrouter",
       method: "device",
       form: consoleForm,
       args: [],
-      answer: { server: "https://opencode.ai/console" },
+      answer: { server: "https://console.example.com" },
     },
     {
-      id: "opencode",
+      id: "openrouter",
       method: "device",
       form: consoleForm,
       args: ["--answer", "server=https://staging.example.com/console"],

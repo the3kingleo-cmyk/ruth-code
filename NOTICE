@@ -5,7 +5,5 @@ Ruth includes software derived from OpenCode
 (https://github.com/anomalyco/opencode), used under the MIT License:
 Copyright (c) 2025 opencode
 
-Ruth is not affiliated with or endorsed by the OpenCode project. The cloud
-provider IDs `opencode` / `opencode-go` and the opencode.ai / models.opencode.ai
-endpoints are third-party service identifiers that Ruth calls for Zen, Zen Go
-and the models.dev catalog; they are kept so those services keep working.
+Ruth is an independent project. It is not affiliated with or endorsed by the
+OpenCode project, and it does not call any OpenCode-hosted service.

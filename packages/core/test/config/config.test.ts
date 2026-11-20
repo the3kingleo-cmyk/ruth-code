@@ -480,7 +480,7 @@ describe("Config", () => {
             expect(yield* Fiber.join(event)).toHaveLength(1)
             return names(yield* config.entries())
           })
-          const integration = Integration.ID.make("opencode")
+          const integration = Integration.ID.make("gateway")
           expect(names(yield* config.entries())).toEqual(["wellknown", "global", "project"])
           expect(
             yield* updated(
@@ -527,7 +527,7 @@ describe("Config", () => {
           Effect.andThen(
             Effect.gen(function* () {
               const config = yield* Config.Service
-              const integration = Integration.ID.make("opencode")
+              const integration = Integration.ID.make("gateway")
               yield* config.integration!(
                 integration,
                 ConfigIntegration.make({
@@ -567,7 +567,7 @@ describe("Config", () => {
         const global = path.join(tmp.path, "global")
         const project = path.join(tmp.path, "project")
         const allowed = "org_allowed"
-        const zen = Integration.ID.make("opencode")
+        const zen = Integration.ID.make("gateway")
         const origin = "https://ai.acme.com"
         const credentialID = Credential.ID.create()
         let org = "org_personal"
@@ -628,7 +628,7 @@ describe("Config", () => {
               JSON.stringify({
                 policies: [
                   { action: "integration.use", resource: "*", effect: "deny" },
-                  { action: "integration.use", resource: `opencode#${allowed}`, effect: "allow" },
+                  { action: "integration.use", resource: `gateway#${allowed}`, effect: "allow" },
                 ],
               }),
             ),

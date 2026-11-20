@@ -1129,7 +1129,7 @@ describe("ModelsDevPlugin", () => {
         })),
       )
 
-      const minimax = yield* modelState.get(Provider.ID.make("opencode-go"), Model.ID.make("minimax-m3"))
+      const minimax = yield* modelState.get(Provider.ID.make("minimax-gateway"), Model.ID.make("minimax-m3"))
       expect(minimax?.variants).toEqual([
         { id: Model.VariantID.make("none"), settings: { thinking: { type: "disabled" } } },
         {

@@ -78,7 +78,7 @@ it.live("sends Console config and remote MCP requests through the embedder's fet
 
     expect(
       yield* request("POST", "/api/credential", {
-        integrationID: "opencode",
+        integrationID: "openrouter",
         value: { type: "key", key: "secret", metadata: { server: consoleServer } },
       }),
     ).toBe(200)

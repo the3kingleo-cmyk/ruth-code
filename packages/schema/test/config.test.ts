@@ -35,7 +35,7 @@ describe("Config.Entry", () => {
     const input = {
       policies: [
         { action: "websearch.use", resource: "*", effect: "deny" },
-        { action: "websearch.use", resource: "opencode", effect: "allow" },
+        { action: "websearch.use", resource: "exa", effect: "allow" },
       ],
     } as const
     expect(Schema.encodeSync(Config.Info)(Schema.decodeUnknownSync(Config.Info)(input))).toEqual(input)
@@ -50,7 +50,7 @@ describe("Config.Entry", () => {
         { action: "integration.use", resource: "skill:team:review", effect: "deny" },
         { action: "integration.use", resource: "plugin:@acme/plugin", effect: "deny" },
         { action: "integration.use", resource: "*", effect: "deny" },
-        { action: "integration.use", resource: "opencode#org_01", effect: "allow" },
+        { action: "integration.use", resource: "openrouter#org_01", effect: "allow" },
         { action: "integration.use", resource: "https://ai.acme.com", effect: "allow" },
         { action: "integration.use", resource: "constructor:x", effect: "allow" },
         { action: "integration.connect", resource: "mcp:x", effect: "allow" },
@@ -62,7 +62,7 @@ describe("Config.Entry", () => {
       { action: "plugin.use", resource: "@acme/plugin", effect: "deny" },
       // A bare wildcard keeps its action, which now means every integration.
       { action: "integration.use", resource: "*", effect: "deny" },
-      { action: "integration.use", resource: "opencode#org_01", effect: "allow" },
+      { action: "integration.use", resource: "openrouter#org_01", effect: "allow" },
       { action: "integration.use", resource: "https://ai.acme.com", effect: "allow" },
       { action: "integration.use", resource: "constructor:x", effect: "allow" },
       { action: "integration.connect", resource: "mcp:x", effect: "allow" },

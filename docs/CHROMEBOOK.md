@@ -36,7 +36,7 @@ export RUTH_SSE_IDLE_TIMEOUT=600000
 export RUTH_OLLAMA_ASSUME_TOOLS=1
 ```
 
-The Ruth provider id (`opencode`) is unchanged so Zen cloud models and `ruth auth login` keep working.
+Cloud providers are optional: add one with `ruth auth login` and your own API key.
 
 ## Install
 

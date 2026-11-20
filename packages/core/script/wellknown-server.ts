@@ -5,7 +5,7 @@ const config = {
   share: "manual",
   model: "example-primary/example-chat",
   enabled_providers: ["example-primary", "example-secondary"],
-  disabled_providers: ["opencode", "anthropic", "openai", "google", "xai", "amazon-bedrock", "azure"],
+  disabled_providers: ["anthropic", "openai", "google", "xai", "amazon-bedrock", "azure"],
   provider: {
     "example-primary": {
       name: "Example Primary",

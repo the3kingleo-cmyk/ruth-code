@@ -16,7 +16,7 @@ import { host } from "../plugin/host"
 export function organizationPolicy(policies: ConfigPolicy.Info[], organization?: string) {
   return new ConfigIntegration.Document({
     type: "document",
-    integrationID: Integration.ID.make("opencode"),
+    integrationID: Integration.ID.make("gateway"),
     connection: { type: "env", name: "RUTH_ZEN_API_KEY" },
     organization,
     info: Schema.decodeUnknownSync(Info)({ policies }),
@@ -26,7 +26,7 @@ export function organizationPolicy(policies: ConfigPolicy.Info[], organization?:
 /** Replaces the connected organization's policy, or removes it; publish `Event.Updated` to make plugins reload. */
 export const setOrganizationPolicy = Effect.fn(function* (policies: ConfigPolicy.Info[] | undefined) {
   const config = yield* Config.Service
-  yield* config.integration?.(Integration.ID.make("opencode"), policies && organizationPolicy(policies)) ?? Effect.void
+  yield* config.integration?.(Integration.ID.make("gateway"), policies && organizationPolicy(policies)) ?? Effect.void
 })
 
 // Exercise the real policy plugin against supplied catalogs without unrelated provider/permission setup.

@@ -152,34 +152,6 @@ it.effect("uses the first key or env connection Integration lists and never a Ch
   }),
 )
 
-it.effect(
-  "starts GPT-Live on Ruth's hosted endpoint with an Zen Console connection only without an OpenAI key",
-  () =>
-    Effect.gen(function* () {
-      const requests: HttpClientRequest.HttpClientRequest[] = []
-      const zen = { opencode: [credential("console", "oauth")] }
-
-      yield* start("gpt-live-1", { openai: [credential("chatgpt", "oauth")], ...zen }, requests)
-      yield* start("gpt-live-1", { opencode: [{ type: "env", name: "RUTH_ZEN_API_KEY" }] }, requests)
-      yield* start("gpt-live-1", { openai: [credential("active", "key")], ...zen }, requests)
-      expect(
-        requests.map((req): (string | undefined)[] => [
-          req.url,
-          req.headers.authorization,
-          req.headers["x-opencode-org-id"],
-        ]),
-      ).toEqual([
-        ["https://opencode.ai/inference/openai/v1/live/sessions", "Bearer console-access", "wrk_console"],
-        ["https://opencode.ai/inference/openai/v1/live/sessions", "Bearer ruth-env-key", undefined],
-        ["https://api.openai.com/v1/live/sessions", "Bearer sk-active", undefined],
-      ])
-
-      const realtime = yield* start("gpt-realtime-2.1", zen, requests).pipe(Effect.flip)
-      expect(realtime).toMatchObject({ _tag: "Voice.UnavailableError", service: "openai" })
-      expect(requests).toHaveLength(3)
-    }),
-)
-
 it.effect("lists voice models with availability and default without resolving credentials", () =>
   Effect.gen(function* () {
     const list = (connections: Partial<Record<string, Integration.Info["connections"]>>) =>
@@ -210,18 +182,6 @@ it.effect("lists voice models with availability and default without resolving cr
         { model: "gemini-3.8-live", provider: "google", transports: ["websocket"], available: true },
       ],
       default: "grok-voice-3.0",
-    })
-
-    expect(
-      yield* list({ openai: [credential("chatgpt", "oauth")], opencode: [credential("console", "oauth")] }),
-    ).toEqual({
-      models: [
-        { model: "gpt-live-1", provider: "opencode", transports: ["webrtc"], available: true },
-        { model: "gpt-realtime-2.1", provider: "openai", transports: ["webrtc", "websocket"], available: false },
-        { model: "grok-voice-3.0", provider: "xai", transports: ["websocket"], available: false },
-        { model: "gemini-3.8-live", provider: "google", transports: ["websocket"], available: false },
-      ],
-      default: "gpt-live-1",
     })
 
     const none = yield* list({ openai: [credential("chatgpt", "oauth")] })

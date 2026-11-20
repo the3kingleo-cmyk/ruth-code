@@ -130,7 +130,7 @@ async function generateReview(base: string, head: string, commits: string) {
   const session = await client.session.create({
     title: `Review ${version} release`,
     location: { directory: root },
-    model: { providerID: "opencode", id: "gpt-5.6-sol", variant: "low" },
+    model: { providerID: "ollama", id: "ruth" },
     permissions: [
       { action: "*", resource: "*", effect: "deny" },
       { action: "read", resource: "*", effect: "allow" },

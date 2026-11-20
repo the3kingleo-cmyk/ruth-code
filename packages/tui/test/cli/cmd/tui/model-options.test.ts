@@ -27,7 +27,7 @@ describe("sortModelOptions", () => {
   test.each(["browse", "search", "provider"])("orders %s results free-first, keeping the given order", (mode) => {
     const options = [
       { providerID: "anthropic", title: "Claude Haiku 4.5" },
-      { providerID: "opencode", title: "Claude Haiku 3" },
+      { providerID: "openrouter", title: "Claude Haiku 3" },
       { providerID: "anthropic", title: "Claude Haiku Free", free: true },
     ].map((item) => ({ ...item, providerID: mode === "provider" ? "anthropic" : item.providerID }))
     const matches = mode === "search" ? go("haik", options, { key: "title" }).map((item) => item.obj) : options
@@ -37,28 +37,28 @@ describe("sortModelOptions", () => {
     expect(titles.slice(1)).toEqual(matches.map((item) => item.title).filter((title) => title !== "Claude Haiku Free"))
   })
 
-  test("orders Zen Go before Zen and other providers", () => {
+  test("orders local Ollama models before other providers", () => {
     const sorted = sortModelOptions([
       { providerID: "openai", providerName: "OpenAI", title: "GPT 5" },
-      { providerID: "opencode", providerName: "Zen", title: "Claude Sonnet 4" },
+      { providerID: "openrouter", providerName: "OpenRouter", title: "Claude Sonnet 4" },
       { providerID: "anthropic", providerName: "Anthropic", title: "Claude Opus 4" },
-      { providerID: "opencode-go", providerName: "Zen Go", title: "Kimi K3" },
+      { providerID: "ollama", providerName: "Ollama", title: "Ruth" },
     ])
 
-    expect(sorted.map((model) => model.title)).toEqual(["Kimi K3", "Claude Sonnet 4", "Claude Opus 4", "GPT 5"])
+    expect(sorted.map((model) => model.title)).toEqual(["Ruth", "Claude Opus 4", "GPT 5", "Claude Sonnet 4"])
   })
 
-  test("keeps ungrouped results free-first regardless of Ruth provider", () => {
+  test("keeps ungrouped results free-first regardless of provider", () => {
     const sorted = sortModelOptions(
       [
-        { providerID: "opencode-go", title: "Go model" },
-        { providerID: "opencode", title: "Free Zen model", free: true },
+        { providerID: "deepinfra", title: "Go model" },
+        { providerID: "openrouter", title: "Free model", free: true },
         { providerID: "anthropic", title: "Anthropic model" },
       ],
       false,
     )
 
-    expect(sorted.map((model) => model.title)).toEqual(["Free Zen model", "Go model", "Anthropic model"])
+    expect(sorted.map((model) => model.title)).toEqual(["Free model", "Go model", "Anthropic model"])
   })
 
   test("orders provider groups by provider name and keeps the server's order within each", () => {
@@ -81,7 +81,7 @@ describe("sortModelOptions", () => {
     expect(sorted.map((model) => model.title)).toEqual(["Claude Sonnet 4", "Claude Opus 4"])
   })
 
-  test("preserves the server's order for free Ruth models", () => {
+  test("preserves the server's order for free models", () => {
     // `Model.available()` puts the preferred free models first, then the rest newest-first.
     const serverOrder = [
       "Big Pickle",
@@ -91,9 +91,9 @@ describe("sortModelOptions", () => {
       "Nemotron 3.5 Super VL Free",
     ]
     const options = serverOrder.map((title, index) => ({
-      value: { providerID: "opencode", modelID: title.toLowerCase().replaceAll(" ", "-") },
-      providerID: "opencode",
-      providerName: "Zen",
+      value: { providerID: "openrouter", modelID: title.toLowerCase().replaceAll(" ", "-") },
+      providerID: "openrouter",
+      providerName: "OpenRouter",
       releaseDate: index === 0 ? 1000 : 5000 - index,
       title,
       free: true,

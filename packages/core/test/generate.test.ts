@@ -221,25 +221,14 @@ resolverIt.effect("resolves dynamic models with their catalog metadata", () =>
   }),
 )
 
-testEffect(Layer.empty).effect("attributes each stateless completion without creating a stored session", () =>
+testEffect(Layer.empty).effect("sends stateless completions without session attribution headers", () =>
   Effect.gen(function* () {
     const sessions: string[] = []
     const http = Layer.succeed(
       HttpClient.HttpClient,
       HttpClient.make((request) =>
         Effect.sync(() => {
-          const session = request.headers["x-opencode-session"]
-          if (!session)
-            return HttpClientResponse.fromWeb(
-              request,
-              Response.json(
-                {
-                  error: { type: "MissingSessionID", message: "Session ID is required" },
-                },
-                { status: 400 },
-              ),
-            )
-          sessions.push(session)
+          sessions.push(Object.keys(request.headers).filter((key) => /session/i.test(key)).join(","))
           return HttpClientResponse.fromWeb(
             request,
             new Response(
@@ -269,9 +258,7 @@ testEffect(Layer.empty).effect("attributes each stateless completion without cre
         ).toBe("OK")
       }
     }).pipe(Effect.provide(Generate.layer.pipe(Layer.provide(Layer.mergeAll(resolver, native, models, executor)))))
-    expect(sessions).toHaveLength(2)
-    expect(sessions[0]).toStartWith("ses_")
-    expect(sessions[1]).not.toBe(sessions[0])
+    expect(sessions).toEqual(["", ""])
   }),
 )
 
@@ -283,7 +270,7 @@ describe("image and decision generation", () => {
       package: "@ruth/ai/providers/openai/images",
     }),
     Info.make({
-      ...Info.default(Provider.ID.make("openrouter"), ID.make("gpt-image-2.5-sunburst")),
+      ...Info.default(Provider.ID.make("acme-gateway"), ID.make("gpt-image-2.5-sunburst")),
       type: "image",
       package: "@ruth/ai/providers/openai/images",
     }),
@@ -340,13 +327,13 @@ describe("image and decision generation", () => {
       ),
     available: (types) => Effect.succeed(catalog.filter((model) => (types ?? ["chat"]).includes(model.type ?? "chat"))),
   })
-  // An Zen Console login keeps its server and organization as credential metadata.
+  // A gateway login keeps its server and organization as credential metadata.
   const mediaIntegrations = Layer.mock(Integration.Service, {
     revision: () => 0,
     connection: {
       active: (id) =>
         Effect.succeed(
-          id === Integration.ID.make("opencode")
+          id === Integration.ID.make("acme-gateway")
             ? IntegrationConnection.CredentialInfo.make({
                 type: "credential",
                 id: Credential.ID.make("console"),
@@ -474,7 +461,7 @@ describe("image and decision generation", () => {
     Effect.gen(function* () {
       requests.length = 0
       const generate = yield* Generate.Service
-      yield* generate.image({ model: ref(Provider.ID.make("openrouter"), "gpt-image-2.5-sunburst"), prompt: "A black circle" })
+      yield* generate.image({ model: ref(Provider.ID.make("acme-gateway"), "gpt-image-2.5-sunburst"), prompt: "A black circle" })
       expect(requests[0]).toMatchObject({
         url: "https://api.openai.com/v1/images/generations",
         headers: { authorization: "Bearer console-token" },

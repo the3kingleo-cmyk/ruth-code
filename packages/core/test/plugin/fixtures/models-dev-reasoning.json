@@ -243,10 +243,10 @@
       }
     }
   },
-  "opencode-go": {
-    "id": "opencode-go",
-    "name": "Zen Go",
-    "env": ["RUTH_ZEN_API_KEY"],
+  "minimax-gateway": {
+    "id": "minimax-gateway",
+    "name": "MiniMax Gateway",
+    "env": ["MINIMAX_GATEWAY_API_KEY"],
     "models": {
       "minimax-m3": {
         "id": "minimax-m3",

@@ -1247,7 +1247,7 @@ describe("ModelResolver", () => {
       model(Provider.aisdk("@openrouter/ai-sdk-provider"), {
         settings: {
           appName: "Ruth",
-          appUrl: "https://opencode.ai",
+          appUrl: "https://example.com",
           extraBody: { transforms: ["middle-out"], provider: { sort: "price" } },
         },
         headers: { "X-OpenRouter-Title": "Custom" },
@@ -1259,7 +1259,7 @@ describe("ModelResolver", () => {
           Effect.succeed({
             model: (modelID, settings) => {
               expect(settings.headers).toEqual({
-                "HTTP-Referer": "https://opencode.ai",
+                "HTTP-Referer": "https://example.com",
                 "X-OpenRouter-Title": "Custom",
               })
               expect(settings.body).toEqual({
