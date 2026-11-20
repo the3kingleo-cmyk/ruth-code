@@ -1633,29 +1633,10 @@ test.each([
     inventory = inventory.map((plugin) => (plugin.id === "broken" ? { ...plugin, state: failure } : plugin))
     setup.events.emit({ id: "evt_failure", created: 1, type: "plugin.updated", data: {} })
   }
-  await setup.waitForFrame((frame) => frame.includes("Plugin failed:") && frame.includes("broken"))
-  expect(setup.captureCharFrame()).toContain("/plugins")
-  expect(setup.captureCharFrame()).toContain("1 plugin failed")
-
-  const lines = setup.captureCharFrame().split("\n")
-  const row = lines.findIndex((line) => line.includes("Open plugins"))
-  expect(row).toBeGreaterThanOrEqual(0)
-  const line = lines[row]
-  if (!line) throw new Error("Open plugins action is missing")
-  await setup.mockMouse.click(line.indexOf("Open plugins"), row)
-  await setup.waitForFrame((frame) => frame.includes("ctrl+a") && frame.includes("broken"))
-  expect(setup.captureCharFrame()).toContain("broken")
-  expect(setup.captureCharFrame()).not.toContain("healthy")
-  setup.mockInput.pressEnter()
-  await setup.waitForFrame((frame) => frame.includes("Server plugin error") && frame.includes("transform failed"))
-  expect(setup.captureCharFrame()).toContain("Plugin disabled")
-  expect(setup.captureCharFrame()).toContain("transform failed")
-  expect(setup.captureCharFrame()).toContain("err_fixture")
-  setup.mockInput.pressEscape()
-  await setup.waitForFrame((frame) => frame.includes("ctrl+a"))
-  setup.mockInput.pressEscape()
-  await setup.waitForFrame((frame) => !frame.includes("ctrl+a"))
-  expect(setup.captureCharFrame()).toContain("1 plugin failed")
+  // Failures never interrupt with a dialog or toast: the footer reports them and /plugins has the details.
+  await setup.waitForFrame((frame) => frame.includes("1 plugin failed"))
+  if (width >= 100) expect(setup.captureCharFrame()).toContain("/plugins")
+  expect(setup.captureCharFrame()).not.toContain("Plugin failed:")
 
   const seen = requests
   setup.events.emit({ id: "evt_repeat", created: 2, type: "plugin.updated", data: {} })
@@ -1669,10 +1650,10 @@ test.each([
   await setup.waitForFrame((frame) => !frame.includes("1 plugin failed"))
   inventory = inventory.map((plugin) => (plugin.id === "broken" ? { ...plugin, state: failure } : plugin))
   setup.events.emit({ id: "evt_failed_again", created: 4, type: "plugin.updated", data: {} })
-  await setup.waitForFrame((frame) => frame.includes("Plugin failed:") && frame.includes("broken"))
+  await setup.waitForFrame((frame) => frame.includes("1 plugin failed"))
 })
 
-test("server plugin failures share one notice and use source names before an ID is known", async () => {
+test("server plugin failures share one quiet footer notice", async () => {
   await using state = await tmpdir()
   await using setup = await createAppFixture({
     state: state.path,
@@ -1697,9 +1678,8 @@ test("server plugin failures share one notice and use source names before an ID 
   })
   await setup.ready
   await setup.waitForFrame((frame) => frame.includes("2 plugins failed"))
-  expect(setup.captureCharFrame()).toContain("missing-package")
-  expect(setup.captureCharFrame()).toContain("/fixture/broken.ts")
-  expect(setup.captureCharFrame()).toContain("Open plugins")
+  expect(setup.captureCharFrame()).not.toContain("Plugin failed:")
+  expect(setup.captureCharFrame()).not.toContain("Open plugins")
 })
 
 test.each([44, 100])(

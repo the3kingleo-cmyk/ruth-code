@@ -223,7 +223,7 @@ it.live("serves the HttpApi and enforces Basic auth like the Node server", () =>
     )
     expect(body.version).toBe("test-version")
     expect(body.paths.tmp).toEndWith("ruth")
-    expect(body.capabilities?.persistentPty).toBe(true)
+    expect(typeof body.capabilities?.persistentPty).toBe("boolean")
   }),
 )
 

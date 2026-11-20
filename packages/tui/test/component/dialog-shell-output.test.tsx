@@ -162,7 +162,7 @@ test.each([40, 100])("shell output opens, follows, scrolls, and survives exit at
   const count = app.requests.length
   await Bun.sleep(1100)
   expect(app.requests).toHaveLength(count)
-})
+}, 20_000) // Waits through real exit and follow timers, which take about 5 s.
 
 test("empty output explains redirection, retries errors, and preserves output after removal", async () => {
   await using app = await setup(100)

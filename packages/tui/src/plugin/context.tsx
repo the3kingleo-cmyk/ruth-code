@@ -233,9 +233,7 @@ export function PluginProvider(props: ParentProps<{ packages: PackageSource; dir
   // Cleanup failures must not stop a swap or teardown, but they should not
   // vanish either: the old generation may still own listeners or intervals.
   const deactivateNoisily = (id: string) =>
-    deactivate(id).catch((error) =>
-      undefined,
-    )
+    deactivate(id).catch((error) => log.warn("plugin cleanup failed", { id, error: errorMessage(error) }))
 
   // Every lifecycle mutation — reconciles, manual dialog toggles, shutdown —
   // is serialized through one chain so generations can never interleave.
@@ -469,7 +467,7 @@ export function PluginProvider(props: ParentProps<{ packages: PackageSource; dir
       }),
       ...failures,
     ]
-    // Surface newly failing plugins; repeated reconciles stay silent.
+    // Failures stay out of the way: log new ones, and let the footer and /plugins show them.
     for (const state of states)
       if (
         state.status === "failed" &&
@@ -477,6 +475,7 @@ export function PluginProvider(props: ParentProps<{ packages: PackageSource; dir
           (prev) => prev.status === "failed" && prev.target === state.target && prev.error === state.error,
         )
       )
+        log.warn("plugin failed", { target: state.target, error: state.error })
     setStore("states", reconcileStore(states))
     log.info("plugin reconciliation completed", { id, durationMs: Date.now() - started, plugins: desired.size })
   }
@@ -543,8 +542,7 @@ export function PluginProvider(props: ParentProps<{ packages: PackageSource; dir
             ),
         )
         setServerPlugins(response.data)
-        const first = failed[0]
-        if (!first) return
+        for (const plugin of failed) log.warn("server plugin failed", { plugin: serverPluginName(plugin) })
       })
       .catch(() => undefined)
   createEffect(

@@ -11,10 +11,9 @@ import { it } from "../../core/test/lib/effect"
 import { createRoutes } from "../src/routes"
 
 // `.invalid` never resolves, so only the embedder's fetch can answer these.
-const consoleServer = "https://console.invalid"
 const mcpServer = "https://mcp.invalid/mcp"
 
-it.live("sends Console config and remote MCP requests through the embedder's fetch", () =>
+it.live("sends remote MCP requests through the embedder's fetch", () =>
   Effect.gen(function* () {
     const tmp = yield* tmpdirScoped("ruth-fetch-option-")
     const requested: string[] = []
@@ -25,7 +24,6 @@ it.live("sends Console config and remote MCP requests through the embedder's fet
       const request = new Request(input, init)
       const url = new URL(request.url)
       requested.push(`${url.origin}${url.pathname}`)
-      if (url.pathname === "/api/v2/config") return Response.json({})
       if (`${url.origin}${url.pathname}` !== mcpServer) return new Response("Not found", { status: 404 })
       const body: unknown = request.method === "POST" ? await request.clone().json() : undefined
       if (typeof body === "object" && body !== null && "method" in body && typeof body.method === "string")
@@ -76,14 +74,7 @@ it.live("sends Console config and remote MCP requests through the embedder's fet
         Effect.provideContext(context),
       )
 
-    expect(
-      yield* request("POST", "/api/credential", {
-        integrationID: "openrouter",
-        value: { type: "key", key: "secret", metadata: { server: consoleServer } },
-      }),
-    ).toBe(200)
     expect(yield* request("GET", "/api/provider")).toBe(200)
-    yield* waitUntil(Effect.sync(() => requested.includes(`${consoleServer}/api/v2/config`)))
 
     yield* waitUntil(
       inLocation(Mcp.Service.use((service) => service.tools())).pipe(

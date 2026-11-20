@@ -1761,7 +1761,7 @@ test("direct footer counts queued and steering work while running", async () => 
     const transparent = RGBA.fromValues(0, 0, 0, 0).toInts()
     const statusline = footerStatusline(app.renderer.root)
     expect(frame).toContain("ctrl+x q 2 pending · ↓ 1 subagent · Build")
-    expect(frame).toMatch(/ruth · ctrl\+p menu *$/m)
+    expect(frame).toMatch(/openrouter · ctrl\+p menu *$/m)
     expect(frame).not.toContain("1 agent")
     expect(statusline.backgroundColor.toInts()).toEqual(transparent)
   } finally {
@@ -2389,10 +2389,11 @@ test("direct model panel keeps native V2 light search and options readable on a 
   const theme = await nativeLightTheme()
   const background = RGBA.fromHex("#ffffff")
   const [providers] = createSignal<RunProvider[] | undefined>([
-    provider(),
+    // Local Ollama models are pinned first.
+    { ...provider(), id: "ollama" },
     { id: "openai", name: "OpenAI", models: { "gpt-5": model({ id: "gpt-5", name: "GPT-5" }) } },
   ])
-  const [current] = createSignal<RunInput["model"]>({ providerID: "openrouter", modelID: "gpt-5" })
+  const [current] = createSignal<RunInput["model"]>({ providerID: "ollama", modelID: "gpt-5" })
 
   const app = await testRender(
     () => (

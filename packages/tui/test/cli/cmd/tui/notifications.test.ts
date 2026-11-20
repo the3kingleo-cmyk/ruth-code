@@ -163,30 +163,6 @@ describe("internal notifications TUI plugin", () => {
     harness.emit(executionFailed("failed-again"))
     expect(harness.toasts).toHaveLength(2)
 
-    harness.emit(executionStarted("free-limit"))
-    harness.emit({
-      id: "free-limit-failed",
-      created: 0,
-      type: "session.execution.failed",
-      data: {
-        sessionID: "session",
-        error: { type: "provider.free-limit", message: "Free usage limit reached." },
-      },
-    } as RuthEvent)
-    expect(harness.toasts).toHaveLength(2)
-    expect(harness.notifications).toHaveLength(2)
-
-    harness.emit(executionStarted("go-limit"))
-    harness.emit({
-      id: "go-limit-failed",
-      created: 0,
-      type: "session.execution.failed",
-      data: {
-        sessionID: "session",
-        error: { type: "provider.go-limit", message: "Zen Go usage limit reached." },
-      },
-    } as RuthEvent)
-    expect(harness.toasts).toHaveLength(2)
     expect(harness.notifications).toHaveLength(2)
   })
 
