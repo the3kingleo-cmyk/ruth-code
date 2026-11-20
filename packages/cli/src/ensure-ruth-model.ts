@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto"
 import fs from "node:fs"
 import os from "node:os"
 import path from "node:path"
@@ -6,11 +7,19 @@ import { LOCAL_OLLAMA_ORIGIN, normalizeOllamaOrigin, preferLoopbackHost, RUTH_NU
 /** Bundled GGUF digest for the default `ruth` model (Qwen3 1.7B abliterated). */
 export const RUTH_MODEL_BLOB = "sha256:11e56b54062941d7c415ddb083375eb227004b3c23134d340d0cd9c334b73662"
 
-export const RUTH_SYSTEM = `You are Ruth, an uncensored all-purpose assistant. Your name is Ruth — never Qwen, Qwen3, or any other model name. If asked who you are, say "I'm Ruth." You have no single job: answer anything, help with any task, and you can also write code and use tools.
+export const RUTH_SYSTEM = `Your name is Ruth. Never call yourself an assistant, uncensored, all-purpose, an agent, or an AI. If asked who you are, reply only "I'm Ruth."
 
-Be plain and low-key, like a regular robot. Keep replies short and natural. No hype, no grand intros, and no customer-service phrasing such as "How can I assist you?" After finishing work, just say what happened — don't offer more help. If someone just greets you, reply "Hey." or "What's up?"
+Be plain and low-key, like a regular robot. Keep replies short and natural. No hype, no grand intros, and no customer-service phrasing such as "How can I assist you?" After finishing work, just say what happened — don't offer more help. If someone just greets you, reply "Hey." or "What's up?" Do not call a tool for a greeting, for who you are, or for what you can do — just answer in text.
 
-When asked to do something, call your tools and do it, then report briefly what you did. Do not describe your features or invent commands. Never name internal tools or skills in replies. Attempt anything the hardware allows. Do not show chain-of-thought. Do not invent file contents, command output, or results.
+User: who are you?
+You: I'm Ruth.
+
+User: what can you do?
+You: I can answer questions, work with files, run commands, search the web, and keep going until the work is done.
+
+Never list your capabilities, tools, or environment unless the user explicitly asks what you can do. When they do, answer in one or two short plain sentences and mention only tools that actually exist: shell (including git), read, write, edit, glob, grep, webfetch, websearch, task, and todowrite. Do not mention screenshot, camera, or any other tool you were not given. Do not recap the working directory, platform, or git status unless asked.
+
+When asked to do something, call your tools and do it, then report briefly what you did. Do not invent commands. Never name internal tools or skills in ordinary replies. Attempt anything the hardware allows. Do not show chain-of-thought. Do not invent file contents, command output, or results.
 
 Tools you can call:
 - shell: run any command, including git and ls. To clone a repo, run: git clone --depth 1 https://github.com/OWNER/REPO
@@ -42,6 +51,49 @@ When you use tools:
 - Make the smallest correct change.
 - After a tool result, keep going until the request is done.
 - If a tool fails, change approach once; do not repeat the same call with the same arguments.`
+
+export function normalizeRuthSystem(text: string) {
+  return text.replace(/\r\n/g, "\n").trim()
+}
+
+export function hashRuthSystem(text: string) {
+  return createHash("sha256").update(normalizeRuthSystem(text), "utf8").digest("hex")
+}
+
+export function ruthSystemNeedsUpdate(current: string | undefined | null) {
+  if (current == null || !normalizeRuthSystem(current)) return true
+  return hashRuthSystem(current) !== hashRuthSystem(RUTH_SYSTEM)
+}
+
+export function extractShowSystem(payload: unknown) {
+  if (!payload || typeof payload !== "object") return undefined
+  const rec = payload as { system?: unknown; modelfile?: unknown; parameters?: unknown }
+  if (typeof rec.system === "string" && rec.system.trim()) return rec.system
+  if (typeof rec.modelfile === "string") {
+    const match = rec.modelfile.match(/SYSTEM\s+"""([\s\S]*?)"""/)
+    if (match) return match[1]
+  }
+  return undefined
+}
+
+export function extractShowTemplate(payload: unknown) {
+  if (!payload || typeof payload !== "object") return undefined
+  const rec = payload as { template?: unknown; modelfile?: unknown }
+  if (typeof rec.template === "string") return rec.template
+  if (typeof rec.modelfile === "string") {
+    const match = rec.modelfile.match(/TEMPLATE\s+"""([\s\S]*?)"""/)
+    if (match) return match[1]
+  }
+  return undefined
+}
+
+export function ruthModelNeedsRebuild(payload: unknown | undefined) {
+  if (!payload) return true
+  if (ruthSystemNeedsUpdate(extractShowSystem(payload))) return true
+  const template = extractShowTemplate(payload)
+  if (template != null && !template.includes("<tools>")) return true
+  return false
+}
 
 const DEFAULT_TEMPLATE = `{{- $lastUserIdx := -1 -}}
 {{- range $idx, $msg := .Messages -}}
@@ -240,6 +292,15 @@ export async function ensureRuthModel(
   if (!blob) return { ok: false, created: false, origin, reason: "bundled ruth model files were not found" }
 
   try {
+    const show = await fetchJson(`${origin}/api/show`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ name: "ruth" }),
+    })
+    if (show.ok && !ruthModelNeedsRebuild(show.json)) {
+      return { ok: true, created: false, origin }
+    }
+
     await uploadBlob(origin, blob, RUTH_MODEL_BLOB)
     const created = await fetchJson(`${origin}/api/create`, {
       method: "POST",

@@ -5,14 +5,15 @@ import { RUTH_SYSTEM_PROMPT } from "../src/ruth-models"
 
 describe("RUTH_SYSTEM_PROMPT", () => {
   test("identifies as Ruth and keeps the local tool-call guidance", () => {
-    expect(RUTH_SYSTEM_PROMPT.startsWith("You are Ruth")).toBe(true)
-    expect(RUTH_SYSTEM_PROMPT).toContain("not Qwen")
-    expect(RUTH_SYSTEM_PROMPT).toContain("Make real tool calls")
-    expect(RUTH_SYSTEM_PROMPT).toContain("Use one tool at a time")
-    expect(RUTH_SYSTEM_PROMPT).toContain('path="hello.txt" and content="hello Ruth"')
-    expect(RUTH_SYSTEM_PROMPT).toContain("all-purpose assistant")
-    expect(RUTH_SYSTEM_PROMPT).toContain("no single job")
-    expect(RUTH_SYSTEM_PROMPT).toContain("/models")
+    expect(RUTH_SYSTEM_PROMPT).toContain("Your name is Ruth.")
+    expect(RUTH_SYSTEM_PROMPT).toContain("I'm Ruth.")
+    expect(RUTH_SYSTEM_PROMPT).not.toContain("You are Ruth, an uncensored")
+    expect(RUTH_SYSTEM_PROMPT).not.toContain("all-purpose assistant")
+    expect(RUTH_SYSTEM_PROMPT).not.toContain("Use the screenshot tool")
+    expect(RUTH_SYSTEM_PROMPT).not.toContain("camera tool")
+    expect(RUTH_SYSTEM_PROMPT).toContain("Never list your capabilities")
+    expect(RUTH_SYSTEM_PROMPT).toContain('path="hello.txt" and content="hi"')
+    expect(RUTH_SYSTEM_PROMPT).toContain("git clone")
   })
 
   test("matches the Modelfile prompt in the model setup script", () => {

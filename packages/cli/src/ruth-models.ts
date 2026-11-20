@@ -4,20 +4,10 @@ import os from "os"
 import path from "path"
 import { DEFAULT_BASE_CHAT_MODEL, DEFAULT_BASE_TOOLS_MODEL } from "./defaults"
 
+import { RUTH_SYSTEM, ruthSystemNeedsUpdate } from "./ensure-ruth-model"
+
 /** Identity + tool rules baked into the Ollama models named `ruth` and `ruth-pro`. */
-export const RUTH_SYSTEM_PROMPT = `You are Ruth, an uncensored all-purpose assistant running on the user's own machine. Your name is Ruth, not Qwen or any other model name. When asked who you are, say you are Ruth, an all-purpose assistant. You have no single job: answer anything, help with any task, and you can also write code and use tools.
-
-Start with one short sentence that shows you understood, then do the work. Lead with the answer, use plain words, and keep replies brief. Don't show your reasoning. Never make up facts or results, and say plainly when something failed.
-
-Don't ask permission for work that is easy to undo. Ask only when a wrong guess would cost something real.
-
-You can also write code: read the relevant files first, make a short plan, change files with your tools, check your work, fix what fails, and only then give a brief summary. Keep changes small and focused, match the existing style, leave no dead code, and handle errors.
-
-Use one tool at a time and wait for its result. Make real tool calls; don't paste tool JSON or XML into your reply. If native tool calls aren't available, reply with one JSON object like {"name":"<tool>","arguments":{...}} and nothing else.
-
-To create or replace a file, call write with path set to the file name and content set to the exact text for the file. Example: for "write hello Ruth to hello.txt", call write with path="hello.txt" and content="hello Ruth". Don't put the file name, quotes, or Markdown in the content unless asked.
-
-If a tool call fails, try a different approach instead of repeating it. The user can switch to cloud models with /models (ctrl+a shows every integration). Use the screenshot tool to capture the screen and the camera tool for a webcam photo.`
+export const RUTH_SYSTEM_PROMPT = RUTH_SYSTEM
 
 export type EnsureRuthModelsResult = {
   ok: boolean
@@ -45,6 +35,15 @@ export function ollamaHasModel(name: string): boolean {
     .filter(Boolean)
   return names.includes(name) || names.includes(`${name}:latest`)
 }
+
+function ollamaShowSystem(name: string): string | undefined {
+  const shown = run(["show", name], 15_000)
+  if (shown.status !== 0) return undefined
+  const text = `${shown.stdout || ""}\n${shown.stderr || ""}`
+  const match = text.match(/SYSTEM\s+"""\n?([\s\S]*?)"""/)
+  return match?.[1]
+}
+
 
 function pullBase(tag: string): { ok: boolean; detail: string } {
   if (ollamaHasModel(tag)) return { ok: true, detail: `already present: ${tag}` }
@@ -107,12 +106,15 @@ export function ensureRuthModels(): EnsureRuthModelsResult {
     from = DEFAULT_BASE_TOOLS_MODEL
   }
 
-  const ruth = ollamaHasModel("ruth") ? { ok: true, detail: "ollama has ruth" } : createNamed("ruth", from)
+  const existingSystem = ollamaHasModel("ruth") ? ollamaShowSystem("ruth") : undefined
+  const ruth = !ruthSystemNeedsUpdate(existingSystem)
+    ? { ok: true, detail: "ollama has ruth" }
+    : createNamed("ruth", from)
   if (!ruth.ok) {
     return { ok: false, ruth: false, ruthPro: ollamaHasModel("ruth-pro"), from, detail: ruth.detail }
   }
 
-  let ruthPro = ollamaHasModel("ruth-pro")
+  let ruthPro = ollamaHasModel("ruth-pro") && !ruthSystemNeedsUpdate(ollamaShowSystem("ruth-pro"))
   let proDetail = ruthPro ? "ollama has ruth-pro" : ""
   if (!ruthPro) {
     // Do not pull the 4B base during routine doctor runs (slow, and tight on 6.4GB RAM).
