@@ -63,7 +63,7 @@ export default Plugin.define({
                   return
                 }
                 const question =
-                  input?.trim() || (await context.ui.dialog.prompt({ title: "/btw", placeholder: "Ask anything" }))
+                  input?.trim() || (await context.ui.dialog.prompt({ title: "/btw", placeholder: "Ask Ruth anything" }))
                 if (!question) return
                 setPending((count) => count + 1)
                 await context.client.session

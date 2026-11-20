@@ -47,7 +47,7 @@ export const Plugin = define({
     yield* ctx.agent.transform((editor) => {
       editor.update(Agent.defaultID, (item) => {
         item.name = Agent.Name.make("Ruth")
-        item.description = "Ruth, the default coding agent. Uses all tools."
+        item.description = "Ruth, the default all-purpose assistant. Uses all tools."
         item.mode = "primary"
         item.hidden = false
         item.permissions = [{ action: "*", resource: "*", effect: "allow" }]
@@ -56,7 +56,7 @@ export const Plugin = define({
 
       editor.update(Agent.ID.make("build"), (item) => {
         item.name = Agent.Name.make("Build")
-        item.description = "The coding agent. Executes tools based on configured permissions."
+        item.description = "Uses tools to get work done, based on configured permissions."
         item.mode = "primary"
         item.hidden = false
         item.permissions = [{ action: "*", resource: "*", effect: "allow" }]

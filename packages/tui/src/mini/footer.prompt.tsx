@@ -352,7 +352,7 @@ export function createPromptState(input: PromptInput): PromptState {
     }
 
     return new StyledText([
-      fg(input.theme().muted)(`Ask anything, / for commands, @ for context${input.mono() ? "..." : "…"}`),
+      fg(input.theme().muted)(`Ask Ruth anything, / for commands, @ for context${input.mono() ? "..." : "…"}`),
     ])
   })
 

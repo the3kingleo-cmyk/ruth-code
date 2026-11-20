@@ -10,7 +10,8 @@ describe("RUTH_SYSTEM_PROMPT", () => {
     expect(RUTH_SYSTEM_PROMPT).toContain("Make real tool calls")
     expect(RUTH_SYSTEM_PROMPT).toContain("Use one tool at a time")
     expect(RUTH_SYSTEM_PROMPT).toContain('path="hello.txt" and content="hello Ruth"')
-    expect(RUTH_SYSTEM_PROMPT).toContain("run the tests, typecheck, or build")
+    expect(RUTH_SYSTEM_PROMPT).toContain("all-purpose assistant")
+    expect(RUTH_SYSTEM_PROMPT).toContain("no single job")
     expect(RUTH_SYSTEM_PROMPT).toContain("/models")
   })
 

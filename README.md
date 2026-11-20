@@ -1,6 +1,6 @@
 # ◆ ruth
 
-A local-first AI coding agent that runs entirely on your machine, with no cloud and no telemetry.
+A local-first all-purpose AI agent that runs entirely on your machine, with no cloud and no telemetry.
 
 <p align="center">
   <img src="docs/images/tui-home.png" alt="Ruth terminal home screen, with the ◆ ruth mark and the your local AI tagline" width="800">
@@ -8,7 +8,7 @@ A local-first AI coding agent that runs entirely on your machine, with no cloud 
 
 ## Features
 
-- **Coding agent** — open a project and work in the terminal: read files, make edits, run commands, and keep going until the task is done.
+- **All-purpose assistant** — ask Ruth anything in the terminal. She can answer questions, help with any task, and also read files, make edits, run commands, and keep going until the work is done.
 - **Tools** — file, shell, and search tools, plus **screenshot** and **camera** tools when you need to see the screen or a photo.
 - **Local models** — talks to [Ollama](https://ollama.com) on your machine. The default model is the uncensored local `ruth` model (Qwen3 1.7B, with Ruth's identity). You can point it at other local Ollama models too.
 - **Offline install** — a single `ruth.run` installer can put Ruth, Ollama, and the default `ruth` model on a machine with no internet.

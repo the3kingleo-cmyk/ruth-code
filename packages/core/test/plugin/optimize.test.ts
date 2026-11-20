@@ -44,10 +44,11 @@ const withLocalNote = (event: SessionHooks["context"]) =>
   `${shared}\n\n${SessionSystemPrompt.render(PROMPT_LOCAL, Object.keys(event.tools))}`
 
 describe("Ruth system prompt", () => {
-  test("names Ruth and carries the coding-quality rules", () => {
+  test("names Ruth as an all-purpose assistant and keeps brief quality rules", () => {
     expect(shared).toContain("You are Ruth")
+    expect(shared).toContain("all-purpose assistant")
     expect(shared).toContain("say you are Ruth")
-    for (const rule of ["Read before you change", "small and focused", "Match the existing style", "no dead code", "Handle errors", "run them before you say you're done"])
+    for (const rule of ["read first", "small and focused", "Match the existing style", "no dead code", "handle errors"])
       expect(shared.toLowerCase()).toContain(rule.toLowerCase())
     expect(shared).not.toContain("${RUTH_TOOL_GUIDANCE}")
   })

@@ -572,7 +572,7 @@ test("direct footer describes commands and context and shows the model provider"
   })
   try {
     await app.renderOnce()
-    expect(app.captureCharFrame()).toContain("┃ Ask anything, / for commands, @ for context…")
+    expect(app.captureCharFrame()).toContain("┃ Ask Ruth anything, / for commands, @ for context…")
     expect(app.captureCharFrame()).toContain("Build · GPT-5 · ruth · ctrl+p menu")
   } finally {
     app.cleanup()

@@ -31,7 +31,7 @@ async function chat(prompt: string) {
     stream: false,
     tools,
     messages: [
-      { role: "system", content: "You are a brief coding assistant. Use tools when asked." },
+      { role: "system", content: "You are a brief all-purpose assistant. Use tools when asked." },
       { role: "user", content: prompt },
     ],
   }
