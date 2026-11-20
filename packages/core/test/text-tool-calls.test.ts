@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test"
-import { LLMEvent, Message } from "@ruth/ai/effect"
+import { LLMEvent } from "@ruth/ai/effect"
 import { Effect, Stream } from "effect"
 import { TextToolCalls } from "../src/session/runner/text-tool-calls"
 
@@ -135,29 +135,5 @@ describe("TextToolCalls.recover", () => {
   test("is a no-op without tools", async () => {
     const events = textBlock("t", ['{"name":"bash","arguments":{}}'])
     expect(await run(events, new Set())).toEqual(events)
-  })
-})
-
-describe("TextToolCalls prompt mode", () => {
-  test("instructions list each tool in a format parse reads back", () => {
-    const text = TextToolCalls.instructions([
-      { name: "bash", description: "Run a command", inputSchema: { type: "object", properties: { command: {} } } },
-    ])
-    expect(text).toContain("<tool_call>")
-    expect(text).toContain('"name":"bash"')
-    expect(text).toContain("Run a command")
-  })
-
-  test("textHistory rewrites native tool turns as text", () => {
-    const history = TextToolCalls.textHistory([
-      Message.user("list files"),
-      Message.assistant([{ type: "tool-call", id: "c1", name: "bash", input: { command: "ls" } }]),
-      Message.tool({ id: "c1", name: "bash", result: "a.ts\nb.ts", resultType: "text" }),
-    ])
-    expect(history.map((message) => message.role)).toEqual(["user", "assistant", "user"])
-    const call = history[1].content[0] as { type: string; text: string }
-    expect(call.type).toBe("text")
-    expect(TextToolCalls.parse(call.text, names)?.calls).toEqual([{ name: "bash", input: { command: "ls" } }])
-    expect((history[2].content[0] as { text: string }).text).toContain('<tool_response name="bash">\na.ts\nb.ts')
   })
 })

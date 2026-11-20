@@ -91,18 +91,6 @@ const Root = Spec.make(typeof RUTH_CLI_NAME === "string" ? RUTH_CLI_NAME : "ruth
         ),
       },
     }),
-    Spec.make("connect", {
-      description:
-        "Find a local model server (Ollama, LM Studio, llama.cpp, vLLM or any OpenAI-compatible one) and use it",
-      params: {
-        url: Argument.String("url").pipe(
-          Argument.withDescription("Server address, e.g. localhost:1234 or http://gpu-box:11434 (scans this machine when omitted)"),
-          Argument.optional,
-        ),
-        model: Flag.String("model").pipe(Flag.withAlias("m"), Flag.withDescription("Make this model the default"), Flag.optional),
-        apiKey: Flag.String("api-key").pipe(Flag.withDescription("API key, for servers that need one"), Flag.optional),
-      },
-    }),
     Spec.make("doctor", {
       description: "Check Ollama, the default model, config, plugin, PATH, disk, and the optional Ruth cloud tunnel, and repair what can be repaired",
       params: {

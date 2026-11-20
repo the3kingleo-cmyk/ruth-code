@@ -12,7 +12,6 @@ import { GitLabPlugin } from "./provider/gitlab.js"
 import { GoogleVertexPlugin } from "./provider/google-vertex.js"
 import { KiloPlugin } from "./provider/kilo.js"
 import { LLMGatewayPlugin } from "./provider/llmgateway.js"
-import { LlamaCppPlugin } from "./provider/llamacpp.js"
 import { LMStudioPlugin } from "./provider/lmstudio.js"
 import { ModalPlugin } from "./provider/modal.js"
 import { NeonPlugin } from "./provider/neon.js"
@@ -20,7 +19,6 @@ import { NvidiaPlugin } from "./provider/nvidia.js"
 import { OllamaPlugin } from "./provider/ollama.js"
 import { OpenAIPlugin } from "./provider/openai.js"
 import { OpenAIContextCapsPlugin } from "./provider/openai-context-caps.js"
-import { OpenAILocalPlugin } from "./provider/openai-local.js"
 import { SnowflakeCortexPlugin } from "./provider/snowflake-cortex.js"
 import { OpenRouterPlugin } from "./provider/openrouter.js"
 import { PoePlugin } from "./provider/poe.js"
@@ -45,7 +43,6 @@ export const ProviderPlugins: PluginInternal.InternalPlugin[] = [
   GoogleVertexPlugin,
   KiloPlugin,
   LLMGatewayPlugin,
-  LlamaCppPlugin,
   LMStudioPlugin,
   ModalPlugin,
   NeonPlugin,
@@ -54,7 +51,6 @@ export const ProviderPlugins: PluginInternal.InternalPlugin[] = [
   SnowflakeCortexPlugin,
   OpenAIPlugin,
   OpenAIContextCapsPlugin,
-  OpenAILocalPlugin,
   OpenRouterPlugin,
   PoePlugin,
   PromptCacheKeyPlugin,

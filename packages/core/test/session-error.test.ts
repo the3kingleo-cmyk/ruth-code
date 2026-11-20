@@ -367,7 +367,6 @@ describe("local model server down", () => {
     expect(error.type).toBe("provider.transport")
     expect(error.message).toContain("Ollama isn't running at 127.0.0.1:11434")
     expect(error.message).toContain("ollama serve")
-    expect(toSessionError(refused("http://localhost:1234/v1/chat/completions")).message).toContain("LM Studio")
   })
 
   test("stops retrying a refused local connection after two quick attempts", async () => {

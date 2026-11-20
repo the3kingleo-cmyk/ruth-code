@@ -1,6 +1,6 @@
 export * as TextToolCalls from "./text-tool-calls.js"
 
-import { LLMEvent, Message } from "@ruth/ai/effect"
+import { LLMEvent } from "@ruth/ai/effect"
 import { Stream } from "effect"
 import { isLocalProvider } from "../../provider.js"
 
@@ -336,70 +336,4 @@ export function recover(names: ReadonlySet<string>) {
       return stream.pipe(Stream.flatMap((event) => Stream.fromIterable(handle(event))))
     })
   }
-}
-
-/**
- * Servers that reject a `tools` field for models without a tool template. LM Studio accepts tools for every model
- * and handles the prompt itself, so it keeps native tools.
- */
-export function promptToolsFor(providerID: string, nativeTools: boolean) {
-  return !nativeTools && isLocalProvider(providerID) && providerID.toLowerCase() !== "lmstudio"
-}
-
-type PromptTool = { readonly name: string; readonly description?: string; readonly inputSchema?: unknown }
-
-/**
- * Tool instructions for a model whose server has no native tool calling (Ollama answers `does not support tools`).
- * The request then carries no `tools`, and the model writes calls in the Hermes format that `parse` reads back.
- */
-export function instructions(tools: ReadonlyArray<PromptTool>) {
-  const specs = tools.map((tool) =>
-    JSON.stringify({ name: tool.name, description: tool.description ?? "", parameters: tool.inputSchema ?? {} }),
-  )
-  return [
-    "# Tools",
-    "You can call tools to act in the user's workspace. To call one, reply with only this block, then stop and wait for the result:",
-    '<tool_call>\n{"name": "<tool name>", "arguments": {<arguments as JSON>}}\n</tool_call>',
-    "You may write several blocks to call several tools. Results come back inside <tool_response> blocks. Never invent a result.",
-    "Available tools:",
-    "<tools>",
-    ...specs,
-    "</tools>",
-  ].join("\n")
-}
-
-function resultText(result: { readonly type: string; readonly value: unknown }) {
-  if (typeof result.value === "string") return result.value
-  if (Array.isArray(result.value))
-    return result.value
-      .map((item) => (isRecord(item) && typeof item.text === "string" ? item.text : JSON.stringify(item)))
-      .join("\n")
-  return JSON.stringify(result.value)
-}
-
-/** Earlier native tool turns rewritten as text, for a model that only reads text. */
-export function textHistory(messages: ReadonlyArray<Message>): Message[] {
-  return messages.map((message) => {
-    if (message.role === "tool")
-      return Message.user(
-        message.content
-          .map((part) => `<tool_response name="${part.name}">\n${resultText(part.result)}\n</tool_response>`)
-          .join("\n"),
-      )
-    if (message.role !== "assistant" || !message.content.some((part) => part.type === "tool-call")) return message
-    return Message.make({
-      ...message,
-      content: message.content.flatMap((part) => {
-        if (part.type === "tool-call" && !part.providerExecuted)
-          return [
-            {
-              type: "text" as const,
-              text: `<tool_call>\n${JSON.stringify({ name: part.name, arguments: part.input ?? {} })}\n</tool_call>`,
-            },
-          ]
-        if (part.type === "tool-result" && !part.providerExecuted) return []
-        return [part]
-      }),
-    })
-  })
 }

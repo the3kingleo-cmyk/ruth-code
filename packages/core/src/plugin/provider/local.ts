@@ -34,7 +34,7 @@ export function createLocalProviderPlugin<Discovered>(input: {
   readonly id: string
   readonly providerID: string
   readonly name: string
-  readonly origin?: string
+  readonly origin: string
   readonly resolveOrigin?: () => string
   readonly stripPathSuffix?: RegExp
   readonly discover: (client: LocalDiscoveryClient) => Effect.Effect<readonly Discovered[], unknown>

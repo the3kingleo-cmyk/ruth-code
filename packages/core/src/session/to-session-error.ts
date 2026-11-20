@@ -111,20 +111,9 @@ function unreachable(reason: AIError["reason"]): SessionError.Error {
 
 function localServerDown(reason: AIError["reason"]): SessionError.Error {
   const url = "url" in reason && reason.url !== undefined ? URL.parse(reason.url) : undefined
-  const port = url?.port
-  const server =
-    port === "11434" ? "Ollama" : port === "1234" ? "LM Studio" : port === "8080" ? "llama.cpp" : "The local model server"
-  const start =
-    server === "Ollama"
-      ? "Start it with `ollama serve`"
-      : server === "LM Studio"
-        ? "Start the server in LM Studio (Developer tab)"
-        : server === "llama.cpp"
-          ? "Start `llama-server`"
-          : "Start the server"
   return {
     ...providerError("provider.transport", reason),
-    message: `${server} isn't running at ${url?.host ?? "localhost"}. ${start}, or run \`ruth connect\` to find another one. \`ruth doctor\` checks the setup.`,
+    message: `Ollama isn't running at ${url?.host ?? "localhost"}. Start it with \`ollama serve\`. \`ruth doctor\` checks the setup.`,
   }
 }
 

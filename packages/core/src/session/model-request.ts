@@ -45,7 +45,6 @@ import { SessionRunnerModel } from "./runner/model.js"
 import { SessionSchema } from "./schema.js"
 import { SessionSystemPrompt } from "./system-prompt.js"
 import { toLLMMessages } from "./runner/to-llm-message.js"
-import { TextToolCalls } from "./runner/text-tool-calls.js"
 import type { SessionMessage } from "./message.js"
 
 const IMAGE_BYTES_TRIGGER = 25 * 1024 * 1024 // 25 MiB
@@ -80,8 +79,6 @@ export interface Prepared<Event = SessionRequest> {
   readonly executeTool: (
     input: Parameters<Tool.Snapshot["execute"]>[0],
   ) => Effect.Effect<Tool.NormalizedResult, ExecuteError>
-  /** Tools described in the system prompt instead of sent natively, for local models without tool support. */
-  readonly textTools?: ReadonlyArray<string>
 }
 
 export interface Input {
@@ -323,9 +320,6 @@ export const layer = Layer.effect(
           return t ? [[name, { ...t, description: d.description, inputSchema: d.input }] as const] : []
         }),
       )
-      // A local model whose server has no native tool calling gets its tools in the prompt and its history as text.
-      const promptTools =
-        hooked.size > 0 && TextToolCalls.promptToolsFor(model.ref.providerID, model.capabilities.tools)
       const entries = Object.entries(shaped.options)
       const generation = Object.fromEntries(entries.filter(([k]) => GENERATION_KEYS.has(k))) as GenerationOptionsFields
       const providerOptions = Object.fromEntries(entries.filter(([k]) => !GENERATION_KEYS.has(k)))
@@ -342,32 +336,19 @@ export const layer = Layer.effect(
         // TODO: Persist cache lineage so nested forks reuse the root session's cache key.
         promptCacheKey: /^ses_[0-9a-f]{64}$/.test(affinity) ? affinity.slice(4) : affinity,
         cache: model.cache?.ttl === undefined ? undefined : { ttl: model.cache.ttl },
-        system: promptTools
-          ? [
-              ...shaped.system,
-              SystemPart.make(
-                TextToolCalls.instructions(
-                  Array.from(hooked, ([name, t]) => ({ name, description: t.description, inputSchema: t.inputSchema })),
-                ),
-              ),
-            ]
-          : shaped.system,
+        system: shaped.system,
         // Strip the stored metadata hooks could read, so it never reaches the provider.
         messages: boundImages(
           unsupportedParts(
-            (promptTools ? TextToolCalls.textHistory : <T>(messages: T) => messages)(
-              shaped.messages.map((message) => {
-                const { metadata, ...rest } = message
-                return metadata === undefined ? message : Message.make(rest)
-              }),
-            ),
+            shaped.messages.map((message) => {
+              const { metadata, ...rest } = message
+              return metadata === undefined ? message : Message.make(rest)
+            }),
             model.capabilities,
             model.model.provider,
           ),
         ),
-        tools: promptTools
-          ? []
-          : Array.from(hooked, ([name, t]) => ({
+        tools: Array.from(hooked, ([name, t]) => ({
           ...t,
           name,
           freeform: t.freeform && model.capabilities.freeform?.includes(t.freeform.type) ? t.freeform : undefined,
@@ -455,7 +436,6 @@ export const layer = Layer.effect(
       return {
         event: shaped,
         request,
-        textTools: promptTools ? Array.from(hooked.keys()) : undefined,
         options: { ...(http ? { http } : {}), ...(webSocket ? { webSocket } : {}) },
         retry: (event: Parameters<Prepared["retry"]>[0]) =>
           hooks.trigger("session", "retry", event).pipe(Effect.asVoid),
