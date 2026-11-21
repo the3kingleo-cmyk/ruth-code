@@ -238,7 +238,9 @@ with open(script, "rb") as fp:
                             tar.extract(info, dest)
                     seen = True
                 else:
-                    if seen and members == ["bin"]:
+                    # Archive order is bin, lib, models. Stop before reading the 2 GB GGUF.
+                    name = info.name.lstrip("./")
+                    if seen and (name == "models" or name.startswith("models/")):
                         break
                     src = tar.extractfile(info)
                     if src is not None:
@@ -514,7 +516,7 @@ fi
 
 # --- extract ---
 
-extract_payload "Extracting the Ruth program" bin
+extract_payload "Extracting the Ruth program" bin lib
 # Python tar extracts may drop the execute bit; the payload still contains the file.
 if [ -f "$TMP/bin/ruth" ]; then
   chmod 755 "$TMP/bin/ruth" "$TMP/bin/Ruth" "$TMP/bin/ollama" 2>/dev/null || true
@@ -598,6 +600,16 @@ else
   else
     die "Ollama is not installed and the bundle did not include an ollama binary."
   fi
+fi
+
+# Runner libraries live at ../lib/ollama relative to the ollama binary.
+if [ -d "$TMP/lib/ollama" ]; then
+  LIB_DIR="$(CDPATH= cd -- "$(dirname -- "$BIN_DIR")" && pwd)/lib/ollama"
+  mkdir -p "$LIB_DIR"
+  cp -a "$TMP/lib/ollama/." "$LIB_DIR/"
+  log "    Installed Ollama runner libraries to $LIB_DIR"
+elif [ ! -x "$(dirname -- "$BIN_DIR")/lib/ollama/llama-server" ] && [ ! -x /usr/lib/ollama/llama-server ]; then
+  log "    Warning: Ollama runner libraries (llama-server) were not in the bundle; chat may fail until they are installed"
 fi
 
 # On a clean machine nothing is listening on 11434: start a user-space server in $HOME.
