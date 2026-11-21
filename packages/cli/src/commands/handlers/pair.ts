@@ -17,6 +17,11 @@ export default Runtime.handler(
       return yield* Effect.fail(
         new Error("Pairing requires the background service; run `ruth service unset disabled` first"),
       )
+    if (input.remote) {
+      return yield* Effect.fail(
+        new Error("Ruth is local-first; remote pairing tunnels are disabled. Run `ruth pair` without --remote."),
+      )
+    }
     if (input.remote && Option.isSome(input.url))
       return yield* Effect.fail(new Error("--remote cannot be combined with --url"))
     if (input.remote && config.remote === undefined) {

@@ -85,13 +85,16 @@ export const Plugin = define({
       }
       const directories = loaded.entries.flatMap((entry) => (entry.type === "directory" ? [entry.path] : []))
       const items = loaded.entries.flatMap((entry) => (entry.type === "document" ? (entry.info.skills ?? []) : []))
+      add(Skill.DirectorySource.make({ type: "directory", path: AbsolutePath.make(path.join(global.config, "skills")) }))
       for (const directory of directories) {
         add(Skill.DirectorySource.make({ type: "directory", path: AbsolutePath.make(path.join(directory, "skill")) }))
         add(Skill.DirectorySource.make({ type: "directory", path: AbsolutePath.make(path.join(directory, "skills")) }))
       }
       for (const item of items) {
         if (URL.canParse(item) && /^(https?:)$/.test(new URL(item).protocol)) {
-          add(Skill.UrlSource.make({ type: "url", url: item }))
+          if (process.env.RUTH_ENABLE_REMOTE_SKILLS === "1" || process.env.RUTH_ENABLE_REMOTE_SKILLS === "true") {
+            add(Skill.UrlSource.make({ type: "url", url: item }))
+          }
           continue
         }
         const expanded = item.startsWith("~/") ? path.join(global.home, item.slice(2)) : item

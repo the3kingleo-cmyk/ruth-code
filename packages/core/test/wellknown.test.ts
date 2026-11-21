@@ -10,6 +10,8 @@ import { WellKnown } from "@ruth/core/wellknown"
 import { location } from "./fixture/location"
 import { testEffect } from "./lib/effect"
 
+process.env.RUTH_ENABLE_WELLKNOWN = "1"
+
 const it = testEffect(FetchHttpClient.layer)
 const serviceIt = testEffect(LayerNode.compile(LayerNode.group([WellKnown.node, KV.node, Bus.node])))
 

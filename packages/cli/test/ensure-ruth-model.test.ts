@@ -16,7 +16,10 @@ test("reads names from an Ollama /api/tags payload", () => {
 
 test("modelfile pins the bundled blob, identity, and an 8192 context", () => {
   const file = ruthModelfile()
-  expect(file).toContain("FROM sha256:11e56b54062941d7c415ddb083375eb227004b3c23134d340d0cd9c334b73662")
+  expect(file).toContain("FROM sha256:4ecac2ba3fd000cf4638ce65dbffacbd8062c2c87a24a75559af421341adb4b2")
+  expect(file).toContain("RENDERER qwen3.5")
+  expect(file).toContain("PARSER qwen3.5")
+  expect(file).toContain("PARAMETER think false")
   expect(file).toContain("Your name is Ruth.")
   expect(file).not.toContain("uncensored all-purpose")
   expect(file).not.toContain("David's coding agent")
@@ -36,7 +39,8 @@ test("rebuilds the ruth model when the SYSTEM hash differs", () => {
   expect(ruthSystemNeedsUpdate(`\n${RUTH_SYSTEM}\n`)).toBe(false)
   expect(hashRuthSystem(RUTH_SYSTEM)).toHaveLength(64)
   expect(extractShowSystem({ system: RUTH_SYSTEM })).toBe(RUTH_SYSTEM)
-  expect(ruthModelNeedsRebuild({ system: RUTH_SYSTEM, template: "hello <tools> and more" })).toBe(false)
-  expect(ruthModelNeedsRebuild({ system: RUTH_SYSTEM, template: "{{ .Prompt }}" })).toBe(true)
-  expect(ruthModelNeedsRebuild({ system: "old wording", template: "hello <tools>" })).toBe(true)
+  const current = { system: RUTH_SYSTEM, renderer: "qwen3.5", parser: "qwen3.5", capabilities: ["completion", "vision", "tools", "thinking"] }
+  expect(ruthModelNeedsRebuild(current)).toBe(false)
+  expect(ruthModelNeedsRebuild({ ...current, renderer: undefined })).toBe(true)
+  expect(ruthModelNeedsRebuild({ system: "old wording", renderer: "qwen3.5", parser: "qwen3.5", capabilities: ["tools"] })).toBe(true)
 })

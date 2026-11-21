@@ -39,6 +39,7 @@ export const Plugin = define({
       const project = discovery.project && FSUtil.contains(root, start)
       const stop = FSUtil.contains(home, start) ? home : root
       const globalFile = yield* fs.resolve(join(global.config, "AGENTS.md"))
+      const memoryFile = yield* fs.resolve(join(global.config, "memory.md"))
       const loaded: { current: Loaded } = { current: { type: "available", files: [] } }
       const configured: { sources: string[]; remote: Map<string, InstructionDiscovery.File> } = {
         sources: [],
@@ -49,7 +50,7 @@ export const Plugin = define({
       // The ancestor walk can reach the global file when the location sits
       // beneath the global config dir; global: false excludes it there too.
       const candidates = [
-        ...(discovery.global ? [globalFile] : []),
+        ...(discovery.global ? [globalFile, memoryFile] : []),
         ...(project
           ? ancestorDirectories(start, stop)
               .map((directory) => join(directory, "AGENTS.md"))
@@ -76,9 +77,14 @@ export const Plugin = define({
       })
 
       const globalSource = Effect.fn("ConfigInstructionPlugin.globalSource")(function* () {
-        if (!discovery.global || !(yield* fs.isFile(globalFile))) return []
-        const file = yield* read(globalFile)
-        return file instanceof InstructionDiscovery.File ? [file] : []
+        if (!discovery.global) return []
+        const files = []
+        for (const filepath of [globalFile, memoryFile]) {
+          if (!(yield* fs.isFile(filepath))) continue
+          const file = yield* read(filepath)
+          if (file instanceof InstructionDiscovery.File) files.push(file)
+        }
+        return files
       })
 
       const projectSource = Effect.fn("ConfigInstructionPlugin.projectSource")(function* () {

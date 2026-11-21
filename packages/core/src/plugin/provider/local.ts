@@ -107,6 +107,9 @@ export function createLocalProviderPlugin<Discovered>(input: {
                 input: ["text", ...(spec.vision ? ["image"] : [])],
                 output: ["text"],
               }
+              if (spec.id === "ruth" || spec.id.startsWith("ruth:")) {
+                model.settings = { ...model.settings, reasoningEffort: "none" }
+              }
               if (typeof spec.context === "number" && spec.context > 0) model.limit.context = spec.context
               if (spec.type !== "decision") return
               model.type = "decision"

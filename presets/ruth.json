@@ -1,11 +1,16 @@
 {
-  "$comment": "Default Ruth config. The local model is named Ruth (Ollama model `ruth`), built from Qwen3 1.7B abliterated (Apache 2.0). Use `ruth-pro` (4B) for heavier tool work.",
+  "$comment": "Default Ruth config. The local model is named Ruth (Ollama `ruth` on uncensored Qwen3.5 2B, with vision).",
   "model": "ollama/ruth",
   "small_model": "ollama/ruth",
   "permissions": [
     {
       "action": "*",
       "resource": "*",
+      "effect": "allow"
+    },
+    {
+      "action": "external_directory",
+      "resource": "~/.config/ruth/**",
       "effect": "allow"
     }
   ],
@@ -14,13 +19,16 @@
     "ollama": {
       "package": "@ruth/ai/providers/openai-compatible",
       "options": {
-        "headerTimeout": 1200000
+        "headerTimeout": 1200000,
+        "reasoningEffort": "none"
       },
       "models": {
         "ruth": {
-          "tool_call": true
+          "tool_call": true,
+          "reasoningEffort": "none"
         }
       }
     }
-  }
+  },
+  "update": "disable"
 }

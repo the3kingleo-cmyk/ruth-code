@@ -84,15 +84,18 @@ const layer = Layer.effect(
   Effect.gen(function* () {
     const { files } = yield* Environment.Service
     const exists = (file: string) => Environment.exists(files, file)
+    const global = yield* Global.Service
     const location = yield* Location.Service
     const permission = yield* Permission.Service
+    const configDir = path.resolve(global.config)
 
     const resolve = Effect.fn("FileAccess.resolve")(function* (input: ResolveInput) {
       const absolute = AbsolutePath.make(resolvePath(location.directory, input.path))
       const worktree = path.resolve(location.project.directory)
       const internal =
         FSUtil.contains(location.directory, absolute) ||
-        (worktree !== path.parse(worktree).root && FSUtil.contains(worktree, absolute))
+        (worktree !== path.parse(worktree).root && FSUtil.contains(worktree, absolute)) ||
+        FSUtil.contains(configDir, absolute)
       if (internal) {
         return {
           absolute,
@@ -162,5 +165,5 @@ const layer = Layer.effect(
 export const node = makeLocationNode({
   service: Service,
   layer,
-  deps: [Environment.node, Location.node, Permission.node],
+  deps: [Environment.node, Global.node, Location.node, Permission.node],
 })

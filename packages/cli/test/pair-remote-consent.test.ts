@@ -108,14 +108,8 @@ test("pair --remote without a terminal fails before enabling anything, and help 
   const [pair, help] = await Promise.all([cli(["pair", "--remote"]), cli(["pair", "--help"])])
 
   expect(pair.exitCode).toBe(1)
-  expect(pair.output).toBe(
-    [
-      "This will expose your Ruth server to the internet.",
-      "Traffic is end-to-end encrypted, and access requires your server password.",
-      "To pair locally instead, run `ruth pair` without the --remote flag.",
-      "Run interactively or pass --yes to continue.",
-      "",
-    ].join(os.EOL),
+  expect(pair.output).toContain(
+    "Ruth is local-first; remote pairing tunnels are disabled. Run `ruth pair` without --remote.",
   )
   expect(await Array.fromAsync(new Bun.Glob("**/service*.json").scan({ cwd: root, dot: true }))).toEqual([])
   expect(help.exitCode).toBe(0)

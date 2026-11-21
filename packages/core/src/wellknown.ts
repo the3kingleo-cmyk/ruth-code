@@ -64,7 +64,15 @@ export const Event = {
 
 const requestTimeout = "15 seconds"
 
+const wellKnownEnabled = () => {
+  const value = process.env.RUTH_ENABLE_WELLKNOWN?.toLowerCase()
+  return value === "1" || value === "true" || value === "yes"
+}
+
 export const inspect = Effect.fn("WellKnown.inspect")(function* (origin: string) {
+  if (!wellKnownEnabled()) {
+    return yield* Effect.fail(new Error("Remote well-known config discovery is disabled"))
+  }
   const url = `${origin.replace(/\/+$/, "")}/.well-known/ruth`
   const http = HttpClient.filterStatusOk(yield* HttpClient.HttpClient)
   return yield* http.execute(HttpClientRequest.get(url).pipe(HttpClientRequest.acceptJson)).pipe(

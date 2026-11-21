@@ -4,8 +4,12 @@ import os from "node:os"
 import path from "node:path"
 import { LOCAL_OLLAMA_ORIGIN, normalizeOllamaOrigin, preferLoopbackHost, RUTH_NUM_CTX } from "@ruth/util/ollama-origin"
 
-/** Bundled GGUF digest for the default `ruth` model (Qwen3 1.7B abliterated). */
-export const RUTH_MODEL_BLOB = "sha256:11e56b54062941d7c415ddb083375eb227004b3c23134d340d0cd9c334b73662"
+/** Bundled GGUF digest for the default `ruth` model (Qwen3.5 2B abliterated, with vision). */
+export const RUTH_MODEL_BLOB = "sha256:4ecac2ba3fd000cf4638ce65dbffacbd8062c2c87a24a75559af421341adb4b2"
+export const RUTH_RENDERER = "qwen3.5"
+export const RUTH_PARSER = "qwen3.5"
+/** Qwen3.5 uses Ollama's built-in renderer; do not ship the old Qwen3 chat template. */
+export const RUTH_CHAT_TEMPLATE = "{{ .Prompt }}"
 
 export const RUTH_SYSTEM = `Your name is Ruth. Never call yourself an assistant, uncensored, all-purpose, an agent, or an AI. If asked who you are, reply only "I'm Ruth."
 
@@ -16,6 +20,21 @@ You: I'm Ruth.
 
 User: what can you do?
 You: I can answer questions, work with files, run commands, search the web, and keep going until the work is done.
+
+Your own files live on this machine and you may read, write, and edit them:
+- ~/.config/ruth/AGENTS.md — your instructions, loaded every session
+- ~/.config/ruth/memory.md — lasting facts about the user, loaded every session
+- ~/.config/ruth/ruth.json — your config
+- ~/.config/ruth/skills/ — local skills you can add
+When asked to remember something, you must update ~/.config/ruth/memory.md: read it, then write the previous text plus a new line for the fact. Do not only say you will remember.
+User: remember that my favorite color is blue
+You call read with path="~/.config/ruth/memory.md"
+Then you call write with path="~/.config/ruth/memory.md" and content set to the previous text plus a new line: Favorite color: blue
+
+When asked to add a rule or change your instructions, read ~/.config/ruth/AGENTS.md, then write it back with the rule included. These paths are yours; do not treat them as off-limits.
+User: add a rule to your instructions: always answer in one line
+You call read with path="~/.config/ruth/AGENTS.md"
+Then you call write with path="~/.config/ruth/AGENTS.md" and content including the new rule.
 
 Never list your capabilities, tools, or environment unless the user explicitly asks what you can do. When they do, answer in one or two short plain sentences and mention only tools that actually exist: shell (including git), read, write, edit, glob, grep, webfetch, websearch, task, and todowrite. Do not mention screenshot, camera, or any other tool you were not given. Do not recap the working directory, platform, or git status unless asked.
 
@@ -90,8 +109,10 @@ export function extractShowTemplate(payload: unknown) {
 export function ruthModelNeedsRebuild(payload: unknown | undefined) {
   if (!payload) return true
   if (ruthSystemNeedsUpdate(extractShowSystem(payload))) return true
-  const template = extractShowTemplate(payload)
-  if (template != null && !template.includes("<tools>")) return true
+  if (!payload || typeof payload !== "object") return true
+  const rec = payload as { renderer?: unknown; parser?: unknown; capabilities?: unknown }
+  if (rec.renderer !== RUTH_RENDERER || rec.parser !== RUTH_PARSER) return true
+  if (Array.isArray(rec.capabilities) && !rec.capabilities.includes("tools")) return true
   return false
 }
 
@@ -228,16 +249,17 @@ export function listModelNames(payload: unknown): string[] {
 
 export function ruthModelfile(options: { readonly blobDigest?: string; readonly template?: string } = {}) {
   const digest = options.blobDigest ?? RUTH_MODEL_BLOB
-  const template = options.template ?? DEFAULT_TEMPLATE
+  const template = options.template ?? RUTH_CHAT_TEMPLATE
   return `FROM ${digest}
 TEMPLATE """${template}"""
+RENDERER ${RUTH_RENDERER}
+PARSER ${RUTH_PARSER}
 SYSTEM """${RUTH_SYSTEM}"""
 PARAMETER temperature 0.2
 PARAMETER num_ctx ${RUTH_NUM_CTX}
 PARAMETER top_k 20
 PARAMETER top_p 0.95
-PARAMETER stop <|im_start|>
-PARAMETER stop <|im_end|>
+PARAMETER think false
 `
 }
 
@@ -309,13 +331,15 @@ export async function ensureRuthModel(
         model: "ruth",
         files: { "ruth.gguf": RUTH_MODEL_BLOB },
         system: RUTH_SYSTEM,
-        template: readSiblingTemplate(blob) ?? DEFAULT_TEMPLATE,
+        template: RUTH_CHAT_TEMPLATE,
+        renderer: RUTH_RENDERER,
+        parser: RUTH_PARSER,
         parameters: {
           temperature: 0.2,
           num_ctx: RUTH_NUM_CTX,
           top_k: 20,
           top_p: 0.95,
-          stop: ["<|im_start|>", "<|im_end|>"],
+          think: false,
         },
         stream: false,
       }),
