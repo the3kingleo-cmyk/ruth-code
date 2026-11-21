@@ -111,6 +111,16 @@ export const Plugin = {
         }),
       )
       .pipe(Effect.orDie)
+
+    // The question tool stops mid-task to wait for the user. Hide it on ordinary
+    // work agents so Ruth just does the work; Plan mode can still use it.
+    const hide = (event: { agent?: string; tools: Record<string, unknown> }) => {
+      if (event.agent !== "plan") delete event.tools[name]
+      return Effect.void
+    }
+    yield* ctx.session.hook("context", hide)
+    yield* ctx.session.hook("compaction", hide)
+    yield* ctx.session.hook("generate", hide)
   }),
 }
 

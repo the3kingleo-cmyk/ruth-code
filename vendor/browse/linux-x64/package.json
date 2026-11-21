@@ -1,0 +1,23 @@
+{
+  "name": "@opencode/browse-linux-x64",
+  "version": "0.1.5",
+  "description": "The browse binary for linux-x64.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anomalyco/browse.git",
+    "directory": "rust"
+  },
+  "os": [
+    "linux"
+  ],
+  "cpu": [
+    "x64"
+  ],
+  "libc": [
+    "glibc"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

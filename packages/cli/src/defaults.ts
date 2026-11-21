@@ -11,6 +11,42 @@ export const DEFAULT_BASE_TOOLS_MODEL = "huihui_ai/qwen3.5-abliterated:2b"
 export const DEFAULT_PROVIDER_MODEL = "ollama/ruth"
 export const DEFAULT_REPO_SLUG = ""
 
+const ALLOW = "allow" as const
+
+/** Default permission rules: do the work without prompting. Explicit denies still win. */
+export function defaultRuthPermissions() {
+  return [
+    { action: "*", resource: "*", effect: ALLOW },
+    { action: "external_directory", resource: "*", effect: ALLOW },
+    { action: "doom_loop", resource: "*", effect: ALLOW },
+    { action: "question", resource: "*", effect: ALLOW },
+    { action: "webfetch", resource: "*", effect: ALLOW },
+    { action: "websearch", resource: "*", effect: ALLOW },
+    { action: "browse*", resource: "*", effect: ALLOW },
+  ]
+}
+
+/** Resolve the bundled browse binary sitting next to `ruth`, else whatever is on PATH. */
+export function browseCommand() {
+  const sibling = path.join(path.dirname(process.execPath), "browse")
+  try {
+    if (fs.existsSync(sibling) && fs.statSync(sibling).isFile()) return [sibling, "mcp"]
+  } catch {
+    // fall through to PATH
+  }
+  return ["browse", "mcp"]
+}
+
+/** Local MCP entry equivalent to `browse install --agent none`, translated to Ruth paths. */
+export function browseMcpServer() {
+  return {
+    type: "local" as const,
+    command: browseCommand(),
+    codemode: false,
+    environment: { OPENCODE_BROWSER_AUTO_UPDATE: "off" },
+  }
+}
+
 export function defaultRuthConfig(pluginPath?: string) {
   return {
     $comment:
@@ -18,10 +54,12 @@ export function defaultRuthConfig(pluginPath?: string) {
     model: DEFAULT_PROVIDER_MODEL,
     small_model: DEFAULT_PROVIDER_MODEL,
     websearch: { provider: "random" },
-    permissions: [
-      { action: "*", resource: "*", effect: "allow" },
-      { action: "external_directory", resource: "~/.config/ruth/**", effect: "allow" },
-    ],
+    permissions: defaultRuthPermissions(),
+    mcp: {
+      servers: {
+        browse: browseMcpServer(),
+      },
+    },
     plugins: [],
     update: "disable",
     provider: {
@@ -85,5 +123,49 @@ export function ensureRuthHomeFiles(directory = configDir()) {
   const memory = path.join(directory, "memory.md")
   if (!fs.existsSync(agents)) fs.writeFileSync(agents, DEFAULT_AGENTS)
   if (!fs.existsSync(memory)) fs.writeFileSync(memory, DEFAULT_MEMORY)
+  const existing = findExistingConfig(directory)
+  if (existing) upgradeRuthConfigFile(existing)
   return { directory, agents, memory }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === "object" && !Array.isArray(value)
+}
+
+/**
+ * Bring an existing ruth.json up to the current defaults: register bundled browse
+ * as the browser MCP server, and turn leftover "ask" permission rules into "allow".
+ * Explicit deny rules are left alone. Returns true when the file was rewritten.
+ */
+export function upgradeRuthConfigFile(file: string): boolean {
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(fs.readFileSync(file, "utf8"))
+  } catch {
+    return false
+  }
+  if (!isRecord(parsed)) return false
+  const before = JSON.stringify(parsed)
+
+  if (!Array.isArray(parsed.permissions)) {
+    parsed.permissions = defaultRuthPermissions()
+  } else {
+    parsed.permissions = parsed.permissions.map((rule) => {
+      if (isRecord(rule) && rule.effect === "ask") return { ...rule, effect: "allow" }
+      return rule
+    })
+    const hasAllowAll = parsed.permissions.some(
+      (rule) =>
+        isRecord(rule) && rule.action === "*" && rule.resource === "*" && rule.effect === "allow",
+    )
+    if (!hasAllowAll) parsed.permissions.push({ action: "*", resource: "*", effect: "allow" })
+  }
+
+  const mcp = isRecord(parsed.mcp) ? parsed.mcp : (parsed.mcp = {})
+  const servers = isRecord(mcp.servers) ? mcp.servers : (mcp.servers = {})
+  if (!isRecord(servers.browse)) servers.browse = browseMcpServer()
+
+  if (JSON.stringify(parsed) === before) return false
+  fs.writeFileSync(file, `${JSON.stringify(parsed, null, 2)}\n`)
+  return true
 }
