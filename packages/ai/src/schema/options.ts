@@ -174,6 +174,8 @@ export const mergeGeneration = (...items: ReadonlyArray<GenerationOptionsFields 
 /** Request options a model applies under each request: the same keys as a request, and the request wins. */
 export interface RequestOptions extends TransportOptions, GenerationOptionsFields {
   readonly providerOptions?: ProviderOptions
+  /** Sends model calls through this `fetch` instead of the client's HTTP executor. */
+  readonly fetch?: typeof globalThis.fetch
 }
 
 /** Merge model options; later items win per key. Empty results are `undefined`. */
@@ -184,6 +186,7 @@ export const mergeRequestOptions = (
     ...mergeTransport(...items),
     ...mergeGeneration(...items),
     providerOptions: mergeProviderOptions(...items.map((item) => item?.providerOptions)),
+    fetch: last(items.map((item) => item?.fetch)),
   }).filter(([, value]) => value !== undefined)
   return merged.length === 0 ? undefined : (Object.fromEntries(merged) as RequestOptions)
 }

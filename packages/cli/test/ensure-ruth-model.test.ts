@@ -14,7 +14,7 @@ test("reads names from an Ollama /api/tags payload", () => {
   ])
 })
 
-test("modelfile pins the bundled blob, identity, and an 8192 context", () => {
+test("modelfile pins the bundled blob, identity, and a 16384 context", () => {
   const file = ruthModelfile()
   expect(file).toContain("FROM sha256:4ecac2ba3fd000cf4638ce65dbffacbd8062c2c87a24a75559af421341adb4b2")
   expect(file).toContain("RENDERER qwen3.5")
@@ -26,7 +26,7 @@ test("modelfile pins the bundled blob, identity, and an 8192 context", () => {
   expect(file).toContain("I'm Ruth.")
   expect(file).toContain("How can I assist you?")
   expect(file).not.toContain("David")
-  expect(file).toContain("PARAMETER num_ctx 8192")
+  expect(file).toContain("PARAMETER num_ctx 16384")
   expect(file).not.toContain("David's coding agent")
 })
 

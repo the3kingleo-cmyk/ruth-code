@@ -2,7 +2,7 @@ import { createHash } from "node:crypto"
 import fs from "node:fs"
 import os from "node:os"
 import path from "node:path"
-import { LOCAL_OLLAMA_ORIGIN, normalizeOllamaOrigin, preferLoopbackHost, RUTH_NUM_CTX } from "@ruth/util/ollama-origin"
+import { LOCAL_OLLAMA_ORIGIN, normalizeOllamaOrigin, preferLoopbackHost, RUTH_CTX_DEFAULT } from "@ruth/util/ollama-origin"
 
 /** Bundled GGUF digest for the default `ruth` model (Qwen3.5 2B abliterated, with vision). */
 export const RUTH_MODEL_BLOB = "sha256:4ecac2ba3fd000cf4638ce65dbffacbd8062c2c87a24a75559af421341adb4b2"
@@ -256,7 +256,7 @@ RENDERER ${RUTH_RENDERER}
 PARSER ${RUTH_PARSER}
 SYSTEM """${RUTH_SYSTEM}"""
 PARAMETER temperature 0.2
-PARAMETER num_ctx ${RUTH_NUM_CTX}
+PARAMETER num_ctx ${RUTH_CTX_DEFAULT}
 PARAMETER top_k 20
 PARAMETER top_p 0.95
 PARAMETER think false
@@ -336,7 +336,7 @@ export async function ensureRuthModel(
         parser: RUTH_PARSER,
         parameters: {
           temperature: 0.2,
-          num_ctx: RUTH_NUM_CTX,
+          num_ctx: RUTH_CTX_DEFAULT,
           top_k: 20,
           top_p: 0.95,
           think: false,

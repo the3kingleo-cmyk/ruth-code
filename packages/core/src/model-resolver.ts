@@ -20,7 +20,7 @@ import { Capabilities, Compatibility, ID, Info, Model, Ref, VariantID } from "./
 import type { RuntimeInfo } from "./model.js"
 import { Npm } from "@ruth/util/npm"
 import { Provider } from "./provider.js"
-import { RUTH_NUM_CTX } from "@ruth/util/ollama-origin"
+import { ollamaNativeChatFetch } from "./plugin/provider/ollama-native-chat.js"
 
 export class VariantUnavailableError extends Schema.TaggedError<VariantUnavailableError>()(
   "SessionRunnerModel.VariantUnavailableError",
@@ -224,18 +224,19 @@ export const fromCatalogModel = (
   )
 
 
-/** Ollama request overlay: disable Qwen3 thinking and pin the default ruth model's context. */
+/** Ollama request overlay: disable Qwen3 thinking. `ruth` context is applied per request via /api/chat. */
 function ollamaRequestBody(model: { readonly providerID: string; readonly id: string }) {
   if (model.providerID !== "ollama" && model.providerID !== "ollama-cloud") return undefined
-  const bare = model.id.endsWith(":latest") ? model.id.slice(0, -":latest".length) : model.id
   return {
     think: false,
     chat_template_kwargs: { enable_thinking: false },
-    options: {
-      think: false,
-      ...(bare === "ruth" ? { num_ctx: RUTH_NUM_CTX } : {}),
-    },
+    options: { think: false },
   }
+}
+
+function ollamaRequestFetch(model: { readonly providerID: string; readonly id: string }) {
+  if (model.providerID !== "ollama" && model.providerID !== "ollama-cloud") return undefined
+  return ollamaNativeChatFetch
 }
 
 const resolveCatalogModel = Effect.fn("ModelResolver.resolveCatalogModel")(function* (
@@ -282,6 +283,7 @@ const resolveCatalogModel = Effect.fn("ModelResolver.resolveCatalogModel")(funct
               body: ollamaRequestBody(resolved),
             },
           }),
+          ...(ollamaRequestFetch(resolved) ? { fetch: ollamaRequestFetch(resolved) } : {}),
         },
       })
     },

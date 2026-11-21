@@ -49,9 +49,10 @@ export function shouldAssumeOllamaTools(): boolean {
 export const OLLAMA_DEFAULT_CONTEXT = 4096
 
 /**
- * The context Ollama actually runs a model with. The OpenAI-compatible API ignores `num_ctx`, and Ollama silently
- * drops the start of a longer prompt (system prompt and tools first), so Ruth must not plan for the training
- * context. A `num_ctx` in the Modelfile wins, then the server's `OLLAMA_CONTEXT_LENGTH`, then Ollama's default.
+ * The context Ollama actually runs a model with. The OpenAI-compatible API ignores `num_ctx` (Ruth rewrites
+ * `ruth` chats to `/api/chat` so a per-request bucket is honored). For other models, a `num_ctx` in the
+ * Modelfile wins, then the server's `OLLAMA_CONTEXT_LENGTH`, then Ollama's default. Ollama silently drops
+ * the start of a longer prompt (system prompt and tools first), so Ruth must not plan for the training context.
  */
 export function ollamaContext(parameters: string | undefined, trained: number | undefined, env = process.env) {
   const configured = /(?:^|\n)\s*num_ctx\s+(\d+)/.exec(parameters ?? "")?.[1]

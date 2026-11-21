@@ -350,7 +350,7 @@ start_bundled_ollama() {
   step "Starting the bundled Ollama in your home directory (timeout ${START_TIMEOUT}s)"
   log "    Serving at $OLLAMA_URL, models at $OLLAMA_MODELS (no sudo, no systemd)"
   # Close inherited fds so a later exec of Ruth does not leave Ollama as a job of this shell.
-  nohup env OLLAMA_MODELS="$OLLAMA_MODELS" OLLAMA_HOST="$OLLAMA_HOST" "$bin" serve >>"$STATE_DIR/ollama.log" 2>&1 &
+  nohup env OLLAMA_MODELS="$OLLAMA_MODELS" OLLAMA_HOST="$OLLAMA_HOST" OLLAMA_KV_CACHE_TYPE=q8_0 OLLAMA_FLASH_ATTENTION=1 "$bin" serve >>"$STATE_DIR/ollama.log" 2>&1 &
   echo $! >"$STATE_DIR/ollama.pid"
   STARTED_BUNDLED_OLLAMA=1
   i=0
@@ -691,7 +691,7 @@ write_modelfile() {
     printf 'RENDERER qwen3.5\n'
     printf 'PARSER qwen3.5\n'
     printf 'PARAMETER temperature 0.2\n'
-    printf 'PARAMETER num_ctx 8192\n'
+    printf 'PARAMETER num_ctx 16384\n'
     printf 'PARAMETER top_k 20\n'
     printf 'PARAMETER top_p 0.95\n'
     printf 'SYSTEM """\n'
@@ -795,7 +795,7 @@ body = {
     "template": "{{ .Prompt }}",
     "renderer": "qwen3.5",
     "parser": "qwen3.5",
-    "parameters": {"temperature": 0.2, "num_ctx": 8192, "top_k": 20, "top_p": 0.95, "think": False},
+    "parameters": {"temperature": 0.2, "num_ctx": 16384, "top_k": 20, "top_p": 0.95, "think": False},
     "stream": False,
 }
 if source.startswith("/") or source.startswith("sha256"):
@@ -902,10 +902,12 @@ link_into_path
 add_env() {
   file=$1
   [ -f "$file" ] || touch "$file"
-  if grep -Fqs "export OLLAMA_MODELS=" "$file" 2>/dev/null; then
-    return 0
+  if ! grep -Fqs "export OLLAMA_MODELS=" "$file" 2>/dev/null; then
+    printf '\n# Ruth: user-space Ollama\nexport OLLAMA_MODELS="%s"\nexport OLLAMA_HOST="%s"\n'     "$OLLAMA_MODELS" "$OLLAMA_HOST" >>"$file"
   fi
-  printf '\n# Ruth: user-space Ollama\nexport OLLAMA_MODELS="%s"\nexport OLLAMA_HOST="%s"\n'     "$OLLAMA_MODELS" "$OLLAMA_HOST" >>"$file"
+  if ! grep -Fqs "export OLLAMA_KV_CACHE_TYPE=" "$file" 2>/dev/null; then
+    printf 'export OLLAMA_KV_CACHE_TYPE=q8_0\nexport OLLAMA_FLASH_ATTENTION=1\n' >>"$file"
+  fi
 }
 
 if [ "$STARTED_BUNDLED_OLLAMA" = 1 ]; then

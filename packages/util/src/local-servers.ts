@@ -74,6 +74,8 @@ export async function startOllama(options: { readonly origin?: string; readonly 
       ...process.env,
       OLLAMA_HOST: `127.0.0.1:${url.port || "11434"}`,
       OLLAMA_CONTEXT_LENGTH: process.env.OLLAMA_CONTEXT_LENGTH ?? String(ollamaServeContext()),
+      OLLAMA_KV_CACHE_TYPE: process.env.OLLAMA_KV_CACHE_TYPE ?? "q8_0",
+      OLLAMA_FLASH_ATTENTION: process.env.OLLAMA_FLASH_ATTENTION ?? "1",
     },
   })
   child.on("error", () => undefined)

@@ -251,6 +251,7 @@ const resolveRequestOptions = (request: LLMRequest): LLMRequest => {
     ...mergeGeneration(options, normalized),
     providerOptions: mergeProviderOptions(options?.providerOptions, normalized.providerOptions),
     ...mergeTransport(options, normalized),
+    fetch: normalized.fetch ?? options?.fetch,
   }
 }
 
